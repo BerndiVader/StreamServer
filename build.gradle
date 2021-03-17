@@ -1,0 +1,36 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'com.gmail.berndivader.streamserver.StreamServer'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    includeLibs
+}
+
+dependencies {
+	includeLibs 'com.github.kokorin.jaffree:jaffree:+'
+	includeLibs 'org.slf4j:slf4j-api:+'
+    includeLibs 'mysql:mysql-connector-java:+'
+    includeLibs 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.code.gson:gson:2.8.6'
+	implementation 'org.slf4j:slf4j-api:+'
+	implementation 'com.github.kokorin.jaffree:jaffree:+'
+    implementation 'mysql:mysql-connector-java:+'
+}
+
+jar {
+    
+    rootSpec.exclude('**/META-INF/*.SF','**/META-INF/*.RSA')
+    
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+
+    from {
+        configurations.includeLibs.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
