@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 import com.github.kokorin.jaffree.ffmpeg.FFmpegProgress;
 import com.github.kokorin.jaffree.ffprobe.Format;
+import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
 public class ConsoleRunner {
@@ -59,6 +60,10 @@ public class ConsoleRunner {
 	            		break;
 	            	case ".restart":
 	            		BroadcastRunner.restartStream();
+	            		break;
+	            	case ".help":
+	            	case ".h":
+	            		System.out.println(Config.HELP_TEXT);
 	            		break;
 	            	default:
 	            		break;
