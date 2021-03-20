@@ -8,18 +8,15 @@ repositories {
 }
 
 configurations {
-    includeLibs
+    implemented
+    compile.extendsFrom(implemented)
 }
 
 dependencies {
-	includeLibs 'com.github.kokorin.jaffree:jaffree:+'
-	includeLibs 'org.slf4j:slf4j-api:+'
-    includeLibs 'mysql:mysql-connector-java:+'
-    includeLibs 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.google.code.gson:gson:2.8.6'
-	implementation 'org.slf4j:slf4j-api:+'
-	implementation 'com.github.kokorin.jaffree:jaffree:+'
-    implementation 'mysql:mysql-connector-java:+'
+	implemented 'com.github.kokorin.jaffree:jaffree:+'
+	implemented 'org.slf4j:slf4j-api:+'
+    implemented 'mysql:mysql-connector-java:+'
+    implemented 'com.google.code.gson:gson:2.8.6'
 }
 
 jar {
@@ -31,6 +28,6 @@ jar {
     }
 
     from {
-        configurations.includeLibs.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.implemented.asFileTree.files.collect { zipTree(it) }
     }
 }
