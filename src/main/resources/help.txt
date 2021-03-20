@@ -2,8 +2,15 @@ StreamServer help
 =================
 
 .x -> exit server
-.restart -> restart current stream
+
 .f [title|artist|date|comment|playtime|file|bitrate|format] -> show ffmpegprobe gathered infos
 .p [time|frames|bitrate|quality|fps|drops|size|speed] -> show ffmpeg progress infos
 .m -> show current ffmpeg output message
 .b [status|file|next] -> info about broadcast status, current file and next file.
+
+.restart -> restart current stream
+.next -> play next
+.prev -> play last
+
+.playlist [regex] show playlist args= valid regex pattern
+.play [filename] play file
