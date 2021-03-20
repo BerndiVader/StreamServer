@@ -16,7 +16,7 @@ public class ConsoleRunner {
     static Thread thread;
     
     static {
-    	keyboard=new Scanner(System.in);
+    	keyboard=new Scanner(System.console().reader());
     }
 	
 	public ConsoleRunner() throws InterruptedException, ExecutionException, TimeoutException {
@@ -61,6 +61,18 @@ public class ConsoleRunner {
 	            	case ".restart":
 	            		BroadcastRunner.restartStream();
 	            		break;
+	            	case ".next":
+	            		BroadcastRunner.playNext();
+	            		break;
+	            	case ".prev":
+	            		BroadcastRunner.playPrevious();
+	            		break;
+	            	case ".playlist":
+	            		playlistInfo(parse[1]);
+	            		break;
+	            	case ".play":
+	            		streamFile(parse[1]);
+	            		break;
 	            	case ".help":
 	            	case ".h":
 	            		System.out.println(Config.HELP_TEXT);
@@ -71,6 +83,17 @@ public class ConsoleRunner {
             }
         }
         keyboard.close();
+	}
+	
+	void streamFile(String file) {
+		int index=Utils.getFilePosition(file);
+		if(index>-1) {
+			BroadcastRunner.broadcastPlaylistPosition(index);
+		}
+	}
+	
+	void playlistInfo(String regex) {
+		System.out.println(Utils.getPlaylistAsString(regex));
 	}
 	
 	void broadcastInfo(String[] args) {
