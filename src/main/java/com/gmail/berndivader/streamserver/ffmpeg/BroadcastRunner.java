@@ -1,10 +1,7 @@
 package com.gmail.berndivader.streamserver.ffmpeg;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -19,6 +16,7 @@ import com.github.kokorin.jaffree.ffmpeg.UrlOutput;
 import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Format;
+import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.config.Config;
 
 public class BroadcastRunner {
@@ -50,8 +48,7 @@ public class BroadcastRunner {
 	Thread create() {
 		quit=false;
 		return new Thread(() -> {
-			files=refreshFilelist();
-			
+			files=Utils.shufflePlaylist(Utils.refreshPlaylist());
 			future=startNewStream(files[0].getAbsolutePath());
 			index=1;
 			
@@ -60,7 +57,7 @@ public class BroadcastRunner {
 	    			future=startNewStream(files[index].getAbsolutePath());
 	    			index++;
 	    			if(index>files.length-1) {
-	    				files=refreshFilelist();
+	    				files=Utils.shufflePlaylist(Utils.refreshPlaylist());
 	    				index=0;
 	    			}
 	    		}
@@ -82,27 +79,6 @@ public class BroadcastRunner {
 				}
 	    	}
 		});
-	}
-	
-	static File[] refreshFilelist() {
-    	File file=new File(Config.PLAYLIST_PATH);
-    	File[]files;
-    	
-    	if(file.isDirectory()) {
-    		FileFilter filter=new FileFilter() {
-				@Override
-				public boolean accept(File pathname) {
-					return pathname.getAbsolutePath().toLowerCase().endsWith(".mp4");
-				}
-			};
-    		files=file.listFiles(filter);
-    	} else if(file.isFile()) {
-    		files=new File[] {file};
-    	} else {
-    		files=new File[0];
-    	}
-		shuffleFiles(files);
-    	return files;
 	}
 	
 	static FFmpegResultFuture startNewStream(String path) {
@@ -147,23 +123,42 @@ public class BroadcastRunner {
 				}).setOverwriteOutput(true).executeAsync();
 	}
 	
-	static void shuffleFiles(File[] files) {
-		Random random=ThreadLocalRandom.current();
-		for (int i1=files.length-1;i1>0;i1--) {
-			int index=random.nextInt(i1+1);
-			File a=files[index];
-			files[index]=files[i1];
-			files[i1]=a;
-		}
-	}
-	
 	public static boolean isStreaming() {
 		return future!=null&&!future.isCancelled()&&!future.isDone();
 	}
 	
-	public static void restartStream() throws InterruptedException, ExecutionException, TimeoutException {
+	public static void broadcastPlaylistPosition(int idx) {
+		index=idx;
 		if(future!=null) {
-			if(index!=0) index--;
+			future.graceStop();
+		}
+	}
+	
+	public static void restartStream() {
+		if(future!=null) {
+			if(index!=0) {
+				index--;
+			} else {
+				index=files.length-1;
+			}
+			future.graceStop();
+		}
+	}
+	
+	public static void playNext() {
+		if(future!=null) {
+			future.graceStop();
+		}
+	}
+	
+	public static void playPrevious() {
+		if(future!=null) {
+			int idx=index;
+			idx-=2;
+			if(idx<0) {
+				idx=files.length-1;
+			}
+			index=idx;
 			future.graceStop();
 		}
 	}
