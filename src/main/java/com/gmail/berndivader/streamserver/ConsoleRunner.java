@@ -81,8 +81,8 @@ public class ConsoleRunner {
 	            	case ".h":
 	            		println(Config.HELP_TEXT);
 	            		break;
-	            	case ".test":
-	            		new UpdatePlaylist();
+	            	case ".mysql":
+	            		executeSqlCommand(parse[1]);
 	            		break;
 	            	default:
 	            		break;
@@ -90,6 +90,15 @@ public class ConsoleRunner {
             }
         }
         keyboard.close();
+	}
+	
+	void executeSqlCommand(String arg) {
+		switch(arg) {
+			case "playlist refresh":
+				new UpdatePlaylist();
+				break;
+		}
+		
 	}
 	
 	void streamFile(String file) {

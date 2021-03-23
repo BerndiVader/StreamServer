@@ -14,3 +14,5 @@ StreamServer help
 
 .playlist [regex] show playlist args= valid regex pattern
 .play [filename] play file
+
+.mysql playlist refresh -> update database with current filelist
