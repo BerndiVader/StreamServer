@@ -7,14 +7,14 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.gmail.berndivader.streamserver.config.Config;
-import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
 public class Utils {
 	
 	public static int getFilePosition(String name) {
 		if(!name.isEmpty()) {
-			for(int i1=0;i1<BroadcastRunner.files.length;i1++) {
-				String file=BroadcastRunner.files[i1].getName().toLowerCase();
+			File[]files=Helper.files.clone();
+			for(int i1=0;i1<files.length;i1++) {
+				String file=files[i1].getName().toLowerCase();
 				if(file.equals(name)) {
 					return i1;
 				}
@@ -24,22 +24,42 @@ public class Utils {
 	}
 	
 	public static ArrayList<String> getPlaylistAsList(String regex) {
+		if(regex.contains("*")) {
+			regex=regex.replaceAll("*","(.*)");
+		} else {
+			regex="(.*)"+regex+("(.*)");
+		}
 		ArrayList<String>list=new ArrayList<>();
-		for(int i1=0;i1<BroadcastRunner.files.length;i1++) {
-			String name=BroadcastRunner.files[i1].getName().toLowerCase();
-			if(name.matches(regex)) {
-				list.add(name);
+		File[]files=Helper.files.clone();
+		for(int i1=0;i1<files.length;i1++) {
+			String name=files[i1].getName().toLowerCase();
+			try {
+				if(name.matches(regex)) {
+					list.add(name);
+				}
+			} catch (Exception e) {
+				ConsoleRunner.println(e.getMessage());
 			}
 		}
 		return list;
 	}
 	
 	public static String getPlaylistAsString(String regex) {
+		if(regex.contains("*")) {
+			regex=regex.replaceAll("*","(.*)");
+		} else {
+			regex="(.*)"+regex+("(.*)");
+		}
 		String playlist="";
-		for(int i1=0;i1<BroadcastRunner.files.length;i1++) {
-			String name=BroadcastRunner.files[i1].getName().toLowerCase();
-			if(name.matches(regex)) {
-				playlist+=name+"\n";
+		File[]files=Helper.files.clone();
+		for(int i1=0;i1<files.length;i1++) {
+			String name=files[i1].getName().toLowerCase();
+			try {
+				if(name.matches(regex)) {
+					playlist+=name+"\n";
+				}
+			} catch (Exception e) {
+				ConsoleRunner.println(e.getMessage());
 			}
 		}
 		return playlist;
@@ -75,6 +95,5 @@ public class Utils {
     	}
     	return files;
 	}
-	
 
 }
