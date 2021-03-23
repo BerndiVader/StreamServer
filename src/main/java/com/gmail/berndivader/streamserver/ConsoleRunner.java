@@ -1,5 +1,6 @@
 package com.gmail.berndivader.streamserver;
 
+import java.io.Console;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -9,14 +10,17 @@ import com.github.kokorin.jaffree.ffmpeg.FFmpegProgress;
 import com.github.kokorin.jaffree.ffprobe.Format;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
+import com.gmail.berndivader.streamserver.mysql.UpdatePlaylist;
 
 public class ConsoleRunner {
 	
     static Scanner keyboard;
     static Thread thread;
+    static Console console;
     
     static {
     	keyboard=new Scanner(System.console().reader());
+    	console=System.console();
     }
 	
 	public ConsoleRunner() throws InterruptedException, ExecutionException, TimeoutException {
@@ -24,7 +28,7 @@ public class ConsoleRunner {
 		boolean exit=false;
 		
 		while (!exit) {
-	        System.out.print("> "); 
+	        printReady();
             String input = keyboard.nextLine();
             
             if(input != null) {
@@ -75,7 +79,10 @@ public class ConsoleRunner {
 	            		break;
 	            	case ".help":
 	            	case ".h":
-	            		System.out.println(Config.HELP_TEXT);
+	            		println(Config.HELP_TEXT);
+	            		break;
+	            	case ".test":
+	            		new UpdatePlaylist();
 	            		break;
 	            	default:
 	            		break;
@@ -93,21 +100,21 @@ public class ConsoleRunner {
 	}
 	
 	void playlistInfo(String regex) {
-		System.out.println(Utils.getPlaylistAsString(regex));
+		println(Utils.getPlaylistAsString(regex));
 	}
 	
 	void broadcastInfo(String[] args) {
-		System.out.println("===Broadcast information===");
+		println("===Broadcast information===");
 		for(int i1=0;i1<args.length;i1++) {
 			switch(args[i1]) {
 				case "status":
-					System.out.println("Is broadcasting: "+BroadcastRunner.isStreaming());
+					println("Is broadcasting: "+BroadcastRunner.isStreaming());
 					break;
 				case "file":
-					System.out.println("Current File: "+BroadcastRunner.files[BroadcastRunner.index-1].getName());
+					println("Current File: "+Helper.files[BroadcastRunner.index-1].getName());
 					break;
 				case "next":
-					System.out.println("Next File: "+BroadcastRunner.files[BroadcastRunner.index].getName());
+					println("Next File: "+Helper.files[BroadcastRunner.index].getName());
 					break;
 				default:
 					break;
@@ -119,12 +126,12 @@ public class ConsoleRunner {
 		if(BroadcastRunner.isStreaming()) {
 			String message=BroadcastRunner.currentMessage;
 			if(message!=null) {
-				System.out.println("Last ffmpeg output: "+message);
+				println("Last ffmpeg output: "+message);
 			} else {
-				System.out.println("Currently no ffmpeg message output present.");
+				println("Currently no ffmpeg message output present.");
 			}
 		} else {
-			System.out.println("Currently no stream is running.");
+			println("Currently no stream is running.");
 		}
 	}
 	
@@ -132,55 +139,55 @@ public class ConsoleRunner {
 		if(BroadcastRunner.isStreaming()) {
 			FFmpegProgress progress=BroadcastRunner.currentProgress;
 			if(progress!=null) {
-				System.out.println("===Progress information===");
+				println("===Progress information===");
 				long duration=progress.getTime(TimeUnit.SECONDS);
 				for(int i1=0;i1<args.length;i1++) {
 					String option=args[i1];
 					switch(option) {
 						case "time":
-							System.out.println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
+							println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
 							break;
 						case "frames":
 						case "frame":
-							System.out.println("Frames: "+progress.getFrame());
+							println("Frames: "+progress.getFrame());
 							break;
 						case "bitrate":
 						case "bits":
-							System.out.println("Bitrate: "+progress.getBitrate());
+							println("Bitrate: "+progress.getBitrate());
 							break;
 						case "quality":
 						case "q":
-							System.out.println("Quality: "+progress.getQ());
+							println("Quality: "+progress.getQ());
 							break;
 						case "fps":
-							System.out.println("FPS: "+progress.getFps());
+							println("FPS: "+progress.getFps());
 							break;
 						case "drops":
-							System.out.println("Drops: "+progress.getDrop());
+							println("Drops: "+progress.getDrop());
 							break;
 						case "size":
-							System.out.println("Size: "+progress.getSize());
+							println("Size: "+progress.getSize());
 							break;
 						case "speed":
-							System.out.println("Speed: "+progress.getSpeed());
+							println("Speed: "+progress.getSpeed());
 							break;
 						default:
-							System.out.println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
-							System.out.println("Frames: "+progress.getFrame());
-							System.out.println("Bitrate: "+progress.getBitrate());
-							System.out.println("Quality: "+progress.getQ());
-							System.out.println("FPS: "+progress.getFps());
-							System.out.println("Drops: "+progress.getDrop());
-							System.out.println("Size: "+progress.getSize());
-							System.out.println("Speed: "+progress.getSpeed());
+							println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
+							println("Frames: "+progress.getFrame());
+							println("Bitrate: "+progress.getBitrate());
+							println("Quality: "+progress.getQ());
+							println("FPS: "+progress.getFps());
+							println("Drops: "+progress.getDrop());
+							println("Size: "+progress.getSize());
+							println("Speed: "+progress.getSpeed());
 							break;
 					}
 				}
 			} else {
-				System.out.println("No progress available atm.");
+				println("No progress available atm.");
 			}
 		} else {
-			System.out.println("Currently no stream is running.");
+			println("Currently no stream is running.");
 		}
 	}
 	
@@ -189,53 +196,65 @@ public class ConsoleRunner {
 			Format format=BroadcastRunner.currentFormat;
 			if(format!=null) {
 				float duration=format.getDuration();
-				System.out.println("===Current playing===");
+				println("===Current playing===");
 				for(int i1=0;i1<args.length;i1++) {
 					switch(args[i1]) {
 					case "title":
-						System.out.println("Title: "+format.getTag("title"));
+						println("Title: "+format.getTag("title"));
 						break;
 					case "artist":
-						System.out.println("Artist:"+format.getTag("artist"));
+						println("Artist:"+format.getTag("artist"));
 						break;
 					case "date":
-						System.out.println("Date:"+format.getTag("date"));
+						println("Date:"+format.getTag("date"));
 						break;
 					case "comment":
-						System.out.println("Comment:"+format.getTag("comment"));
+						println("Comment:"+format.getTag("comment"));
 						break;
 					case "playtime":
 					case "time":
-						System.out.println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
+						println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
 						break;
 					case "file":
-						System.out.println("File:"+format.getFilename());
+						println("File:"+format.getFilename());
 						break;
 					case "bitrate":
 					case "bits":
-						System.out.println("Bitrate:"+format.getBitRate());
+						println("Bitrate:"+format.getBitRate());
 						break;
 					case "format":
-						System.out.println("Format:"+format.getFormatName());
+						println("Format:"+format.getFormatName());
 						break;
 					default:
-						System.out.println("Title: "+format.getTag("title"));
-						System.out.println("Artist:"+format.getTag("artist"));
-						System.out.println("Date:"+format.getTag("date"));
-						System.out.println("Comment:"+format.getTag("comment"));
-						System.out.println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
-						System.out.println("File:"+format.getFilename());
-						System.out.println("Bitrate:"+format.getBitRate());
-						System.out.println("Format:"+format.getFormatName());
+						println("Title: "+format.getTag("title"));
+						println("Artist:"+format.getTag("artist"));
+						println("Date:"+format.getTag("date"));
+						println("Comment:"+format.getTag("comment"));
+						println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
+						println("File:"+format.getFilename());
+						println("Bitrate:"+format.getBitRate());
+						println("Format:"+format.getFormatName());
 						break;
 					}
 				}
 			} else {
-				System.out.println("No information about stream available.");
+				println("No information about stream available.");
 			}
 		} else {
-			System.out.println("Currently no stream is running.");
+			println("Currently no stream is running.");
 		}
+	}
+	
+	public static void println(String string) {
+		console.printf("%s\n>",string);
+	}
+	
+	public static void print(String string) {
+		console.printf("%s",string);
+	}
+	
+	public static void printReady() {
+		console.printf("\n%s",">");
 	}
 
 }
