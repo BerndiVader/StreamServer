@@ -1,6 +1,5 @@
 package com.gmail.berndivader.streamserver.ffmpeg;
 
-import java.io.File;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -16,6 +15,8 @@ import com.github.kokorin.jaffree.ffmpeg.UrlOutput;
 import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Format;
+import com.gmail.berndivader.streamserver.ConsoleRunner;
+import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.config.Config;
 
@@ -29,53 +30,52 @@ public class BroadcastRunner {
 	public static String currentMessage;
 	public static FFmpegResultFuture future;
 	public static int index;
-	public static File[] files;
 	
 	public BroadcastRunner() {
-		System.out.print("Staring BroadcastRunner...");
+		ConsoleRunner.print("Staring BroadcastRunner...");
 		THREAD=create();
 		THREAD.start();
-		System.out.println("DONE!");
+		ConsoleRunner.println("DONE!");
 	}
 	
 	public void stop() throws InterruptedException {
-		System.out.print("Stopping BroadcastRunner...");
+		ConsoleRunner.print("Stopping BroadcastRunner...");
 		quit=true;
 		THREAD.join();
-		System.out.println("DONE!");
+		ConsoleRunner.println("DONE!");
 	}
 	
 	Thread create() {
 		quit=false;
 		return new Thread(() -> {
-			files=Utils.shufflePlaylist(Utils.refreshPlaylist());
-			future=startNewStream(files[0].getAbsolutePath());
+			Helper.files=Utils.shufflePlaylist(Utils.refreshPlaylist());
+			future=startNewStream(Helper.files[0].getAbsolutePath());
 			index=1;
 			
 	    	while(!quit) {
 	    		if(future.isCancelled()||future.isDone()){
-	    			future=startNewStream(files[index].getAbsolutePath());
+	    			future=startNewStream(Helper.files[index].getAbsolutePath());
 	    			index++;
-	    			if(index>files.length-1) {
-	    				files=Utils.shufflePlaylist(Utils.refreshPlaylist());
+	    			if(index>Helper.files.length-1) {
+	    				Helper.files=Utils.shufflePlaylist(Utils.refreshPlaylist());
 	    				index=0;
 	    			}
 	    		}
 	    		try {
-					Thread.sleep(1000);
+					Thread.sleep(500);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
     		}
 	    	if(future!=null&&!future.isCancelled()||!future.isDone()) {
-	    		System.out.print("[Stop broadcasting...");
+	    		ConsoleRunner.print("[Stop broadcasting...");
 	    		future.graceStop();
 	    		try {
 					future.get(30,TimeUnit.SECONDS);
-		    		System.out.print("DONE!]...");
+					ConsoleRunner.print("DONE!]...");
 				} catch (InterruptedException | ExecutionException | TimeoutException e) {
 					e.printStackTrace();
-					System.out.print("FAILED!]...");
+					ConsoleRunner.print("FAILED!]...");
 				}
 	    	}
 		});
@@ -89,7 +89,7 @@ public class BroadcastRunner {
 			.execute();
 		
 		currentFormat=probeResult.getFormat();
-		System.out.println("Now playing: "
+		ConsoleRunner.println("Now playing: "
 			+currentFormat.getTag("title")
 			+":"+currentFormat.getTag("artist")
 			+":"+currentFormat.getTag("date")
@@ -139,7 +139,7 @@ public class BroadcastRunner {
 			if(index!=0) {
 				index--;
 			} else {
-				index=files.length-1;
+				index=Helper.files.length-1;
 			}
 			future.graceStop();
 		}
@@ -156,7 +156,7 @@ public class BroadcastRunner {
 			int idx=index;
 			idx-=2;
 			if(idx<0) {
-				idx=files.length-1;
+				idx=Helper.files.length-1;
 			}
 			index=idx;
 			future.graceStop();
