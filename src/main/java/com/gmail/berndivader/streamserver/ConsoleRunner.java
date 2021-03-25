@@ -92,10 +92,10 @@ public class ConsoleRunner {
         keyboard.close();
 	}
 	
-	void executeSqlCommand(String arg) {
+	void executeSqlCommand(String arg) throws InterruptedException, ExecutionException, TimeoutException {
 		switch(arg) {
 			case "playlist refresh":
-				new UpdatePlaylist();
+				new UpdatePlaylist(true);
 				break;
 		}
 		

@@ -53,6 +53,7 @@ public class BroadcastRunner {
 			index=1;
 			
 	    	while(!quit) {
+   		
 	    		if(future.isCancelled()||future.isDone()){
 	    			future=startNewStream(Helper.files[index].getAbsolutePath());
 	    			index++;
