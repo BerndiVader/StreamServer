@@ -1,18 +1,22 @@
-StreamServer help
-=================
+StreamServer console help
+=========================
 
-.x -> exit server
+.x||exit -> Exit server
 
-.f [title|artist|date|comment|playtime|file|bitrate|format] -> show ffmpegprobe gathered infos
-.p [time|frames|bitrate|quality|fps|drops|size|speed] -> show ffmpeg progress infos
-.m -> show current ffmpeg output message
-.b [status|file|next] -> info about broadcast status, current file and next file.
+.f [title|artist|date|comment|playtime|file|bitrate|format] -> Show ffmpegprobe gathered info
+.p [time|frames|bitrate|quality|fps|drops|size|speed] -> Show ffmpeg progress info
+.m -> Show current ffmpeg output message
+.b [status|file|next] -> Info about broadcast status, current file and next file
 
-.restart -> restart current stream
-.next -> play next
-.prev -> play last
+.restart -> Restart current stream
+.next||stop -> Stop and play next file
+.prev -> Play last file
 
-.playlist [regex] show playlist args= valid regex pattern
-.play [filename] play file
+.playlist [regex] -> Show playlist use regex to filter = valid regex pattern
+.play [filename] -> Play file
 
-.mysql playlist refresh -> update database with current filelist
+.mysql playlist refresh -> Update database with current filelist
+.mysql schedule [filename] -> Add file to scheduled playlist
+
+.config save -> Save current settings to config file
+.config load -> Load config file from disc and use it
