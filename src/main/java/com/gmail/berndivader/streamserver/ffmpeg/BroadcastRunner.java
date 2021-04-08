@@ -1,5 +1,7 @@
 package com.gmail.berndivader.streamserver.ffmpeg;
 
+import java.io.File;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -19,11 +21,14 @@ import com.gmail.berndivader.streamserver.ConsoleRunner;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.config.Config;
+import com.gmail.berndivader.streamserver.mysql.GetNextScheduled;
+import com.gmail.berndivader.streamserver.mysql.UpdateCurrent;
+import com.gmail.berndivader.streamserver.mysql.UpdatePlaylist;
 
-public class BroadcastRunner {
-	static Thread THREAD;
+public class BroadcastRunner extends TimerTask {
 	
 	boolean quit;
+	long longTimer;
 	
 	public static FFmpegProgress currentProgress;
 	public static Format currentFormat;
@@ -32,57 +37,86 @@ public class BroadcastRunner {
 	public static int index;
 	
 	public BroadcastRunner() {
-		ConsoleRunner.print("Staring BroadcastRunner...");
-		THREAD=create();
-		THREAD.start();
+		ConsoleRunner.print("Starting BroadcastRunner...");
+
+		quit=false;
+		
+		Helper.files=Utils.shufflePlaylist(Utils.refreshPlaylist());
+		longTimer=3600;
 		ConsoleRunner.println("DONE!");
+		
+		future=startNewStream(Helper.files[0]);
+		index=1;
+		
+		Helper.scheduledExecutor.scheduleAtFixedRate(this, 0l, 1000l, TimeUnit.MILLISECONDS);
+		
 	}
 	
 	public void stop() throws InterruptedException {
 		ConsoleRunner.print("Stopping BroadcastRunner...");
+		
 		quit=true;
-		THREAD.join();
+    	if(future!=null&&(!future.isCancelled()||!future.isDone())) {
+    		ConsoleRunner.print("[Stop broadcasting...");
+    		future.graceStop();
+    		try {
+				future.get(30,TimeUnit.SECONDS);
+				ConsoleRunner.print("DONE!]...");
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				e.printStackTrace();
+				ConsoleRunner.print("FAILED!]...");
+			}
+    	}
+		
 		ConsoleRunner.println("DONE!");
 	}
 	
-	Thread create() {
-		quit=false;
-		return new Thread(() -> {
-			Helper.files=Utils.shufflePlaylist(Utils.refreshPlaylist());
-			future=startNewStream(Helper.files[0].getAbsolutePath());
-			index=1;
-			
-	    	while(!quit) {
-   		
-	    		if(future.isCancelled()||future.isDone()){
-	    			future=startNewStream(Helper.files[index].getAbsolutePath());
+	@Override
+	public void run() {
+		
+    	if(!quit) {
+    		if(longTimer>=3600) {
+    			longTimer=0;
+    			try {
+					new UpdatePlaylist(false);
+				} catch (InterruptedException | ExecutionException | TimeoutException e) {
+					e.printStackTrace();
+				}
+    		}
+    		longTimer++;
+    		
+    		if(future.isCancelled()||future.isDone()){
+    			
+    			GetNextScheduled scheduled=new GetNextScheduled();
+    			String filename=null;
+    			try {
+					filename=scheduled.future.get(20,TimeUnit.SECONDS);
+				} catch (InterruptedException | ExecutionException | TimeoutException e) {
+					e.printStackTrace();
+				}
+    			int filepos=-1;
+    			if(filename!=null) {
+    				filepos=Utils.getFilePosition(filename.toLowerCase());
+    			}
+    			
+    			if(filepos>-1) {
+    				future=startNewStream(Helper.files[filepos]);
+    			} else {
+	    			future=startNewStream(Helper.files[index]);
 	    			index++;
 	    			if(index>Helper.files.length-1) {
 	    				Helper.files=Utils.shufflePlaylist(Utils.refreshPlaylist());
 	    				index=0;
 	    			}
-	    		}
-	    		try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+    			}
+    			
     		}
-	    	if(future!=null&&!future.isCancelled()||!future.isDone()) {
-	    		ConsoleRunner.print("[Stop broadcasting...");
-	    		future.graceStop();
-	    		try {
-					future.get(30,TimeUnit.SECONDS);
-					ConsoleRunner.print("DONE!]...");
-				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					e.printStackTrace();
-					ConsoleRunner.print("FAILED!]...");
-				}
-	    	}
-		});
+		}
+		
 	}
 	
-	static FFmpegResultFuture startNewStream(String path) {
+	static FFmpegResultFuture startNewStream(File file) {
+		String path=file.getAbsolutePath();
 		FFprobeResult probeResult=FFprobe.atPath()
 			.setShowFormat(true)
 			.setInput(path)
@@ -90,6 +124,14 @@ public class BroadcastRunner {
 			.execute();
 		
 		currentFormat=probeResult.getFormat();
+		
+		String title=file.getName();
+		if(title.toLowerCase().endsWith(".mp4")) {
+			title=title.substring(0,title.length()-4);
+		}
+		String info=currentFormat.getTag("artist")+":"+currentFormat.getTag("date")+":"+currentFormat.getTag("comment");
+		new UpdateCurrent(title, info);
+		
 		ConsoleRunner.println("Now playing: "
 			+currentFormat.getTag("title")
 			+":"+currentFormat.getTag("artist")
@@ -163,7 +205,7 @@ public class BroadcastRunner {
 			future.graceStop();
 		}
 	}
-	
+
 	***REMOVED***		
 	***REMOVED***
 	***REMOVED***
