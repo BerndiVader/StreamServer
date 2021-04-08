@@ -45,24 +45,28 @@ public class Utils {
 	}
 	
 	public static String getPlaylistAsString(String regex) {
+		int count=0;
+		StringBuilder playlist=new StringBuilder();
 		if(regex.contains("*")) {
 			regex=regex.replaceAll("*","(.*)");
 		} else {
 			regex="(.*)"+regex+("(.*)");
 		}
-		String playlist="";
 		File[]files=Helper.files.clone();
 		for(int i1=0;i1<files.length;i1++) {
 			String name=files[i1].getName().toLowerCase();
 			try {
 				if(name.matches(regex)) {
-					playlist+=name+"\n";
+					playlist.append(name+"\n");
+					count++;
 				}
 			} catch (Exception e) {
 				ConsoleRunner.println(e.getMessage());
 			}
 		}
-		return playlist;
+		playlist.append("\nThere are "+count+" matches.");
+		
+		return playlist.toString();
 	}
 	
 	public static File[] shufflePlaylist(File[] files) {
