@@ -27,17 +27,18 @@ public class DatabaseConnection {
 		
 		if(INIT) {
 			try (Connection connection=getNewConnection()) {
-				PreparedStatement statement=connection.prepareStatement("SELECT infotext FROM ytbot.info LIMIT 1",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
-				statement.closeOnCompletion();
-				ResultSet result=statement.executeQuery();
-				if(result!=null) {
-					result.first();
-					INIT=result.getString("infotext").equals("YouTube Broadcast Bot Database");
-					result.close();
-				} else {
-					ConsoleRunner.println("FAILED!");
-					ConsoleRunner.println("Not able to identify the database!");
-					INIT=false;
+				try(PreparedStatement statement=connection.prepareStatement("SELECT infotext FROM ytbot.info LIMIT 1",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
+					try(ResultSet result=statement.executeQuery()) {
+						if(result!=null) {
+							result.first();
+							INIT=result.getString("infotext").equals("YouTube Broadcast Bot Database");
+							ConsoleRunner.println(INIT?"DONE!":"FAILED!");
+						} else {
+							ConsoleRunner.println("FAILED!");
+							ConsoleRunner.println("Not able to identify the database!");
+							INIT=false;
+						}
+					}
 				}
 			} catch (SQLException e) {
 				ConsoleRunner.println("FAILED!");
