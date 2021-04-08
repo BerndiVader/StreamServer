@@ -4,7 +4,11 @@ apply plugin: 'application'
 mainClassName = 'com.gmail.berndivader.streamserver.StreamServer'
 
 repositories {
+	jcenter()
     mavenCentral()
+  	maven {
+    	url 'https://m2.dv8tion.net/releases'
+  	}
 }
 
 configurations {
@@ -16,7 +20,10 @@ dependencies {
 	implemented 'com.github.kokorin.jaffree:jaffree:+'
 	implemented 'org.slf4j:slf4j-api:+'
     implemented 'mysql:mysql-connector-java:+'
-    implemented 'com.google.code.gson:gson:2.8.6'
+    implemented 'com.google.code.gson:gson:+'
+    implemented 'org.slf4j:slf4j-nop:+'
+    implemented 'com.discord4j:discord4j-core:+'
+    implemented 'com.sedmelluq:lavaplayer:+'
 }
 
 jar {
