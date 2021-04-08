@@ -19,7 +19,7 @@ import com.gmail.berndivader.streamserver.Helper;
 
 public class UpdatePlaylist implements Callable<Boolean> {
 	
-	String sqlInsert="INSERT INTO `playlist` (`title`, `filepath`, `info`) VALUES(?, ?, ?);";
+	String sql="INSERT INTO `playlist` (`title`, `filepath`, `info`) VALUES(?, ?, ?);";
     String[]spinner=new String[] {"\u0008/", "\u0008-", "\u0008\\", "\u0008|"};
     boolean isCommand;
 	
@@ -44,7 +44,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 		File[]files=Helper.files.clone();
 		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
-			try(PreparedStatement statement=connection.prepareStatement(sqlInsert,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
+			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
 				
 				ConsoleRunner.println("[BEGIN MYSQL PLAYLIST UPDATE]");
 				if(isCommand) {
