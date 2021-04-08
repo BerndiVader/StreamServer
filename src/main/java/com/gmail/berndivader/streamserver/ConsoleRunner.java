@@ -10,6 +10,7 @@ import com.github.kokorin.jaffree.ffmpeg.FFmpegProgress;
 import com.github.kokorin.jaffree.ffprobe.Format;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
+import com.gmail.berndivader.streamserver.mysql.AddScheduled;
 import com.gmail.berndivader.streamserver.mysql.UpdatePlaylist;
 
 public class ConsoleRunner {
@@ -17,6 +18,8 @@ public class ConsoleRunner {
     static Scanner keyboard;
     static Thread thread;
     static Console console;
+    
+    public static boolean forceExit;
     
     static {
     	keyboard=new Scanner(System.console().reader());
@@ -39,11 +42,12 @@ public class ConsoleRunner {
             	}
             	
             	String command=parse[0];
-            	String[]args=parse[1].split(" ");
+            	String[]args=parse[1].split(" ",2);
             	
             	switch(command) {
 	            	case ".x":
 	            	case ".exit":
+	            		forceExit=args[0].equals("force")?true:false;
 	            		exit=true;
 	            		break;
 	            	case ".f":
@@ -66,24 +70,27 @@ public class ConsoleRunner {
 	            		BroadcastRunner.restartStream();
 	            		break;
 	            	case ".next":
+	            	case ".stop":
 	            		BroadcastRunner.playNext();
 	            		break;
 	            	case ".prev":
 	            		BroadcastRunner.playPrevious();
 	            		break;
 	            	case ".playlist":
-	            		playlistInfo(parse[1]);
+	            		playlistInfo(new String[] {parse[1]});
 	            		break;
 	            	case ".play":
-	            		streamFile(parse[1]);
+	            		streamFile(new String[] {parse[1]});
 	            		break;
 	            	case ".help":
 	            	case ".h":
 	            		println(Config.HELP_TEXT);
 	            		break;
 	            	case ".mysql":
-	            		executeSqlCommand(parse[1]);
+	            		executeSqlCommand(args);
 	            		break;
+	            	case ".config":
+	            		executeConfigCommand(new String[] {parse[1]});
 	            	default:
 	            		break;
             	}
@@ -92,23 +99,63 @@ public class ConsoleRunner {
         keyboard.close();
 	}
 	
-	void executeSqlCommand(String arg) throws InterruptedException, ExecutionException, TimeoutException {
-		switch(arg) {
-			case "playlist refresh":
-				new UpdatePlaylist(true);
+	void executeConfigCommand(String[] args) {
+		switch(args[0]) {
+		case "save":
+			if(!Config.saveConfig()) {
+				println("Configuration saved");
+			} else {
+				println("Failed to save configuration");
+			}
+			break;
+		case "load":
+			if(Config.loadConfig()) {
+				println("Configuration reloaded");
+			} else {
+				println("Failed to load configuration");
+			}
+			break;
+		}
+	}
+	
+	void executeSqlCommand(String[] args) throws InterruptedException, ExecutionException, TimeoutException {
+		switch(args[0]) {
+			case "playlist":
+				if(args.length>0) {
+					switch(args[1]) {
+						case "refresh":
+							new UpdatePlaylist(true);
+							break;
+					}
+				}
+				break;
+			case "schedule":
+				if(args.length>0) {
+					String filename=args[1];
+					if(!filename.endsWith(".mp4")) {
+						filename=filename+".mp4";
+					}
+					int index=Utils.getFilePosition(filename);
+					if(index>-1) {
+						filename=Helper.files[index].getName();
+						new AddScheduled(filename);
+					}
+				}
 				break;
 		}
 		
 	}
 	
-	void streamFile(String file) {
+	void streamFile(String[] args) {
+		String file=args[0];
 		int index=Utils.getFilePosition(file);
 		if(index>-1) {
 			BroadcastRunner.broadcastPlaylistPosition(index);
 		}
 	}
 	
-	void playlistInfo(String regex) {
+	void playlistInfo(String[] args) {
+		String regex=args[0];
 		println(Utils.getPlaylistAsString(regex));
 	}
 	
