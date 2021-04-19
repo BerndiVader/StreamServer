@@ -23,14 +23,31 @@ public class Utils {
 		return -1;
 	}
 	
+	public static int getCustomFilePosition(String name) {
+		if(!name.isEmpty()) {
+			File[]files=Helper.customs.clone();
+			for(int i1=0;i1<files.length;i1++) {
+				String file=files[i1].getName().toLowerCase();
+				if(file.equals(name)) {
+					return i1;
+				}
+			}
+		}
+		return -1;
+	}
+	
 	public static ArrayList<String> getPlaylistAsList(String regex) {
+		return getPlaylistAsList(regex, false);
+	}
+	
+	public static ArrayList<String> getPlaylistAsList(String regex,boolean custom) {
 		if(regex.contains("*")) {
 			regex=regex.replaceAll("*","(.*)");
 		} else {
 			regex="(.*)"+regex+("(.*)");
 		}
 		ArrayList<String>list=new ArrayList<>();
-		File[]files=Helper.files.clone();
+		File[]files=custom==false?Helper.files.clone():Helper.customs.clone();
 		for(int i1=0;i1<files.length;i1++) {
 			String name=files[i1].getName().toLowerCase();
 			try {
@@ -44,7 +61,7 @@ public class Utils {
 		return list;
 	}
 	
-	public static String getPlaylistAsString(String regex) {
+	public static String getPlaylistAsString(String regex, boolean custom) {
 		int count=0;
 		StringBuilder playlist=new StringBuilder();
 		if(regex.contains("*")) {
@@ -52,7 +69,7 @@ public class Utils {
 		} else {
 			regex="(.*)"+regex+("(.*)");
 		}
-		File[]files=Helper.files.clone();
+		File[]files=custom==false?Helper.files.clone():Helper.customs.clone();
 		for(int i1=0;i1<files.length;i1++) {
 			String name=files[i1].getName().toLowerCase();
 			try {
@@ -64,9 +81,13 @@ public class Utils {
 				ConsoleRunner.println(e.getMessage());
 			}
 		}
-		playlist.append("\nThere are "+count+" matches.");
+		playlist.append("\nThere are "+count+" matches for "+regex);
 		
 		return playlist.toString();
+	}
+	
+	public static String getPlaylistAsString(String regex) {
+		return getPlaylistAsString(regex, false);
 	}
 	
 	public static File[] shufflePlaylist(File[] files) {
@@ -82,21 +103,40 @@ public class Utils {
 	
 	public static File[] refreshPlaylist() {
     	File file=new File(Config.PLAYLIST_PATH);
+    	File custom=new File(Config.PLAYLIST_PATH_CUSTOM);
     	File[]files;
     	
-    	if(file.isDirectory()) {
-    		FileFilter filter=new FileFilter() {
-				@Override
-				public boolean accept(File pathname) {
-					return pathname.getAbsolutePath().toLowerCase().endsWith(".mp4");
-				}
-			};
-    		files=file.listFiles(filter);
-    	} else if(file.isFile()) {
-    		files=new File[] {file};
+		FileFilter filter=new FileFilter() {
+			@Override
+			public boolean accept(File pathname) {
+				return pathname.getAbsolutePath().toLowerCase().endsWith(".mp4");
+			}
+		};
+    	
+		if(file.exists()) {
+	    	if(file.isDirectory()) {
+	    		files=file.listFiles(filter);
+	    	} else if(file.isFile()) {
+	    		files=new File[] {file};
+	    	} else {
+	    		files=new File[0];
+	    	}
+		} else {
+			files=new File[0];
+		}
+    	
+    	if(custom.exists()) {
+        	if(custom.isDirectory()) {
+        		Helper.customs=custom.listFiles(filter);
+        	} else if(custom.isFile()) {
+        		Helper.customs=new File[] {custom};
+        	} else {
+        		Helper.customs=new File[0];
+        	}
     	} else {
-    		files=new File[0];
+    		Helper.customs=new File[0];
     	}
+    	
     	return files;
 	}
 
