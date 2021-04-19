@@ -1,11 +1,17 @@
 package com.gmail.berndivader.streamserver.discord;
 
+import java.time.Duration;
+import java.util.function.Consumer;
+
 import com.gmail.berndivader.streamserver.ConsoleRunner;
+import com.gmail.berndivader.streamserver.StreamServer;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+
+import reactor.core.publisher.Mono;
 
 public class TrackScheduler implements AudioLoadResultHandler {
 	
@@ -35,8 +41,14 @@ public class TrackScheduler implements AudioLoadResultHandler {
 	@Override
 	public void loadFailed(FriendlyException exception) {
 		ConsoleRunner.println("error: "+exception.getMessage());
-		// TODO Auto-generated method stub
-		
+		Mono.delay(Duration.ofSeconds(5)).doOnNext(new Consumer<Long>() {
+
+			@Override
+			public void accept(Long l) {
+				StreamServer.DISCORDBOT.connectStream();
+			}
+			
+		}).subscribe();
 	}
 
 }
