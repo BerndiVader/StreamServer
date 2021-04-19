@@ -91,12 +91,26 @@ public class ConsoleRunner {
 	            		break;
 	            	case ".config":
 	            		executeConfigCommand(new String[] {parse[1]});
+	            		break;
+	            	case ".discord":
+	            		executeDiscordCommand(new String[] {parse[1]});
+	            		break;
 	            	default:
 	            		break;
             	}
             }
         }
         keyboard.close();
+	}
+	
+	void executeDiscordCommand(String[] args) {
+		switch(args[0]) {
+			case "voice connect":
+			case "voiceconnect":
+			case "vconnect":
+				StreamServer.DISCORDBOT.connectStream();
+				break;
+		}
 	}
 	
 	void executeConfigCommand(String[] args) {
@@ -139,6 +153,12 @@ public class ConsoleRunner {
 					if(index>-1) {
 						filename=Helper.files[index].getName();
 						new AddScheduled(filename);
+					} else {
+						index=Utils.getCustomFilePosition(filename);
+						if(index>-1) {
+							filename=Helper.customs[index].getName();
+							new AddScheduled(filename);
+						}
 					}
 				}
 				break;
@@ -149,14 +169,24 @@ public class ConsoleRunner {
 	void streamFile(String[] args) {
 		String file=args[0];
 		int index=Utils.getFilePosition(file);
-		if(index>-1) {
+		if(index==-1) {
+			index=Utils.getCustomFilePosition(file);
+			if(index>-1) {
+				BroadcastRunner.broadcastFilename(Helper.customs[index]);
+			}
+		} else {
 			BroadcastRunner.broadcastPlaylistPosition(index);
 		}
 	}
 	
 	void playlistInfo(String[] args) {
 		String regex=args[0];
-		println(Utils.getPlaylistAsString(regex));
+		if(regex.startsWith("custom ")) {
+			regex=regex.replaceFirst("custom ", "");
+			println(Utils.getPlaylistAsString(regex,true));
+		} else {
+			println(Utils.getPlaylistAsString(regex));
+		}
 	}
 	
 	void broadcastInfo(String[] args) {
