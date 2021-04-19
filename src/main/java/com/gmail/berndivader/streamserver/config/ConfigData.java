@@ -13,6 +13,8 @@ public class ConfigData {
 	String DISCORD_CHANNEL;
 	String DISCORD_ROLE;
 	String DISCORD_COMMAND_PREFIX;
+	String PLAYLIST_PATH_CUSTOM;
+	
 	Boolean DISCORD_RESPONSE_TO_PRIVATE;
 
 }
