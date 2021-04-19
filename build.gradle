@@ -27,7 +27,6 @@ dependencies {
 }
 
 jar {
-    
     rootSpec.exclude('**/META-INF/*.SF','**/META-INF/*.RSA')
     
     manifest {
