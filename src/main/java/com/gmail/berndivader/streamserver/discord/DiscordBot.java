@@ -1,5 +1,7 @@
 package com.gmail.berndivader.streamserver.discord;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +13,8 @@ import org.reactivestreams.Subscription;
 
 import com.gmail.berndivader.streamserver.ConsoleRunner;
 import com.gmail.berndivader.streamserver.config.Config;
+import com.gmail.berndivader.streamserver.discord.command.Command;
+import com.gmail.berndivader.streamserver.discord.command.Commands;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -29,7 +33,6 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.VoiceChannelCreateSpec;
@@ -41,15 +44,17 @@ import reactor.core.publisher.Mono;
 public class DiscordBot {
 	
 	final AudioPlayerManager playerManager;
-	final AudioPlayer audioPlayer;
+	public final AudioPlayer audioPlayer;
 	final AudioProvider provider;
 	final TrackScheduler scheduler;
+	final Commands commands;
 	
 	final GatewayDiscordClient client;
 	final EventDispatcher dispatcher;
 	public static Status status;
 	
-	public DiscordBot() {
+	public DiscordBot() throws FileNotFoundException, IOException, ClassNotFoundException {
+		commands=new Commands();
 		playerManager=new DefaultAudioPlayerManager();
 		playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
 		AudioSourceManagers.registerRemoteSources(playerManager);
@@ -200,6 +205,8 @@ public class DiscordBot {
 				
 			}).subscribe();
 		
+		
+		
 		dispatcher.on(MessageCreateEvent.class)
 			.subscribe(new Consumer<MessageCreateEvent>() {
 
@@ -223,20 +230,32 @@ public class DiscordBot {
 							public void accept(List<Role> roles) {
 								if(!roles.isEmpty()) {
 									String[]parse=content.split(" ",2);
-									String command=parse.length==2?parse[1]:"";
-									message.getAuthor().get().getPrivateChannel().subscribe(new Consumer<PrivateChannel>() {
+									String temp=parse.length==2?parse[1]:"";
+									String[]args=temp.split(" ",2);
+									String command=args[0].toLowerCase();
+									
+									Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE?message.getAuthor().get().getPrivateChannel():message.getChannel();
+									
+									mono.subscribe(new Consumer<MessageChannel>() {
 
 										@Override
-										public void accept(PrivateChannel channel) {
+										public void accept(MessageChannel channel) {
 											if(channel!=null) {
 												if(!command.isEmpty()) {
-													Mono<Void>cmd=Commands.getPlaylist(command,channel);
-													cmd.subscribe();
+													Command<?> kommand=commands.getCommand(command);
+													
+													if(kommand!=null) {
+														Mono<?>cmd=kommand.execute(args.length==2?args[1]:"",channel);
+														cmd.subscribe();
+													}
 												} else {
-													sendHelp(channel);
+													Command<?> kommand=commands.getCommand("help");
+													if(kommand!=null) {
+														Mono<?>cmd=kommand.execute(args.length==2?args[1]:"",channel);
+														cmd.subscribe();
+													}
 												}
 											}
-											
 										}
 										
 									});
@@ -311,6 +330,7 @@ public class DiscordBot {
 				
 			}).block(Duration.ofSeconds(20));
 		
+		audioPlayer.destroy();
 		client.logout().block(Duration.ofSeconds(20));
 	}
 	
