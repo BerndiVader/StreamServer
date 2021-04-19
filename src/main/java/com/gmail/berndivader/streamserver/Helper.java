@@ -10,6 +10,7 @@ public class Helper {
 	public static ExecutorService executor;
 	public static ScheduledExecutorService scheduledExecutor;
 	public static File[] files;
+	public static File[] customs;
 	
 	static {
 		executor=Executors.newFixedThreadPool(10);
