@@ -23,7 +23,6 @@ import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.mysql.GetNextScheduled;
 import com.gmail.berndivader.streamserver.mysql.UpdateCurrent;
-import com.gmail.berndivader.streamserver.mysql.UpdatePlaylist;
 
 public class BroadcastRunner extends TimerTask {
 	
@@ -33,6 +32,7 @@ public class BroadcastRunner extends TimerTask {
 	public static FFmpegProgress currentProgress;
 	public static Format currentFormat;
 	public static String currentMessage;
+	public static File currentPlaying;
 	public static FFmpegResultFuture future;
 	public static int index;
 	
@@ -44,9 +44,9 @@ public class BroadcastRunner extends TimerTask {
 		Helper.files=Utils.shufflePlaylist(Utils.refreshPlaylist());
 		longTimer=3600;
 		ConsoleRunner.println("DONE!");
-		
-		future=startNewStream(Helper.files[0]);
-		index=1;
+
+		index=0;
+		runStream();
 		
 		Helper.scheduledExecutor.scheduleAtFixedRate(this, 0l, 1000l, TimeUnit.MILLISECONDS);
 		
@@ -75,47 +75,49 @@ public class BroadcastRunner extends TimerTask {
 	public void run() {
 		
     	if(!quit) {
-    		if(longTimer>=3600) {
-    			longTimer=0;
-    			try {
-					new UpdatePlaylist(false);
-				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					e.printStackTrace();
-				}
-    		}
-    		longTimer++;
-    		
-    		if(future.isCancelled()||future.isDone()){
-    			
-    			GetNextScheduled scheduled=new GetNextScheduled();
-    			String filename=null;
-    			try {
-					filename=scheduled.future.get(20,TimeUnit.SECONDS);
-				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					e.printStackTrace();
-				}
-    			int filepos=-1;
-    			if(filename!=null) {
-    				filepos=Utils.getFilePosition(filename.toLowerCase());
-    			}
-    			
-    			if(filepos>-1) {
-    				future=startNewStream(Helper.files[filepos]);
-    			} else {
-	    			future=startNewStream(Helper.files[index]);
-	    			index++;
-	    			if(index>Helper.files.length-1) {
-	    				Helper.files=Utils.shufflePlaylist(Utils.refreshPlaylist());
-	    				index=0;
-	    			}
-    			}
-    			
+    		if(future.isCancelled()||future.isDone()) {
+    			runStream();
     		}
 		}
 		
 	}
 	
-	static FFmpegResultFuture startNewStream(File file) {
+	void runStream() {
+		
+		GetNextScheduled scheduled=new GetNextScheduled();
+		String filename=null;
+		try {
+			filename=scheduled.future.get(20,TimeUnit.SECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			e.printStackTrace();
+		}
+		if(filename!=null) {
+			int filepos=-1;
+			filepos=Utils.getFilePosition(filename.toLowerCase());
+			
+			if(filepos>-1) {
+				future=startNewStream(Helper.files[filepos]);
+				currentPlaying=Helper.files[filepos];
+			} else {
+				filepos=Utils.getCustomFilePosition(filename.toLowerCase());
+				if(filepos>-1) {
+    				future=startNewStream(Helper.customs[filepos]);
+    				currentPlaying=Helper.customs[filepos];
+				}
+			}
+		} else {
+			future=startNewStream(Helper.files[index]);
+			currentPlaying=Helper.files[index];
+			index++;
+			if(index>Helper.files.length-1) {
+				Helper.files=Utils.shufflePlaylist(Utils.refreshPlaylist());
+				index=0;
+			}
+		}
+		
+	}
+	
+	private static FFmpegResultFuture startNewStream(File file) {
 		String path=file.getAbsolutePath();
 		FFprobeResult probeResult=FFprobe.atPath()
 			.setShowFormat(true)
@@ -170,6 +172,19 @@ public class BroadcastRunner extends TimerTask {
 		return future!=null&&!future.isCancelled()&&!future.isDone();
 	}
 	
+	public static void broadcastFilename(File file) {
+		if(future!=null) {
+			future.graceStop();
+			try {
+				future.get(20,TimeUnit.SECONDS);
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				e.printStackTrace();
+			}
+		}
+		future=startNewStream(file);
+		ConsoleRunner.println(file.getName());
+	}
+	
 	public static void broadcastPlaylistPosition(int idx) {
 		index=idx;
 		if(future!=null) {
@@ -179,13 +194,9 @@ public class BroadcastRunner extends TimerTask {
 	
 	public static void restartStream() {
 		if(future!=null) {
-			if(index!=0) {
-				index--;
-			} else {
-				index=Helper.files.length-1;
-			}
-			future.graceStop();
+			future.forceStop();
 		}
+		future=startNewStream(currentPlaying);
 	}
 	
 	public static void playNext() {
