@@ -1,0 +1,16 @@
+StreamServer discord help
+=========================
+.mtv -> prefix to interact with StreamServer
+
+Commands
+========
+playlist [filter] -> search for files
+
+play [filename] -> broadcast file
+play next -> stop current and broadcast next
+play last -> stop current and broadcast previous played
+play repeat -> restart current file
+
+schedule [filename] -> add file to schedule table
+
+current -> display current playing file
