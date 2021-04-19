@@ -20,7 +20,7 @@ public class StreamServer {
 	public static DatabaseConnection DATABASECONNECTION;
 	public static DiscordBot DISCORDBOT;
 	
-	public static void main(String[] args) throws GeneralSecurityException, IOException, URISyntaxException, InterruptedException, ExecutionException, TimeoutException, ClassNotFoundException, SQLException {
+	public static void main(String[] args) throws GeneralSecurityException, IOException, URISyntaxException, InterruptedException, ExecutionException, TimeoutException, ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
 		
 		CONFIG=new Config();
 		DATABASECONNECTION=new DatabaseConnection();
