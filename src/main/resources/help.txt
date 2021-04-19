@@ -20,3 +20,5 @@ StreamServer console help
 
 .config save -> Save current settings to config file
 .config load -> Load config file from disc and use it
+
+.discord voiceconnect -> reconnect to youtube livestream

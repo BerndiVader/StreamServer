@@ -12,5 +12,6 @@ play last -> stop current and broadcast previous played
 play repeat -> restart current file
 
 schedule [filename] -> add file to schedule table
-
 current -> display current playing file
+reconnect -> try to reconnect to youtube stream
+link -> display youtube stream url
