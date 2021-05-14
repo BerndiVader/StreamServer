@@ -1,9 +1,11 @@
 package com.gmail.berndivader.streamserver.discord;
 
 import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.util.function.Consumer;
 
-import com.gmail.berndivader.streamserver.ConsoleRunner;
 import com.gmail.berndivader.streamserver.StreamServer;
+import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEvent;
@@ -11,9 +13,11 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventListener;
 import com.sedmelluq.discord.lavaplayer.player.event.TrackEndEvent;
 import com.sedmelluq.discord.lavaplayer.player.event.TrackExceptionEvent;
 import com.sedmelluq.discord.lavaplayer.player.event.TrackStuckEvent;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
 
 import discord4j.voice.AudioProvider;
+import reactor.core.publisher.Mono;
 
 public class LavaPlayerAudioProvider extends AudioProvider {
 	
@@ -32,20 +36,33 @@ public class LavaPlayerAudioProvider extends AudioProvider {
 			public void onEvent(AudioEvent event) {
 				
 				if(event instanceof TrackEndEvent) {
-					ConsoleRunner.println("Track ended, try to reconnect to stream.");
-					StreamServer.DISCORDBOT.connectStream();
+					TrackEndEvent e=(TrackEndEvent)event;
+					if(!e.endReason.equals(AudioTrackEndReason.REPLACED)) {
+						ConsoleRunner.println("Track ended, try to reconnect to stream.");
+						delayedConnect();
+					}
 				} else if(event instanceof TrackStuckEvent) {
 					ConsoleRunner.println("Track stucked, try to reconnect to stream.");
-					StreamServer.DISCORDBOT.audioPlayer.stopTrack();
+					delayedConnect();
 				} else if(event instanceof TrackExceptionEvent) {
 					ConsoleRunner.println(((TrackExceptionEvent) event).exception.getMessage());
 					ConsoleRunner.println("Track exception occured, try to reconnect to stream.");
-					StreamServer.DISCORDBOT.audioPlayer.stopTrack();
-					StreamServer.DISCORDBOT.connectStream();
+					delayedConnect();
 				}
 			}
 		});
 		
+	}
+	
+	void delayedConnect() {
+		Mono.delay(Duration.ofSeconds(5)).doOnSuccess(new Consumer<Long>() {
+
+			@Override
+			public void accept(Long l) {
+				StreamServer.DISCORDBOT.connectStream();
+			}
+			
+		}).subscribe();
 	}
 
 	@Override
