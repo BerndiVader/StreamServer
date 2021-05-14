@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.gmail.berndivader.streamserver.config.Config;
+import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 
 public class Utils {
 	
@@ -37,17 +38,24 @@ public class Utils {
 	}
 	
 	public static ArrayList<String> getPlaylistAsList(String regex) {
-		return getPlaylistAsList(regex, false);
-	}
-	
-	public static ArrayList<String> getPlaylistAsList(String regex,boolean custom) {
 		if(regex.contains("*")) {
 			regex=regex.replaceAll("*","(.*)");
 		} else {
 			regex="(.*)"+regex+("(.*)");
 		}
 		ArrayList<String>list=new ArrayList<>();
-		File[]files=custom==false?Helper.files.clone():Helper.customs.clone();
+		File[]files=Helper.files.clone();
+		for(int i1=0;i1<files.length;i1++) {
+			String name=files[i1].getName().toLowerCase();
+			try {
+				if(name.matches(regex)) {
+					list.add(name);
+				}
+			} catch (Exception e) {
+				ConsoleRunner.println(e.getMessage());
+			}
+		}
+		files=Helper.customs.clone();
 		for(int i1=0;i1<files.length;i1++) {
 			String name=files[i1].getName().toLowerCase();
 			try {
@@ -61,7 +69,7 @@ public class Utils {
 		return list;
 	}
 	
-	public static String getPlaylistAsString(String regex, boolean custom) {
+	public static String getPlaylistAsString(String regex) {
 		int count=0;
 		StringBuilder playlist=new StringBuilder();
 		if(regex.contains("*")) {
@@ -69,7 +77,19 @@ public class Utils {
 		} else {
 			regex="(.*)"+regex+("(.*)");
 		}
-		File[]files=custom==false?Helper.files.clone():Helper.customs.clone();
+		File[]files=Helper.files.clone();
+		for(int i1=0;i1<files.length;i1++) {
+			String name=files[i1].getName().toLowerCase();
+			try {
+				if(name.matches(regex)) {
+					playlist.append(name+"\n");
+					count++;
+				}
+			} catch (Exception e) {
+				ConsoleRunner.println(e.getMessage());
+			}
+		}
+		files=Helper.customs.clone();
 		for(int i1=0;i1<files.length;i1++) {
 			String name=files[i1].getName().toLowerCase();
 			try {
@@ -82,12 +102,7 @@ public class Utils {
 			}
 		}
 		playlist.append("\nThere are "+count+" matches for "+regex);
-		
 		return playlist.toString();
-	}
-	
-	public static String getPlaylistAsString(String regex) {
-		return getPlaylistAsString(regex, false);
 	}
 	
 	public static File[] shufflePlaylist(File[] files) {
