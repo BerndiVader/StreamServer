@@ -10,13 +10,13 @@ import java.util.HashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import com.gmail.berndivader.streamserver.ConsoleRunner;
 import com.gmail.berndivader.streamserver.StreamServer;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
+import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 
 public class Commands {
 	
-	final static String PACKAGE_NAME="com.gmail.berndivader.streamserver.command.commands";
+	final static String PACKAGE_NAME="com/gmail/berndivader/streamserver/discord/command/commands";
 	static String fileName;
 	HashMap<String,String>commands;
 	
@@ -51,7 +51,7 @@ public class Commands {
 				entry=jarStream.getNextJarEntry();
 				if(entry!=null) {
 					String clazzName=entry.getName();
-					if(clazzName.endsWith(".class")&&clazzName.startsWith("com/gmail/berndivader/streamserver/discord/command/commands")) {
+					if(clazzName.endsWith(".class")&&clazzName.startsWith(PACKAGE_NAME)) {
 						clazzName=clazzName.substring(0,clazzName.length()-6).replace("/",".");
 						Class<?>clazz=Class.forName(clazzName);
 						DiscordCommand anno=clazz.getAnnotation(DiscordCommand.class);
@@ -74,7 +74,6 @@ public class Commands {
 				ConsoleRunner.println(e.getMessage());
 			}
 		}
-		
 		return null;
 	}
 	
