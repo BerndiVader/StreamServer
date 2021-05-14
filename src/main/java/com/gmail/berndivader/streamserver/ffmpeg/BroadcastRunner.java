@@ -17,16 +17,16 @@ import com.github.kokorin.jaffree.ffmpeg.UrlOutput;
 import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Format;
-import com.gmail.berndivader.streamserver.ConsoleRunner;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.config.Config;
+import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.mysql.GetNextScheduled;
 import com.gmail.berndivader.streamserver.mysql.UpdateCurrent;
 
 public class BroadcastRunner extends TimerTask {
 	
-	boolean quit;
+	boolean stop;
 	long longTimer;
 	
 	public static FFmpegProgress currentProgress;
@@ -39,7 +39,7 @@ public class BroadcastRunner extends TimerTask {
 	public BroadcastRunner() {
 		ConsoleRunner.print("Starting BroadcastRunner...");
 
-		quit=false;
+		stop=false;
 		
 		Helper.files=Utils.shufflePlaylist(Utils.refreshPlaylist());
 		longTimer=3600;
@@ -55,7 +55,7 @@ public class BroadcastRunner extends TimerTask {
 	public void stop() throws InterruptedException {
 		ConsoleRunner.print("Stopping BroadcastRunner...");
 		
-		quit=true;
+		stop=true;
     	if(future!=null&&(!future.isCancelled()||!future.isDone())) {
     		ConsoleRunner.print("[Stop broadcasting...");
     		future.graceStop();
@@ -74,7 +74,7 @@ public class BroadcastRunner extends TimerTask {
 	@Override
 	public void run() {
 		
-    	if(!quit) {
+    	if(!stop) {
     		if(future.isCancelled()||future.isDone()) {
     			runStream();
     		}

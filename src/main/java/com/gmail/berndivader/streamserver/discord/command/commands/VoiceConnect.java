@@ -27,7 +27,7 @@ public class VoiceConnect extends Command<Message> {
 				
 				embed.setTitle("Reconnect to youtube");
 				embed.setColor(Color.CINNABAR);
-				embed.setDescription("```"+"Try to reconnect to youtube stream.");
+				embed.setDescription("```"+"Try to reconnect to youtube stream."+"```");
 				embed.setFooter(Config.YOUTUBE_LINK,null);
 			}
 			
