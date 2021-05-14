@@ -3,8 +3,8 @@ package com.gmail.berndivader.streamserver.discord;
 import java.time.Duration;
 import java.util.function.Consumer;
 
-import com.gmail.berndivader.streamserver.ConsoleRunner;
 import com.gmail.berndivader.streamserver.StreamServer;
+import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -40,7 +40,7 @@ public class TrackScheduler implements AudioLoadResultHandler {
 
 	@Override
 	public void loadFailed(FriendlyException exception) {
-		ConsoleRunner.println("error: "+exception.getMessage());
+		ConsoleRunner.println("ERROR: "+exception.getMessage());
 		Mono.delay(Duration.ofSeconds(5)).doOnNext(new Consumer<Long>() {
 
 			@Override

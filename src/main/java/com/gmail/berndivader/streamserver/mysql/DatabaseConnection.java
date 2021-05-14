@@ -6,8 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.gmail.berndivader.streamserver.ConsoleRunner;
 import com.gmail.berndivader.streamserver.config.Config;
+import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 
 public class DatabaseConnection {
 	

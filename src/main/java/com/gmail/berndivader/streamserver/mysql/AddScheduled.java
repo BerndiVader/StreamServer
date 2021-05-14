@@ -5,8 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.gmail.berndivader.streamserver.ConsoleRunner;
 import com.gmail.berndivader.streamserver.Helper;
+import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 
 public class AddScheduled implements Runnable {
 	

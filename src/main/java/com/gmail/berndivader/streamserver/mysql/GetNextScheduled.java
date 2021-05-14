@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import com.gmail.berndivader.streamserver.ConsoleRunner;
+import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.Helper;
 
 public class GetNextScheduled implements Callable<String> {

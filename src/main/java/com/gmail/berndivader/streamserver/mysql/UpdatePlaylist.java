@@ -14,7 +14,7 @@ import java.util.concurrent.TimeoutException;
 import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Format;
-import com.gmail.berndivader.streamserver.ConsoleRunner;
+import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.Helper;
 
 public class UpdatePlaylist implements Callable<Boolean> {
