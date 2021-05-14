@@ -11,8 +11,8 @@ import java.util.function.Predicate;
 
 import org.reactivestreams.Subscription;
 
-import com.gmail.berndivader.streamserver.ConsoleRunner;
 import com.gmail.berndivader.streamserver.config.Config;
+import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.command.Commands;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -216,7 +216,7 @@ public class DiscordBot {
 					Message message=event.getMessage();
 					String content=message.getContent();
 					
-					if(event.getMember().isPresent()&&content.toLowerCase().startsWith(".mtv")) {
+					if(event.getMember().isPresent()&&content.toLowerCase().startsWith(Config.DISCORD_COMMAND_PREFIX.toLowerCase())) {
 						event.getMember().get().getRoles().filter(new Predicate<Role>() {
 
 							@Override
