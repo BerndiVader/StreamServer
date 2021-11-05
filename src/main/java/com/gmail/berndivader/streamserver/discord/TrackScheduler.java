@@ -34,7 +34,7 @@ public class TrackScheduler implements AudioLoadResultHandler {
 
 	@Override
 	public void noMatches() {
-		ConsoleRunner.println("noatches");
+		ConsoleRunner.println("noMatches");
 		
 	}
 
