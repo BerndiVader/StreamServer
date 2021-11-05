@@ -13,7 +13,6 @@ import com.gmail.berndivader.streamserver.console.command.Commands;
 public class ConsoleRunner {
 	
     static Scanner keyboard;
-    static Thread thread;
     static Console console;
     static Commands commands;
     
