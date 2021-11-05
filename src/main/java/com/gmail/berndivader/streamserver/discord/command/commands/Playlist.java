@@ -19,11 +19,10 @@ public class Playlist extends Command<Void> {
 	@Override
 	public Mono<Void> execute(String string,MessageChannel channel) {
 		
-		return Mono.just(string).map(new Function<String,Void>() {
+		return Mono.just(string).flatMap(new Function<String,Mono<Void>>() {
 
 			@Override
-			public Void apply(String command) {
-				
+			public Mono<Void> apply(String command) {
 				String regex=command.toLowerCase();
 				boolean custom=regex.startsWith("custom ");
 				if(custom) {
@@ -68,9 +67,9 @@ public class Playlist extends Command<Void> {
 					}).subscribe();
 				}
 				
-				return null;
-				
+				return Mono.empty();
 			}
+			
 		});
 		
 	}
