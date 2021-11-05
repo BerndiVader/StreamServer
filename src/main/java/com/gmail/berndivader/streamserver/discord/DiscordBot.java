@@ -97,10 +97,10 @@ public class DiscordBot {
 		dispatcher=client.getEventDispatcher();
 		
 		dispatcher.on(ReadyEvent.class)
-			.map(new Function<ReadyEvent, Void>() {
+			.flatMap(new Function<ReadyEvent, Mono<Void>>() {
 				
 				@Override
-				public Void apply(ReadyEvent ready) {
+				public Mono<Void> apply(ReadyEvent ready) {
 					
 					if(!ready.getGuilds().isEmpty()) {
 						Iterator<discord4j.core.event.domain.lifecycle.ReadyEvent.Guild>iterator=ready.getGuilds().iterator();
@@ -200,9 +200,16 @@ public class DiscordBot {
 							
 						}
 					}
-					return null;
+					return Mono.empty();
 				}
 				
+			}).doOnError(new Consumer<Throwable>() {
+
+				@Override
+				public void accept(Throwable t) {
+					ConsoleRunner.println(t.getMessage());
+				}
+			
 			}).subscribe();
 		
 		
@@ -212,7 +219,7 @@ public class DiscordBot {
 
 				@Override
 				public void accept(MessageCreateEvent event) {
-					
+
 					Message message=event.getMessage();
 					String content=message.getContent();
 					
