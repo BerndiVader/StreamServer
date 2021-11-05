@@ -9,14 +9,14 @@ StreamServer console help
 .b [status|file|next] -> Info about broadcast status, current file and next file
 
 .restart -> Restart current stream
+.refresh -> Refresh playlist in database
 .next||stop -> Stop and play next file
 .prev -> Play last file
 
 .playlist [regex] -> Show playlist use regex to filter = valid regex pattern
 .play [filename] -> Play file
-
-.mysql playlist refresh -> Update database with current filelist
-.mysql schedule [filename] -> Add file to scheduled playlist
+.schedule [filename] -> Add file to scheduled playlist
+.listscheduled -> Show all scheduled files
 
 .config save -> Save current settings to config file
 .config load -> Load config file from disc and use it
