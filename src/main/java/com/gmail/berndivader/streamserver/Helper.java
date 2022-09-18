@@ -9,6 +9,12 @@ import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 
 public class Helper {
 	
+	public enum Hilfe {
+		EINS,
+		ZWEI,
+		DREI
+	}
+	
 	public static ExecutorService executor;
 	public static ScheduledExecutorService scheduledExecutor;
 	public static File[] files;

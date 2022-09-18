@@ -70,7 +70,7 @@ public class Commands {
 		if(className!=null) {
 			try {
 				return (Command) Class.forName(className).newInstance();
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | SecurityException e) {
 				ConsoleRunner.println(e.getMessage());
 			}
 		}
