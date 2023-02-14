@@ -1,7 +1,5 @@
 package com.gmail.berndivader.streamserver.discord;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +51,7 @@ public class DiscordBot {
 	final EventDispatcher dispatcher;
 	public static Status status;
 	
-	public DiscordBot() throws FileNotFoundException, IOException, ClassNotFoundException {
+	public DiscordBot() {
 		commands=new Commands();
 		playerManager=new DefaultAudioPlayerManager();
 		playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);

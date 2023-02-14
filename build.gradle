@@ -4,7 +4,6 @@ apply plugin: 'application'
 mainClassName = 'com.gmail.berndivader.streamserver.StreamServer'
 
 repositories {
-	jcenter()
     mavenCentral()
   	maven {
     	url 'https://m2.dv8tion.net/releases'

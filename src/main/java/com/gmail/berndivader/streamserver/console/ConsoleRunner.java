@@ -3,8 +3,6 @@ package com.gmail.berndivader.streamserver.console;
 import java.io.Console;
 import java.io.IOException;
 import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.StreamServer;
 import com.gmail.berndivader.streamserver.console.command.Command;
@@ -28,7 +26,7 @@ public class ConsoleRunner {
     	console=System.console();
     }
 	
-	public ConsoleRunner() throws InterruptedException, ExecutionException, TimeoutException {
+	public ConsoleRunner() {
 		
 		exit=false;
 		

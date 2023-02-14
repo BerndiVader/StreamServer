@@ -41,7 +41,8 @@ public class BroadcastRunner extends TimerTask {
 
 		stop=false;
 		
-		Helper.files=Utils.shufflePlaylist(Utils.refreshPlaylist());
+		Helper.files=Utils.refreshPlaylist();
+		Utils.shufflePlaylist(Helper.files);
 		longTimer=3600;
 		ConsoleRunner.println("DONE!");
 
@@ -96,28 +97,29 @@ public class BroadcastRunner extends TimerTask {
 			filepos=Utils.getFilePosition(filename.toLowerCase());
 			
 			if(filepos>-1) {
-				future=startNewStream(Helper.files[filepos]);
+				future=createStream(Helper.files[filepos]);
 				currentPlaying=Helper.files[filepos];
 			} else {
 				filepos=Utils.getCustomFilePosition(filename.toLowerCase());
 				if(filepos>-1) {
-    				future=startNewStream(Helper.customs[filepos]);
+    				future=createStream(Helper.customs[filepos]);
     				currentPlaying=Helper.customs[filepos];
 				}
 			}
 		} else {
-			future=startNewStream(Helper.files[index]);
+			future=createStream(Helper.files[index]);
 			currentPlaying=Helper.files[index];
 			index++;
 			if(index>Helper.files.length-1) {
-				Helper.files=Utils.shufflePlaylist(Utils.refreshPlaylist());
+				Helper.files=Utils.refreshPlaylist();
+				Utils.shufflePlaylist(Helper.files);
 				index=0;
 			}
 		}
 		
 	}
 	
-	private static FFmpegResultFuture startNewStream(File file) {
+	private static FFmpegResultFuture createStream(File file) {
 		String path=file.getAbsolutePath();
 		FFprobeResult probeResult=FFprobe.atPath()
 			.setShowFormat(true)
@@ -181,7 +183,7 @@ public class BroadcastRunner extends TimerTask {
 				e.printStackTrace();
 			}
 		}
-		future=startNewStream(file);
+		future=createStream(file);
 		ConsoleRunner.println(file.getName());
 	}
 	
@@ -196,7 +198,7 @@ public class BroadcastRunner extends TimerTask {
 		if(future!=null) {
 			future.forceStop();
 		}
-		future=startNewStream(currentPlaying);
+		future=createStream(currentPlaying);
 	}
 	
 	public static void playNext() {
@@ -216,9 +218,5 @@ public class BroadcastRunner extends TimerTask {
 			future.graceStop();
 		}
 	}
-
-	***REMOVED***		
-	***REMOVED***
-	***REMOVED***
 	
 }

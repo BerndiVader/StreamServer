@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -69,8 +70,8 @@ public class Commands {
 		String className=commands.get(name);
 		if(className!=null) {
 			try {
-				return (Command) Class.forName(className).newInstance();
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | SecurityException e) {
+				return (Command) Class.forName(className).getDeclaredConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				ConsoleRunner.println(e.getMessage());
 			}
 		}

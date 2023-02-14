@@ -105,7 +105,7 @@ public class Utils {
 		return playlist.toString();
 	}
 	
-	public static File[] shufflePlaylist(File[] files) {
+	public static void shufflePlaylist(File[] files) {
 		Random random=ThreadLocalRandom.current();
 		for (int i1=files.length-1;i1>0;i1--) {
 			int index=random.nextInt(i1+1);
@@ -113,7 +113,6 @@ public class Utils {
 			files[index]=files[i1];
 			files[i1]=a;
 		}
-		return files;
 	}
 	
 	public static File[] refreshPlaylist() {

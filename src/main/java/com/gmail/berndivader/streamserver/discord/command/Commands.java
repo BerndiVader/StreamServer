@@ -1,9 +1,8 @@
 package com.gmail.berndivader.streamserver.discord.command;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -36,31 +35,35 @@ public class Commands {
 		}
 	}
 	
-	public Commands() throws FileNotFoundException, IOException, ClassNotFoundException {
+	public Commands() {
 		
 		commands=new HashMap<>();
 		loadClasses();
 		
 	}
 	
-	void loadClasses() throws FileNotFoundException, IOException, ClassNotFoundException {
+	void loadClasses() {
 		
-		try(JarInputStream jarStream=new JarInputStream(new FileInputStream(fileName))) {
-			JarEntry entry;
-			while(jarStream.available()==1) {
-				entry=jarStream.getNextJarEntry();
-				if(entry!=null) {
-					String clazzName=entry.getName();
-					if(clazzName.endsWith(".class")&&clazzName.startsWith(PACKAGE_NAME)) {
-						clazzName=clazzName.substring(0,clazzName.length()-6).replace("/",".");
-						Class<?>clazz=Class.forName(clazzName);
-						DiscordCommand anno=clazz.getAnnotation(DiscordCommand.class);
-						if(anno!=null) {
-							commands.put(anno.name(),clazzName);
+		try {
+			try(JarInputStream jarStream=new JarInputStream(new FileInputStream(fileName))) {
+				JarEntry entry;
+				while(jarStream.available()==1) {
+					entry=jarStream.getNextJarEntry();
+					if(entry!=null) {
+						String clazzName=entry.getName();
+						if(clazzName.endsWith(".class")&&clazzName.startsWith(PACKAGE_NAME)) {
+							clazzName=clazzName.substring(0,clazzName.length()-6).replace("/",".");
+							Class<?>clazz=Class.forName(clazzName);
+							DiscordCommand anno=clazz.getAnnotation(DiscordCommand.class);
+							if(anno!=null) {
+								commands.put(anno.name(),clazzName);
+							}
 						}
 					}
 				}
 			}
+		} catch(Exception e) {
+			System.err.println(e);
 		}
 		
 	}
@@ -69,8 +72,8 @@ public class Commands {
 		String className=commands.get(name);
 		if(className!=null) {
 			try {
-				return (Command<?>) Class.forName(className).newInstance();
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				return (Command<?>) Class.forName(className).getDeclaredConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				ConsoleRunner.println(e.getMessage());
 			}
 		}
