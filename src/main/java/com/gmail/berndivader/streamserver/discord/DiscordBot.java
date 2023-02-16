@@ -51,7 +51,10 @@ public class DiscordBot {
 	final EventDispatcher dispatcher;
 	public static Status status;
 	
+	public static DiscordBot instance;
+	
 	public DiscordBot() {
+		instance=this;
 		commands=new Commands();
 		playerManager=new DefaultAudioPlayerManager();
 		playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
@@ -300,6 +303,11 @@ public class DiscordBot {
 	
 	public void connectStream() {
 		playerManager.loadItem(Config.YOUTUBE_LINK,scheduler);
+	}
+	
+	public void updateStatus(String comment) {
+		return;
+//		client.updatePresence(StatusUpdate.builder().build().withStatus(comment)).subscribe();
 	}
 	
 	public void close() {

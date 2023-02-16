@@ -15,10 +15,10 @@ public final class StreamServer {
 	public static final DiscordBot DISCORDBOT;
 	
 	static {
-		BROADCASTRUNNER=new BroadcastRunner();
 		CONFIG=new Config();
-		DATABASECONNECTION=new DatabaseConnection();
 		DISCORDBOT=new DiscordBot();
+		DATABASECONNECTION=new DatabaseConnection();
+		BROADCASTRUNNER=new BroadcastRunner();
 		CONSOLERUNNER=new ConsoleRunner();
 	}
 	

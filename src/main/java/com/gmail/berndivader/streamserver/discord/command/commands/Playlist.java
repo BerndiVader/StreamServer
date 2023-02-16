@@ -29,7 +29,7 @@ public class Playlist extends Command<Void> {
 					regex=regex.replaceFirst("custom ","");
 				}
 				
-				ArrayList<String>list=Utils.getPlaylistAsList(regex);
+				ArrayList<String>list=Utils.getFilelistAsList(regex);
 				int size=list.size();
 				
 				ArrayList<String>messages=new ArrayList<String>();

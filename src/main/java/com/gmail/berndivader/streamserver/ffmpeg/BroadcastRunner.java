@@ -21,13 +21,13 @@ import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
+import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.mysql.GetNextScheduled;
 import com.gmail.berndivader.streamserver.mysql.UpdateCurrent;
 
 public class BroadcastRunner extends TimerTask {
 	
 	boolean stop;
-	long longTimer;
 	
 	public static FFmpegProgress currentProgress;
 	public static Format currentFormat;
@@ -41,15 +41,14 @@ public class BroadcastRunner extends TimerTask {
 
 		stop=false;
 		
-		Helper.files=Utils.refreshPlaylist();
-		Utils.shufflePlaylist(Helper.files);
-		longTimer=3600;
+		Utils.refreshFilelist();
+		Utils.shuffleFilelist(Helper.files);
 		ConsoleRunner.println("DONE!");
 
 		index=0;
 		runStream();
 		
-		Helper.scheduledExecutor.scheduleAtFixedRate(this, 0l, 1000l, TimeUnit.MILLISECONDS);
+		Helper.scheduledExecutor.scheduleAtFixedRate(this, 0l, 1l, TimeUnit.SECONDS);
 		
 	}
 	
@@ -111,8 +110,8 @@ public class BroadcastRunner extends TimerTask {
 			currentPlaying=Helper.files[index];
 			index++;
 			if(index>Helper.files.length-1) {
-				Helper.files=Utils.refreshPlaylist();
-				Utils.shufflePlaylist(Helper.files);
+				Utils.refreshFilelist();
+				Utils.shuffleFilelist(Helper.files);				
 				index=0;
 			}
 		}
@@ -136,12 +135,14 @@ public class BroadcastRunner extends TimerTask {
 		String info=currentFormat.getTag("artist")+":"+currentFormat.getTag("date")+":"+currentFormat.getTag("comment");
 		new UpdateCurrent(title, info);
 		
+		DiscordBot.instance.updateStatus(title);
+		
 		ConsoleRunner.println("Now playing: "
 			+currentFormat.getTag("title")
 			+":"+currentFormat.getTag("artist")
 			+":"+currentFormat.getTag("date")
 			+":"+currentFormat.getTag("comment"));
-		
+				
 		return FFmpeg.atPath()
 				.addInput(UrlInput.fromUrl(path)
 						.addArgument("-re")

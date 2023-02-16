@@ -37,7 +37,7 @@ public class Utils {
 		return -1;
 	}
 	
-	public static ArrayList<String> getPlaylistAsList(String regex) {
+	public static ArrayList<String> getFilelistAsList(String regex) {
 		if(regex.contains("*")) {
 			regex=regex.replaceAll("*","(.*)");
 		} else {
@@ -69,7 +69,7 @@ public class Utils {
 		return list;
 	}
 	
-	public static String getPlaylistAsString(String regex) {
+	public static String getFilelistAsString(String regex) {
 		int count=0;
 		StringBuilder playlist=new StringBuilder();
 		if(regex.contains("*")) {
@@ -80,32 +80,24 @@ public class Utils {
 		File[]files=Helper.files.clone();
 		for(int i1=0;i1<files.length;i1++) {
 			String name=files[i1].getName().toLowerCase();
-			try {
-				if(name.matches(regex)) {
-					playlist.append(name+"\n");
-					count++;
-				}
-			} catch (Exception e) {
-				ConsoleRunner.println(e.getMessage());
+			if(name!=null&&!name.isEmpty()&&name.matches(regex)) {
+				playlist.append(name+"\n");
+				count++;
 			}
 		}
 		files=Helper.customs.clone();
 		for(int i1=0;i1<files.length;i1++) {
 			String name=files[i1].getName().toLowerCase();
-			try {
-				if(name.matches(regex)) {
-					playlist.append(name+"\n");
-					count++;
-				}
-			} catch (Exception e) {
-				ConsoleRunner.println(e.getMessage());
+			if(name!=null&&!name.isEmpty()&&name.matches(regex)) {
+				playlist.append(name+"\n");
+				count++;
 			}
 		}
 		playlist.append("\nThere are "+count+" matches for "+regex);
 		return playlist.toString();
 	}
 	
-	public static void shufflePlaylist(File[] files) {
+	public static void shuffleFilelist(File[] files) {
 		Random random=ThreadLocalRandom.current();
 		for (int i1=files.length-1;i1>0;i1--) {
 			int index=random.nextInt(i1+1);
@@ -115,10 +107,9 @@ public class Utils {
 		}
 	}
 	
-	public static File[] refreshPlaylist() {
+	public static void refreshFilelist() {
     	File file=new File(Config.PLAYLIST_PATH);
     	File custom=new File(Config.PLAYLIST_PATH_CUSTOM);
-    	File[]files;
     	
 		FileFilter filter=new FileFilter() {
 			@Override
@@ -129,14 +120,14 @@ public class Utils {
     	
 		if(file.exists()) {
 	    	if(file.isDirectory()) {
-	    		files=file.listFiles(filter);
+	    		Helper.files=file.listFiles(filter);
 	    	} else if(file.isFile()) {
-	    		files=new File[] {file};
+	    		Helper.files=new File[] {file};
 	    	} else {
-	    		files=new File[0];
+	    		Helper.files=new File[0];
 	    	}
 		} else {
-			files=new File[0];
+			Helper.files=new File[0];
 		}
     	
     	if(custom.exists()) {
@@ -151,7 +142,6 @@ public class Utils {
     		Helper.customs=new File[0];
     	}
     	
-    	return files;
 	}
 
 }

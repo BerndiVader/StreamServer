@@ -41,6 +41,7 @@ public class TrackScheduler implements AudioLoadResultHandler {
 	@Override
 	public void loadFailed(FriendlyException exception) {
 		ConsoleRunner.println("ERROR: "+exception.getMessage());
+		exception.printStackTrace();
 		Mono.delay(Duration.ofSeconds(5)).doOnNext(new Consumer<Long>() {
 
 			@Override

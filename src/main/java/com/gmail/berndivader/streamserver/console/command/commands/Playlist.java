@@ -12,7 +12,7 @@ public class Playlist extends Command {
 	public boolean execute(String[] args) {
 		String regex=args[0];
 		if(regex.startsWith("custom ")) regex=regex.replaceFirst("custom ", "");
-		ConsoleRunner.println(Utils.getPlaylistAsString(regex));
+		ConsoleRunner.println(Utils.getFilelistAsString(regex));
 		return true;
 	}
 
