@@ -24,7 +24,7 @@ public class Help extends Command<Message> {
 			public void accept(EmbedCreateSpec embed) {
 				embed.setTitle("StreamServer discord help");
 				embed.setColor(Color.GREEN);
-				embed.setDescription("```"+Config.DISCORD_HELP_TEXT+"```");
+				embed.setDescription(Config.DISCORD_HELP_TEXT);
 			}
 			
 		});

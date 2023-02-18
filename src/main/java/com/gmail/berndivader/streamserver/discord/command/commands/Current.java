@@ -25,9 +25,9 @@ public class Current extends Command<Message> {
 				embed.setColor(Color.CINNABAR);
 				embed.setTitle("Current playing");
 				if(BroadcastRunner.currentPlaying!=null) {
-					embed.setDescription("```"+BroadcastRunner.currentPlaying.getName()+"```");
+					embed.setDescription(BroadcastRunner.currentPlaying.getName());
 				} else {
-					embed.setDescription("```Nothing playing```");
+					embed.setDescription("Nothing playing");
 				}
 			}
 			
