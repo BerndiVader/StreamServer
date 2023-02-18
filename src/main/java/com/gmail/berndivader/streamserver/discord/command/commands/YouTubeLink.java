@@ -23,7 +23,7 @@ public class YouTubeLink extends Command<Message> {
 			public void accept(EmbedCreateSpec embed) {
 				embed.setTitle("Youtube link:");
 				embed.setColor(Color.CINNABAR);
-				embed.setDescription("```"+Config.YOUTUBE_LINK+"```");
+				embed.setDescription(Config.YOUTUBE_LINK);
 			}
 			
 		});

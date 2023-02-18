@@ -34,7 +34,6 @@ public class LavaPlayerAudioProvider extends AudioProvider {
 			
 			@Override
 			public void onEvent(AudioEvent event) {
-				
 				if(event instanceof TrackEndEvent) {
 					TrackEndEvent e=(TrackEndEvent)event;
 					if(!e.endReason.equals(AudioTrackEndReason.REPLACED)) {
@@ -54,11 +53,12 @@ public class LavaPlayerAudioProvider extends AudioProvider {
 		
 	}
 	
-	void delayedConnect() {
-		Mono.delay(Duration.ofSeconds(5)).doOnSuccess(new Consumer<Long>() {
+	public void delayedConnect() {
+		Mono.delay(Duration.ofSeconds(5)).doOnNext(new Consumer<Long>() {
 
 			@Override
 			public void accept(Long l) {
+				ConsoleRunner.println("Try to reconnect Audiostream");
 				StreamServer.DISCORDBOT.connectStream();
 			}
 			

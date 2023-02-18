@@ -36,14 +36,13 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.VoiceChannelCreateSpec;
 import discord4j.core.spec.VoiceChannelJoinSpec;
 import discord4j.rest.util.Color;
-import discord4j.voice.AudioProvider;
 import reactor.core.publisher.Mono;
 
 public class DiscordBot {
 	
-	final AudioPlayerManager playerManager;
+	public final AudioPlayerManager playerManager;
 	public final AudioPlayer audioPlayer;
-	final AudioProvider provider;
+	public final LavaPlayerAudioProvider provider;
 	final TrackScheduler scheduler;
 	final Commands commands;
 	
@@ -213,18 +212,16 @@ public class DiscordBot {
 			
 			}).subscribe();
 		
-		
-		
 		dispatcher.on(MessageCreateEvent.class)
-			.subscribe(new Consumer<MessageCreateEvent>() {
+			.flatMap(new Function<MessageCreateEvent, Mono<Void>>() {
 
 				@Override
-				public void accept(MessageCreateEvent event) {
-
-					Message message=event.getMessage();
-					String content=message.getContent();
-					
-					if(event.getMember().isPresent()&&content.toLowerCase().startsWith(Config.DISCORD_COMMAND_PREFIX.toLowerCase())) {
+				public Mono<Void> apply(MessageCreateEvent event) {
+										
+					Message msg=event.getMessage();
+					String content=msg.getContent().toLowerCase();
+										
+					if(event.getMember().isPresent()&&content.startsWith(Config.DISCORD_COMMAND_PREFIX)) {
 						event.getMember().get().getRoles().filter(new Predicate<Role>() {
 
 							@Override
@@ -235,47 +232,64 @@ public class DiscordBot {
 						}).collectList().doOnSuccess(new Consumer<List<Role>>() {
 
 							@Override
-							public void accept(List<Role> roles) {
-								if(!roles.isEmpty()) {
-									String[]parse=content.split(" ",2);
-									String temp=parse.length==2?parse[1]:"";
-									String[]args=temp.split(" ",2);
-									String command=args[0].toLowerCase();
-									
-									Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE?message.getAuthor().get().getPrivateChannel():message.getChannel();
-									
-									mono.subscribe(new Consumer<MessageChannel>() {
+							public void accept(List<Role> role) {
+								if(role.isEmpty()) return;
+								
+								String[]parse=content.split(" ",2);
+								String temp=parse.length==2?parse[1]:"";
+								String[]args=temp.split(" ",2);
+								String command=args[0].toLowerCase();
+								
+								Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE?msg.getAuthor().get().getPrivateChannel():msg.getChannel();
+								mono.subscribe(new Consumer<MessageChannel>() {
 
-										@Override
-										public void accept(MessageChannel channel) {
-											if(channel!=null) {
-												if(!command.isEmpty()) {
-													Command<?> kommand=commands.getCommand(command);
-													
-													if(kommand!=null) {
-														Mono<?>cmd=kommand.execute(args.length==2?args[1]:"",channel);
-														cmd.subscribe();
-													}
-												} else {
-													Command<?> kommand=commands.getCommand("help");
-													if(kommand!=null) {
-														Mono<?>cmd=kommand.execute(args.length==2?args[1]:"",channel);
-														cmd.subscribe();
-													}
-												}
+									@Override
+									public void accept(MessageChannel channel) {
+										Mono<?>cmd=Mono.empty();
+										if(!command.isEmpty()) {
+											Command<?> kommand=commands.getCommand(command);
+											if(kommand!=null) {
+												cmd=kommand.execute(args.length==2?args[1]:"",channel);
+											}
+										} else {
+											Command<?> kommand=commands.getCommand("help");
+											if(kommand!=null) {
+												cmd=kommand.execute(args.length==2?args[1]:"",channel);
 											}
 										}
-										
-									});
-								}
+										cmd.doOnError(new Consumer<Throwable>() {
+
+											@Override
+											public void accept(Throwable t) {
+												ConsoleRunner.println(t.getMessage());
+											}
+										}).subscribe();
+									}
+								});
+								
+							}
+						}).doOnError(new Consumer<Throwable>() {
+
+							@Override
+							public void accept(Throwable t) {
+								ConsoleRunner.println(t.getMessage());
 							}
 							
 						}).subscribe();
+						
 					}
 					
+					return Mono.empty();
 				}
+				
+			}).doOnError(new Consumer<Throwable>() {
 
-			});
+				@Override
+				public void accept(Throwable t) {
+					ConsoleRunner.println(t.getMessage());					
+				}
+				
+		}).subscribe();
 		
 		client.onDisconnect().doOnSuccess(new Consumer<Void>() {
 

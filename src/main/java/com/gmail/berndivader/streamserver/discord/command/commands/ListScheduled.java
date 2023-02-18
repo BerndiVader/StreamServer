@@ -37,17 +37,15 @@ public class ListScheduled extends Command<Message>{
 				if(files!=null&&!files.isEmpty()) {
 					embed.setColor(Color.CINNABAR);
 					StringBuilder builder=new StringBuilder();
-					builder.append("```");
 					int size=files.size();
 					for(int i1=0;i1<size;i1++) {
 						builder.append(files.get(i1));
 						builder.append("\n");
 					}
-					builder.append("```");
 					embed.setDescription(builder.toString());
 				} else {
 					embed.setColor(Color.RED);
-					embed.setDescription("```No scheduled files.```");
+					embed.setDescription("No scheduled files.");
 				}
 			}
 			
