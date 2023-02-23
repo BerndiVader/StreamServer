@@ -6,17 +6,16 @@ import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 @DiscordCommand(name="help")
-public class Help extends Command<Message> {
+public class Help extends Command<Void> {
 	
 	@Override
-	public Mono<Message> execute(String string,MessageChannel channel) {
+	public Mono<Void> execute(String string,MessageChannel channel) {
 		
 		return channel.createEmbed(new Consumer<EmbedCreateSpec>() {
 
@@ -24,10 +23,10 @@ public class Help extends Command<Message> {
 			public void accept(EmbedCreateSpec embed) {
 				embed.setTitle("StreamServer discord help");
 				embed.setColor(Color.GREEN);
-				embed.setDescription("```"+Config.DISCORD_HELP_TEXT+"```");
+				embed.setDescription(Config.DISCORD_HELP_TEXT);
 			}
 			
-		});
+		}).then();
 		
 	}
 

@@ -11,17 +11,16 @@ import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.mysql.GetAllScheduled;
 
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 @DiscordCommand(name="allscheduled")
-public class ListScheduled extends Command<Message>{
+public class ListScheduled extends Command<Void>{
 
 	@Override
-	public Mono<Message> execute(String string, MessageChannel channel) {
+	public Mono<Void> execute(String string, MessageChannel channel) {
 		return channel.createEmbed(new Consumer<EmbedCreateSpec>() {
 
 			@Override
@@ -37,21 +36,20 @@ public class ListScheduled extends Command<Message>{
 				if(files!=null&&!files.isEmpty()) {
 					embed.setColor(Color.CINNABAR);
 					StringBuilder builder=new StringBuilder();
-					builder.append("```");
 					int size=files.size();
 					for(int i1=0;i1<size;i1++) {
 						builder.append(files.get(i1));
 						builder.append("\n");
 					}
-					builder.append("```");
 					embed.setDescription(builder.toString());
 				} else {
 					embed.setColor(Color.RED);
-					embed.setDescription("```No scheduled files.```");
+					embed.setDescription("No scheduled files.");
 				}
 			}
 			
-		});
+		}).then();
+		
 	}
 
 }

@@ -12,8 +12,10 @@ import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 public class DatabaseConnection {
 	
 	public boolean INIT;
+	public static DatabaseConnection instance;
 	
 	public DatabaseConnection() {
+		instance=this;
 		INIT=true;
 		ConsoleRunner.print("Try connection to mysql database...");
 		

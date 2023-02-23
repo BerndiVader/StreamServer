@@ -41,6 +41,8 @@ public class Config {
 	public static File working_dir,config_dir,config_file;
 	public static ConfigData data;
 	
+	public static Config instance;
+	
 	static {
         try {
    			HELP_TEXT=inputstreamToString(StreamServer.class.getResourceAsStream("/help.txt"));
@@ -62,6 +64,7 @@ public class Config {
 	}
 	
 	public Config() {
+		instance=this;
 		ConsoleRunner.print("Load or create config...");
 		if(loadConfig()) {
 			ConsoleRunner.println("DONE!");

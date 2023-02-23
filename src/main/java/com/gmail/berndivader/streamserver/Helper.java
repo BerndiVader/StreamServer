@@ -15,6 +15,8 @@ public class Helper {
 	public static File[] customs;
 	
 	static {
+		files=new File[0];
+		customs=new File[0];
 		executor=Executors.newFixedThreadPool(10);
 		scheduledExecutor=Executors.newScheduledThreadPool(5);
 	}

@@ -1,7 +1,6 @@
 package com.gmail.berndivader.streamserver.discord.command.commands;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.Utils;
@@ -18,48 +17,39 @@ import reactor.core.publisher.Mono;
 public class Schedule extends Command<Void> {
 
 	@Override
-	public Mono<Void> execute(String string, MessageChannel channel) {
+	public Mono<Void> execute(String p, MessageChannel channel) {
 		
-		return Mono.just(string).map(new Function<String,Void>() {
+		int index=Utils.getFilePosition(p);
+		if(index==-1) {
+			index=Utils.getCustomFilePosition(p);
+			if(index>-1) {
+				new AddScheduled(Helper.customs[index].getName());
+			}
+		} else {
+			new AddScheduled(p);
+		}
+		if(index!=-1) {
+			return channel.createEmbed(new Consumer<EmbedCreateSpec>() {
+
+				@Override
+				public void accept(EmbedCreateSpec embed) {
+					embed.setColor(Color.BROWN);
+					embed.setTitle("Scheduled");
+					embed.setDescription(p);
+				}
+
+			}).then();
+		}
+		return channel.createEmbed(new Consumer<EmbedCreateSpec>() {
 
 			@Override
-			public Void apply(String p) {
-				int index=Utils.getFilePosition(p);
-				if(index==-1) {
-					index=Utils.getCustomFilePosition(p);
-					if(index>-1) {
-						new AddScheduled(Helper.customs[index].getName());
-					}
-				} else {
-					new AddScheduled(p);
-				}
-				if(index!=-1) {
-					channel.createEmbed(new Consumer<EmbedCreateSpec>() {
-	
-						@Override
-						public void accept(EmbedCreateSpec embed) {
-							embed.setColor(Color.BROWN);
-							embed.setTitle("Scheduled");
-							embed.setDescription("```"+p+"```");
-						}
-	
-					}).subscribe();
-				} else {
-					channel.createEmbed(new Consumer<EmbedCreateSpec>() {
-	
-						@Override
-						public void accept(EmbedCreateSpec embed) {
-							embed.setColor(Color.RED);
-							embed.setTitle("No file found for");
-							embed.setDescription("```"+p+"```");
-						}
-	
-					}).subscribe();
-				}
-				return null;
+			public void accept(EmbedCreateSpec embed) {
+				embed.setColor(Color.RED);
+				embed.setTitle("No file found for");
+				embed.setDescription(p);
 			}
 
-		});
+		}).then();
+				
 	}
-
 }

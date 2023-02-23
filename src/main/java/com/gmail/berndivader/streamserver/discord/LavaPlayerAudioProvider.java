@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.function.Consumer;
 
-import com.gmail.berndivader.streamserver.StreamServer;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -59,7 +58,7 @@ public class LavaPlayerAudioProvider extends AudioProvider {
 
 			@Override
 			public void accept(Long l) {
-				StreamServer.DISCORDBOT.connectStream();
+				DiscordBot.instance.connectStream();
 			}
 			
 		}).subscribe();

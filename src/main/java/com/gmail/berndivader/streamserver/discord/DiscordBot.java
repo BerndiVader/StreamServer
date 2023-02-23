@@ -3,6 +3,10 @@ package com.gmail.berndivader.streamserver.discord;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -214,68 +218,57 @@ public class DiscordBot {
 			}).subscribe();
 		
 		
-		
 		dispatcher.on(MessageCreateEvent.class)
-			.subscribe(new Consumer<MessageCreateEvent>() {
+			.flatMap(new Function<MessageCreateEvent,Mono<Void>>() {
 
 				@Override
-				public void accept(MessageCreateEvent event) {
+				public Mono<Void> apply(MessageCreateEvent e) {
 
-					Message message=event.getMessage();
+					boolean isCommand=e.getMessage().getContent().toLowerCase().startsWith(Config.DISCORD_COMMAND_PREFIX);
+					if(!isCommand||!e.getMember().isPresent()) Mono.empty();
+					
+					Message message=e.getMessage();
 					String content=message.getContent();
+					String[]parse=content.split(" ",2);
+					String temp=parse.length==2?parse[1]:"";
+					String[]args=temp.split(" ",2);
+					Command<?>command=commands.getCommand(args[0].toLowerCase());
+					if(command==null) return Mono.empty();
 					
-					if(event.getMember().isPresent()&&content.toLowerCase().startsWith(Config.DISCORD_COMMAND_PREFIX.toLowerCase())) {
-						event.getMember().get().getRoles().filter(new Predicate<Role>() {
+					return Mono.just(e).flatMap(new Function<MessageCreateEvent, Mono<Void>>() {
 
-							@Override
-							public boolean test(Role role) {
-								return role.getName().equals(Config.DISCORD_ROLE);
-							}
-							
-						}).collectList().doOnSuccess(new Consumer<List<Role>>() {
+						@Override
+						public Mono<Void> apply(MessageCreateEvent event) {
+														
+							if(!event.getMember().get().getRoles().filter(new Predicate<Role>() {
 
-							@Override
-							public void accept(List<Role> roles) {
-								if(!roles.isEmpty()) {
-									String[]parse=content.split(" ",2);
-									String temp=parse.length==2?parse[1]:"";
-									String[]args=temp.split(" ",2);
-									String command=args[0].toLowerCase();
-									
-									Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE?message.getAuthor().get().getPrivateChannel():message.getChannel();
-									
-									mono.subscribe(new Consumer<MessageChannel>() {
-
-										@Override
-										public void accept(MessageChannel channel) {
-											if(channel!=null) {
-												if(!command.isEmpty()) {
-													Command<?> kommand=commands.getCommand(command);
-													
-													if(kommand!=null) {
-														Mono<?>cmd=kommand.execute(args.length==2?args[1]:"",channel);
-														cmd.subscribe();
-													}
-												} else {
-													Command<?> kommand=commands.getCommand("help");
-													if(kommand!=null) {
-														Mono<?>cmd=kommand.execute(args.length==2?args[1]:"",channel);
-														cmd.subscribe();
-													}
-												}
-											}
-										}
-										
-									});
+								@Override
+								public boolean test(Role role) {
+									return role.getName().equals(Config.DISCORD_ROLE);
 								}
+								
+							}).collectList().block().isEmpty()) {
+
+								Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE?message.getAuthor().get().getPrivateChannel():message.getChannel();
+								
+								mono.subscribe(new Consumer<MessageChannel>() {
+
+									@Override
+									public void accept(MessageChannel channel) {
+										if(channel==null) return;
+										command.execute(args.length==2?args[1]:"",channel)
+										.subscribe();
+									}
+									
+								});
 							}
 							
-						}).subscribe();
-					}
-					
+							return Mono.empty();
+						}
+					});
 				}
-
-			});
+				
+			}).subscribe();
 		
 		client.onDisconnect().doOnSuccess(new Consumer<Void>() {
 
@@ -302,7 +295,15 @@ public class DiscordBot {
 	}
 	
 	public void connectStream() {
-		playerManager.loadItem(Config.YOUTUBE_LINK,scheduler);
+		if(playerManager!=null&&scheduler!=null) {
+			Future<Void>future=playerManager.loadItem(Config.YOUTUBE_LINK,scheduler);
+			try {
+				future.get(5l,TimeUnit.SECONDS);
+				
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				ConsoleRunner.println(e.getMessage());
+			}
+		}
 	}
 	
 	public void updateStatus(String comment) {

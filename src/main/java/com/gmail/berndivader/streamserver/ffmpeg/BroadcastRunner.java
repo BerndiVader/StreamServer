@@ -36,9 +36,12 @@ public class BroadcastRunner extends TimerTask {
 	public static FFmpegResultFuture future;
 	public static int index;
 	
+	public static BroadcastRunner instance;
+	
 	public BroadcastRunner() {
 		ConsoleRunner.print("Starting BroadcastRunner...");
-
+		
+		instance=this;
 		stop=false;
 		
 		Utils.refreshFilelist();

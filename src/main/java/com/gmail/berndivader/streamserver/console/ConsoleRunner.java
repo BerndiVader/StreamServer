@@ -1,20 +1,22 @@
 package com.gmail.berndivader.streamserver.console;
 
-import java.io.Console;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Scanner;
 
-import com.gmail.berndivader.streamserver.StreamServer;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.console.command.Commands;
+import com.gmail.berndivader.streamserver.discord.DiscordBot;
 
 public class ConsoleRunner {
 	
     static Scanner keyboard;
-    static Console console;
+    static PrintStream console;
     static Commands commands;
     
     public static boolean forceExit,exit;
+    
+    public static ConsoleRunner instance;
     
     static {
     	try {
@@ -22,12 +24,13 @@ public class ConsoleRunner {
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 		}
-    	keyboard=new Scanner(System.console().reader());
-    	console=System.console();
+    	keyboard=new Scanner(System.in);
+    	console=System.out;
     }
 	
 	public ConsoleRunner() {
 		
+		instance=this;
 		exit=false;
 		
 		while (!exit) {
@@ -64,7 +67,7 @@ public class ConsoleRunner {
 			case "voice connect":
 			case "voiceconnect":
 			case "vconnect":
-				StreamServer.DISCORDBOT.connectStream();
+				DiscordBot.instance.connectStream();
 				break;
 		}
 	}

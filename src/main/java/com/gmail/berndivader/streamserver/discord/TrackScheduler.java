@@ -2,8 +2,8 @@ package com.gmail.berndivader.streamserver.discord;
 
 import java.time.Duration;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
-import com.gmail.berndivader.streamserver.StreamServer;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -46,10 +46,20 @@ public class TrackScheduler implements AudioLoadResultHandler {
 
 			@Override
 			public void accept(Long l) {
-				StreamServer.DISCORDBOT.connectStream();
+				DiscordBot.instance.connectStream();
 			}
 			
-		}).subscribe();
+		})
+		.onErrorReturn(new Predicate<Throwable>() {
+
+			@Override
+			public boolean test(Throwable t) {
+				t.printStackTrace();
+				return true;
+			}
+			
+		}, 1l)
+		.subscribe();
 	}
 
 }

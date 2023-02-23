@@ -69,6 +69,7 @@ public class Commands {
 	}
 	
 	public Command<?> getCommand(String name) {
+		if(name.isEmpty()) name="help";
 		String className=commands.get(name);
 		if(className!=null) {
 			try {
