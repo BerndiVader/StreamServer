@@ -40,14 +40,13 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.VoiceChannelCreateSpec;
 import discord4j.core.spec.VoiceChannelJoinSpec;
 import discord4j.rest.util.Color;
-import discord4j.voice.AudioProvider;
 import reactor.core.publisher.Mono;
 
 public class DiscordBot {
 	
-	final AudioPlayerManager playerManager;
+	public final AudioPlayerManager playerManager;
 	public final AudioPlayer audioPlayer;
-	final AudioProvider provider;
+	public final LavaPlayerAudioProvider provider;
 	final TrackScheduler scheduler;
 	final Commands commands;
 	
@@ -216,7 +215,6 @@ public class DiscordBot {
 				}
 			
 			}).subscribe();
-		
 		
 		dispatcher.on(MessageCreateEvent.class)
 			.flatMap(new Function<MessageCreateEvent,Mono<Void>>() {

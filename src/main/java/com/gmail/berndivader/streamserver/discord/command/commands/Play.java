@@ -8,19 +8,29 @@ import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 @DiscordCommand(name="play")
-public class Play extends Command<Void> {
+public class Play extends Command<Message> {
 	
 	int index=-1;
 	
 	@Override
+<<<<<<< HEAD
 	public Mono<Void> execute(String s,MessageChannel channel) {
 		
+=======
+	public Mono<Message> execute(String s,MessageChannel channel) {
+		
+		Mono<Message>mono=Mono.empty();
+		
+		System.err.println(s);
+		
+>>>>>>> a25f33e71db747c369d305e9a33fc4d3154e2a7f
 		if(s.toLowerCase().equals("next")) {
 			BroadcastRunner.playNext();
 		} else if(s.toLowerCase().equals("last")) {
@@ -36,6 +46,7 @@ public class Play extends Command<Void> {
 				}
 			} else {
 				BroadcastRunner.broadcastFilename(Helper.files[index]);
+<<<<<<< HEAD
 			}
 		}
 		if(index!=-1) {
@@ -59,10 +70,44 @@ public class Play extends Command<Void> {
 				embed.setColor(Color.RED);
 				embed.setTitle("No file found for");
 				embed.setDescription(s);
+=======
+>>>>>>> a25f33e71db747c369d305e9a33fc4d3154e2a7f
 			}
+		}
+		if(index!=-1) {
 			
+<<<<<<< HEAD
 		}).then();
+=======
+			mono=channel.createEmbed(new Consumer<EmbedCreateSpec>() {
+
+				@Override
+				public void accept(EmbedCreateSpec embed) {
+					embed.setColor(Color.CINNABAR);
+					embed.setTitle("Now playing");
+					embed.setDescription(s);
+				}
+				
+			});
+			
+		} else {
+			
+			mono=channel.createEmbed(new Consumer<EmbedCreateSpec>() {
+
+				@Override
+				public void accept(EmbedCreateSpec embed) {
+					embed.setColor(Color.RED);
+					embed.setTitle("No file found for");
+					embed.setDescription(s);
+				}
+				
+			});
+			
+		}
+>>>>>>> a25f33e71db747c369d305e9a33fc4d3154e2a7f
 		
+		return mono;
+				
 	}
 
 

@@ -7,18 +7,19 @@ import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 @DiscordCommand(name="playlist")
-public class Playlist extends Command<Void> {
+public class Playlist extends Command<Message> {
 	
 	@Override
-	public Mono<Void> execute(String string,MessageChannel channel) {
+	public Mono<Message> execute(String command,MessageChannel channel) {
 		
-		String regex=string.toLowerCase();
+		String regex=command.toLowerCase();
 		boolean custom=regex.startsWith("custom ");
 		if(custom) {
 			regex=regex.replaceFirst("custom ","");
@@ -61,7 +62,6 @@ public class Playlist extends Command<Void> {
 				
 			}).subscribe();
 		}
-		
 		return Mono.empty();
 	}
 

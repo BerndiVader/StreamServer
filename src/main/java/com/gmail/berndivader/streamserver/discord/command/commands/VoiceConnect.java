@@ -28,7 +28,6 @@ public class VoiceConnect extends Command<Void> {
 					embed.setDescription("Try to reconnect to youtube stream.");
 				}
 			}).then();
-			
 		} catch (Exception e) {
 			return channel.createEmbed(new Consumer<EmbedCreateSpec>() {
 
