@@ -225,7 +225,7 @@ public class DiscordBot {
 				public Mono<Void> apply(MessageCreateEvent e) {
 
 					boolean isCommand=e.getMessage().getContent().toLowerCase().startsWith(Config.DISCORD_COMMAND_PREFIX);
-					if(!isCommand||!e.getMember().isPresent()) Mono.empty();
+					if(!isCommand||!e.getMember().isPresent()) return Mono.empty();
 					
 					Message message=e.getMessage();
 					String content=message.getContent();
@@ -233,6 +233,7 @@ public class DiscordBot {
 					String temp=parse.length==2?parse[1]:"";
 					String[]args=temp.split(" ",2);
 					Command<?>command=commands.getCommand(args[0].toLowerCase());
+					
 					if(command==null) return Mono.empty();
 					
 					return Mono.just(e).flatMap(new Function<MessageCreateEvent, Mono<Void>>() {
