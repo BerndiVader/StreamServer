@@ -46,6 +46,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 		File[]files=Helper.files.clone();
 		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
+			connection.setAutoCommit(false);
 			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
 				
 				ConsoleRunner.println("[BEGIN MYSQL PLAYLIST UPDATE]");
@@ -54,9 +55,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 				}
 				
 				statement.addBatch("START TRANSACTION;");
-				statement.addBatch("DELETE FROM `playlist`;");
-				statement.executeBatch();
-				statement.clearBatch();
+				statement.addBatch("TRUNCATE TABLE playlist;");
 				
 				for(int i1=0;i1<files.length;i1++) {
 					
@@ -80,7 +79,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 					statement.setString(1,title);
 					statement.setString(2,path);
 					statement.setString(3,comment);
-					statement.execute();
+					statement.addBatch();
 					
 				}
 				
@@ -88,6 +87,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 				statement.executeBatch();
 				
 			}
+			connection.commit();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			ConsoleRunner.println("\n[FAILED MYSQL PLAYLIST UPDATE]");
