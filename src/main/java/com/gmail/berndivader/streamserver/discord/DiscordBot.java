@@ -39,6 +39,7 @@ import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.VoiceChannelCreateSpec;
 import discord4j.core.spec.VoiceChannelJoinSpec;
+import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
@@ -257,6 +258,7 @@ public class DiscordBot {
 										if(channel==null) return;
 										command.execute(args.length==2?args[1]:"",channel)
 										.subscribe();
+										updateStatus(content);
 									}
 									
 								});
@@ -307,7 +309,7 @@ public class DiscordBot {
 	
 	public void updateStatus(String comment) {
 		return;
-//		client.updatePresence(StatusUpdate.builder().build().withStatus(comment)).subscribe();
+		//client.updatePresence(StatusUpdate.builder().build().withStatus(comment)).subscribe();
 	}
 	
 	public void close() {
