@@ -23,6 +23,10 @@ dependencies {
     implemented 'org.slf4j:slf4j-nop:+'
     implemented 'com.discord4j:discord4j-core:3.1.7'
     implemented 'com.sedmelluq:lavaplayer:+'
+	implemented 'org.apache.httpcomponents:httpclient:+'
+
+    
+    
 }
 
 jar {
