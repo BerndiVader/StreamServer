@@ -11,21 +11,21 @@ repositories {
 }
 
 configurations {
-    implemented
-    compile.extendsFrom(implemented)
+    compileClasspath.extendsFrom(supplied)
 }
 
 dependencies {
-	implemented 'com.github.kokorin.jaffree:jaffree:+'
-	implemented 'org.slf4j:slf4j-api:+'
-    implemented 'mysql:mysql-connector-java:+'
-    implemented 'com.google.code.gson:gson:+'
-    implemented 'org.slf4j:slf4j-nop:+'
-    implemented 'com.discord4j:discord4j-core:3.1.7'
-    implemented 'com.sedmelluq:lavaplayer:+'
+	supplied 'com.github.kokorin.jaffree:jaffree:+'
+	supplied 'org.slf4j:slf4j-api:+'
+    supplied 'mysql:mysql-connector-java:+'
+    supplied 'com.google.code.gson:gson:+'
+    supplied 'org.slf4j:slf4j-nop:+'
+    supplied 'com.discord4j:discord4j-core:3.1.7'
+    supplied 'com.sedmelluq:lavaplayer:+'
 }
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     rootSpec.exclude('**/META-INF/*.SF','**/META-INF/*.RSA')
     
     manifest {
@@ -33,7 +33,7 @@ jar {
     }
 
     from {
-        configurations.implemented.asFileTree.files.collect { zipTree(it) }
+        configurations.supplied.asFileTree.files.collect { zipTree(it) }
     }
 }
 
