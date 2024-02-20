@@ -1,7 +1,9 @@
 apply plugin: 'java'
 apply plugin: 'application'
 
-mainClassName = 'com.gmail.berndivader.streamserver.StreamServer'
+application {
+	mainClass.set("com.gmail.berndivader.streamserver.StreamServer")
+}
 
 repositories {
     mavenCentral()
@@ -29,7 +31,7 @@ jar {
     rootSpec.exclude('**/META-INF/*.SF','**/META-INF/*.RSA')
     
     manifest {
-        attributes 'Main-Class': mainClassName
+        attributes 'Main-Class': application.mainClass
     }
 
     from {
