@@ -1,7 +1,9 @@
 apply plugin: 'java'
 apply plugin: 'application'
 
-mainClassName = 'com.gmail.berndivader.streamserver.StreamServer'
+application {
+	mainClass.set("com.gmail.berndivader.streamserver.StreamServer")
+}
 
 repositories {
     mavenCentral()
@@ -11,7 +13,7 @@ repositories {
 }
 
 configurations {
-    compile.extendsFrom(supplied)
+    compileClasspath.extendsFrom(supplied)
 }
 
 dependencies {
@@ -22,15 +24,14 @@ dependencies {
     supplied 'org.slf4j:slf4j-nop:+'
     supplied 'com.discord4j:discord4j-core:3.1.7'
     supplied 'com.sedmelluq:lavaplayer:+'
-	supplied 'org.apache.httpcomponents:httpclient:+'    
 }
 
 jar {
-	duplicatesStrategy=DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     rootSpec.exclude('**/META-INF/*.SF','**/META-INF/*.RSA')
     
     manifest {
-        attributes 'Main-Class': mainClassName
+        attributes 'Main-Class': application.mainClass
     }
 
     from {

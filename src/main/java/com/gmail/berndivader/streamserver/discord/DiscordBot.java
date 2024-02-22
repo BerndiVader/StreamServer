@@ -39,7 +39,6 @@ import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.VoiceChannelCreateSpec;
 import discord4j.core.spec.VoiceChannelJoinSpec;
-import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
