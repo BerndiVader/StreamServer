@@ -35,16 +35,16 @@ public class ConsoleRunner {
 		
 		while (!exit) {
 	        printReady();
-            String input = keyboard.nextLine();
+            String input=keyboard.nextLine();
             
             if(input!=null&&input.startsWith(".")) {
             	
-            	String[]parse=input.toLowerCase().split(" ",2);
+            	String[]parse=input.split(" ",2);
             	if(parse.length==1) {
             		parse=new String[] {parse[0],""};
             	}
             	
-            	String command=parse[0];
+            	String command=parse[0].toLowerCase();
             	String[]args=new String[] {parse[1]};
             	
             	Command cmd=commands.getCommand(command.substring(1));

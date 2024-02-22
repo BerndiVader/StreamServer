@@ -1,37 +1,45 @@
 package com.gmail.berndivader.streamserver.youtube;
 
+import java.util.concurrent.Future;
+
 import com.gmail.berndivader.streamserver.Helper;
-import com.google.gson.JsonArray;
+import com.gmail.berndivader.streamserver.config.Config;
 import com.google.gson.JsonObject;
 
 public class Youtube {
 	
-	private static String url="https://www.googleapis.com/youtube/v3/";
+	private static final String URL="https://youtube.googleapis.com/youtube/v3/";
 	
-	
-	public static void livestreamsByChannelId(String id) {
+	public static Future<JsonObject> livestreamsByChannelId(String id) {
 		
-		String query=url.concat("search?part=snippet&channelId=").concat(id).concat("&type=video&eventType=live&key=").concat("AIzaSyC73-UO5JfFHzPoTPL8iNlRjDURNvtA4es");
+		String query=URL.concat("search?part=snippet&eventType=live&maxResults=1&type=video&prettyPrint=true&channelId=").concat(id).concat("&key=").concat(Config.YOUTUBE_KEY);
+		System.err.println(query);
 		
-		Helper.executor.submit(new GetHttpCallable(query) {
+		return Helper.executor.submit(new GetHttpCallable<JsonObject>(query) {
 			
 			@Override
-			protected boolean handle(JsonObject json) {
-				if(json.get("items").isJsonArray()) {
-					JsonArray array=json.get("items").getAsJsonArray();
-					int size=array.size();
-					for(int i=0;i<size;i++) {
-						JsonObject object=array.get(i).getAsJsonObject();
-						String videoId=object.getAsJsonObject("id").getAsJsonObject("videoId").getAsString();
-						JsonObject snippet=object.getAsJsonObject("snipped");
-						String startDate=snippet.getAsJsonObject("publishedAt").getAsString();
-						
-					}
-				}
-				return true;
+			protected JsonObject handle(JsonObject json) {
+				System.err.println(json.toString());
+				return json;
 			}
+
+			@Override
+			protected JsonObject handleErr(JsonObject json) {
+				System.err.println(json.toString());
+				return json;
+			}
+			
 		});
 		
 	}
-		
+
 }
+
+/*
+ * liveBroadcasts?broadcastStatus=active&id=YOUR_BROADCAST_ID&key=[YOUR_API_KEY]
+ *  
+ * search?part=snippet&eventType=live&maxResults=1&q=news&type=video&prettyPrint=true&key=[YOUR_API_KEY]
+ * search?part=snippet&channelId=ID&eventType=live&maxResults=1&type=video&prettyPrint=true&key=[YOUR_API_KEY]
+ * 
+ * 
+*/

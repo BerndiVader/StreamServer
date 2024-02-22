@@ -4,7 +4,10 @@ public class ConfigData {
 	
 	String STREAM_KEY;
 	String STREAM_URL;
+	
 	String YOUTUBE_LINK;
+	String YOUTUBE_KEY;
+	
 	Boolean STREAM_BOT_START;
 	
 	String PLAYLIST_PATH;

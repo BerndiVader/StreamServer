@@ -15,7 +15,7 @@ import com.gmail.berndivader.streamserver.Helper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public abstract class GetHttpCallable implements Callable<Boolean> {
+public abstract class GetHttpCallable<T> implements Callable<T> {
 	
 	private String query;
 
@@ -24,35 +24,24 @@ public abstract class GetHttpCallable implements Callable<Boolean> {
 	}
 
 	@Override
-	public Boolean call() throws Exception {
+	public T call() throws Exception {
 		HttpUriRequest request=new HttpGet(query);
 		JsonObject json=Helper.httpClient.execute(request,new ResponseHandler<JsonObject>() {
-			
 
 			@Override
 			public JsonObject handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-				
 				String text="";
-			    try (Scanner scanner = new Scanner(response.getEntity().getContent(), StandardCharsets.UTF_8.name())) {
-			        text = scanner.useDelimiter("\\A").next();
+			    try (Scanner scanner=new Scanner(response.getEntity().getContent(), StandardCharsets.UTF_8.name())) {
+			        text=scanner.useDelimiter("\\A").next();
 			    }
-				JsonObject json=JsonParser.parseString(text).getAsJsonObject();
-			    return json;
+				return JsonParser.parseString(text).getAsJsonObject();
 			}
 		});
 		
-		if(json.get("error")==null) {
-			return handle(json);
-		}
-		
-		return handleErr(json);
+		return handle(json);
 	}
 	
-	protected abstract boolean handle(JsonObject json);
-	
-	protected boolean handleErr(JsonObject json) {
-		
-		return false;
-	}
+	protected abstract T handle(JsonObject json);
+	protected abstract T handleErr(JsonObject json);
 
 }

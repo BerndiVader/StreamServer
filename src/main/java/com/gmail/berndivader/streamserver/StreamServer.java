@@ -28,7 +28,7 @@ public final class StreamServer {
 			}
 		}
 				
-		Youtube.livestreamsByChannelId("UCSUcEL_Jm8kZ1rXjT1jDWIg");
+		//Youtube.livestreamsByChannelId("UCSUcEL_Jm8kZ1rXjT1jDWIg");
 		//new DiscordBot();
 		//new BroadcastRunner();
 		new ConsoleRunner();
