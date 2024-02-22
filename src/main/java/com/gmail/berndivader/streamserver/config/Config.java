@@ -18,7 +18,10 @@ public class Config {
 	
 	public static String STREAM_KEY="xxxx-xxxx-xxxx-xxxx-xxxx";
 	public static String STREAM_URL="rtmp://a.rtmp.youtube.com/live2";
+	
 	public static String YOUTUBE_LINK="https://youtu.be/xxxxxxx";
+	public static String YOUTUBE_KEY="yt-api-key";
+	
 	public static Boolean STREAM_BOT_START=true;
 	
 	public static String PLAYLIST_PATH="./playlist";
@@ -88,6 +91,7 @@ public class Config {
 			data.STREAM_KEY=STREAM_KEY;
 			data.STREAM_URL=STREAM_URL;
 			data.YOUTUBE_LINK=YOUTUBE_LINK;
+			data.YOUTUBE_KEY=YOUTUBE_KEY;
 			data.STREAM_BOT_START=STREAM_BOT_START;
 			data.DATABASE_CONNECTION=DATABASE_CONNECTION;
 			data.DATABASE_USER=DATABASE_USER;
@@ -115,6 +119,7 @@ public class Config {
 			if(data.STREAM_KEY!=null) STREAM_KEY=data.STREAM_KEY;
 			if(data.STREAM_URL!=null) STREAM_URL=data.STREAM_URL;
 			if(data.YOUTUBE_LINK!=null) YOUTUBE_LINK=data.YOUTUBE_LINK;
+			if(data.YOUTUBE_KEY!=null) YOUTUBE_KEY=data.YOUTUBE_KEY;
 			if(data.STREAM_BOT_START!=null) STREAM_BOT_START=data.STREAM_BOT_START;
 			if(data.DATABASE_CONNECTION!=null) DATABASE_CONNECTION=data.DATABASE_CONNECTION;
 			if(data.DATABASE_USER!=null) DATABASE_USER=data.DATABASE_USER;

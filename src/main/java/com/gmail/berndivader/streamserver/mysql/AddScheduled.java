@@ -25,9 +25,8 @@ public class AddScheduled implements Runnable {
 	@Override
 	public void run() {
 		
+		boolean exists=false;
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
-			
-			boolean exists=false;
 			try(PreparedStatement testfor=connection.prepareStatement(sql_testfor,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				testfor.setString(1, filename);
 				ResultSet result=testfor.executeQuery();
@@ -44,10 +43,10 @@ public class AddScheduled implements Runnable {
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
-			ConsoleRunner.println("\n[MYSQL FAILED TO ADD TO SCHEDULED]");
+			ConsoleRunner.println("\n[MYSQL FAILED TO ADD FOR SCHEDULE]");
 			return;
 		}
-		ConsoleRunner.println("\n[MYSQL SUCCSEED TO ADD TO SCHEDULED]");
+		ConsoleRunner.println(exists?"\n[MYSQL TRACK ADDED FOR SCHEDULE]":"\n[MYSQL TRACK ALREADY ON SCHEDULE]");
 	}
 
 }

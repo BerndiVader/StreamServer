@@ -9,6 +9,7 @@ import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
 import com.gmail.berndivader.streamserver.mysql.WipeDatabase;
+import com.gmail.berndivader.streamserver.youtube.Youtube;
 
 public final class StreamServer {
 	
@@ -26,13 +27,14 @@ public final class StreamServer {
 				break;
 			}
 		}
-		
-		new DiscordBot();
-		new BroadcastRunner();
+				
+		//Youtube.livestreamsByChannelId("UCSUcEL_Jm8kZ1rXjT1jDWIg");
+		//new DiscordBot();
+		//new BroadcastRunner();
 		new ConsoleRunner();
 				
-		BroadcastRunner.instance.stop();
-		DiscordBot.instance.close();
+		//BroadcastRunner.instance.stop();
+		//DiscordBot.instance.close();
 		Helper.close();
 		
 		if(ConsoleRunner.forceExit) {
