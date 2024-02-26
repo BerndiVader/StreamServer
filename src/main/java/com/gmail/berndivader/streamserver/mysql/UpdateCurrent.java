@@ -32,12 +32,10 @@ public class UpdateCurrent implements Runnable{
 				
 				statement.addBatch("START TRANSACTION;");
 				statement.addBatch("DELETE FROM `current`;");
-				statement.executeBatch();
-				statement.clearBatch();
 				
 				statement.setString(1,title);
 				statement.setString(2,info);
-				statement.execute();
+				statement.addBatch();
 				
 				statement.addBatch("COMMIT;");
 				statement.executeBatch();
