@@ -107,7 +107,7 @@ public class DiscordBot {
 				public Mono<Void> apply(ReadyEvent ready) {
 					
 					if(!ready.getGuilds().isEmpty()) {
-						Iterator<discord4j.core.event.domain.lifecycle.ReadyEvent.Guild>iterator=ready.getGuilds().iterator();
+						Iterator<ReadyEvent.Guild>iterator=ready.getGuilds().iterator();
 						for(;iterator.hasNext();) {
 							Snowflake flake=iterator.next().getId();
 							client.getGuildById(flake)
