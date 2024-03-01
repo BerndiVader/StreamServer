@@ -15,11 +15,11 @@ import com.gmail.berndivader.streamserver.Helper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public abstract class GetHttpCallable<T> implements Callable<T> {
+public abstract class Response<T> implements Callable<T> {
 	
 	private String query;
 
-	public GetHttpCallable(String query) {
+	public Response(String query) {
 		this.query=query;
 	}
 
