@@ -5,7 +5,7 @@ import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 
-@ConsoleCommand(name="config")
+@ConsoleCommand(name="config", usage="")
 public class ConfigCommands extends Command {
 
 	@Override

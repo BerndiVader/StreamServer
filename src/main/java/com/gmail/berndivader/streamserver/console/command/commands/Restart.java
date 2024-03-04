@@ -4,7 +4,7 @@ import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
-@ConsoleCommand(name="restart")
+@ConsoleCommand(name="restart",usage="")
 public class Restart extends Command {
 
 	@Override

@@ -6,7 +6,7 @@ import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
-@ConsoleCommand(name="play")
+@ConsoleCommand(name="play",usage="")
 public class Play extends Command {
 
 	@Override

@@ -5,7 +5,7 @@ import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 
-@ConsoleCommand(name="playlist")
+@ConsoleCommand(name="playlist",usage="")
 public class Playlist extends Command {
 
 	@Override

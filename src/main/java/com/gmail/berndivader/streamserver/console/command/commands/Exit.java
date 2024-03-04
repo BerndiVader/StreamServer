@@ -4,7 +4,7 @@ import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 
-@ConsoleCommand(name="x")
+@ConsoleCommand(name="x",usage="")
 public class Exit extends Command {
 
 	@Override

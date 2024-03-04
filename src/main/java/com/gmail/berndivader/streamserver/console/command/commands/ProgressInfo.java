@@ -8,7 +8,7 @@ import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
-@ConsoleCommand(name="p")
+@ConsoleCommand(name="p",usage="")
 public class ProgressInfo extends Command {
 
 	@Override

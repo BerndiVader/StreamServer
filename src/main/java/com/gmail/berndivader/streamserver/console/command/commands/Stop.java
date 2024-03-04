@@ -4,7 +4,7 @@ import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
-@ConsoleCommand(name="stop")
+@ConsoleCommand(name="stop",usage="")
 public class Stop extends Command {
 
 	@Override

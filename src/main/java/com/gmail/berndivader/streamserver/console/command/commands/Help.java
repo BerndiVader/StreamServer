@@ -5,7 +5,7 @@ import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 
-@ConsoleCommand(name="h")
+@ConsoleCommand(name="h",usage="")
 public class Help extends Command {
 
 	@Override
