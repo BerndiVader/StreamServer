@@ -18,7 +18,7 @@ public final class StreamServer {
 	public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException {
 		
 		new Config();
-		new DatabaseConnection();
+		//new DatabaseConnection();
 		
 		if(args.length!=0) {
 			switch(args[0]) {
