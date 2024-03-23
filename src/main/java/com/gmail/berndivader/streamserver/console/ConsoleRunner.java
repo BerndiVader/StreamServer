@@ -6,7 +6,6 @@ import java.util.Scanner;
 
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.console.command.Commands;
-import com.gmail.berndivader.streamserver.discord.DiscordBot;
 
 public class ConsoleRunner {
 	
@@ -15,7 +14,6 @@ public class ConsoleRunner {
     static Commands commands;
     
     public static boolean forceExit,exit;
-    
     public static ConsoleRunner instance;
     
     static {
@@ -50,26 +48,9 @@ public class ConsoleRunner {
             	Command cmd=commands.getCommand(command.substring(1));
             	if(cmd!=null) cmd.execute(args);
             	
-            	switch(command) {
-	            	case ".discord":
-	            		executeDiscordCommand(new String[] {parse[1]});
-	            		break;
-	            	default:
-	            		break;
-            	}
             }
         }
         keyboard.close();
-	}
-	
-	void executeDiscordCommand(String[] args) {
-		switch(args[0]) {
-			case "voice connect":
-			case "voiceconnect":
-			case "vconnect":
-				DiscordBot.instance.connectStream();
-				break;
-		}
 	}
 	
 	public static void println(String string) {
