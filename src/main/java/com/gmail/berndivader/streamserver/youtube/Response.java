@@ -27,18 +27,17 @@ public abstract class Response<T> implements Callable<T> {
 	public T call() throws Exception {
 		HttpUriRequest request=new HttpGet(query);
 		JsonObject json=Helper.httpClient.execute(request,new ResponseHandler<JsonObject>() {
-
 			@Override
 			public JsonObject handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
 				String text="";
-			    try (Scanner scanner=new Scanner(response.getEntity().getContent(), StandardCharsets.UTF_8.name())) {
+			    try(Scanner scanner=new Scanner(response.getEntity().getContent(), StandardCharsets.UTF_8.name())) {
 			        text=scanner.useDelimiter("\\A").next();
 			    }
 				return JsonParser.parseString(text).getAsJsonObject();
 			}
 		});
 		
-		return handle(json);
+		return !json.has("error")?handle(json):handleErr(json.get("error").getAsJsonObject());
 	}
 	
 	protected abstract T handle(JsonObject json);

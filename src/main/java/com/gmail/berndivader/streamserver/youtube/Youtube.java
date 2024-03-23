@@ -23,7 +23,6 @@ public class Youtube {
 			
 			@Override
 			protected Packet handle(JsonObject json) {
-				if(json.has("error")) handleErr(json.get("error").getAsJsonObject());
 				LiveStreamPacket packet=new Gson().fromJson(json,LiveStreamPacket.class);
 				packet.source=json;
 				return packet;
