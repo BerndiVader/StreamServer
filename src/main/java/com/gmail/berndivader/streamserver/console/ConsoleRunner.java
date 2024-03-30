@@ -53,6 +53,10 @@ public class ConsoleRunner {
         keyboard.close();
 	}
 	
+	public static void printErr(String string) {
+		console.printf("\033[0;1m%s\n>",string);
+	}
+	
 	public static void println(String string) {
 		console.printf("%s\n>",string);
 	}
