@@ -13,6 +13,8 @@ public class ConfigData {
 	String PLAYLIST_PATH;
 	String PLAYLIST_PATH_CUSTOM;
 	
+	String DL_MUSIC_PATH;
+	
 	String DATABASE_CONNECTION;
 	String DATABASE_USER;
 	String DATABASE_PWD;

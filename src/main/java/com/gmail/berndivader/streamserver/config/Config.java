@@ -27,6 +27,8 @@ public class Config {
 	public static String PLAYLIST_PATH="./playlist";
 	public static String PLAYLIST_PATH_CUSTOM="./custom";
 	
+	public static String DL_MUSIC_PATH="./music";
+	
 	public static String DATABASE_CONNECTION="jdbc:mysql://x.x.xxx.xxx:3306/ytbot";
 	public static String DATABASE_USER="default";
 	public static String DATABASE_PWD="default";
@@ -88,6 +90,7 @@ public class Config {
 		try (FileWriter writer=new FileWriter(config_file.getAbsoluteFile())) {
 			data.PLAYLIST_PATH=PLAYLIST_PATH;
 			data.PLAYLIST_PATH_CUSTOM=PLAYLIST_PATH_CUSTOM;
+			data.DL_MUSIC_PATH=DL_MUSIC_PATH;
 			data.STREAM_KEY=STREAM_KEY;
 			data.STREAM_URL=STREAM_URL;
 			data.YOUTUBE_LINK=YOUTUBE_LINK;
@@ -116,6 +119,7 @@ public class Config {
 			data=new Gson().fromJson(reader,ConfigData.class);
 			if(data.PLAYLIST_PATH!=null) PLAYLIST_PATH=data.PLAYLIST_PATH;
 			if(data.PLAYLIST_PATH_CUSTOM!=null) PLAYLIST_PATH_CUSTOM=data.PLAYLIST_PATH_CUSTOM;
+			if(data.DL_MUSIC_PATH!=null) DL_MUSIC_PATH=data.DL_MUSIC_PATH;
 			if(data.STREAM_KEY!=null) STREAM_KEY=data.STREAM_KEY;
 			if(data.STREAM_URL!=null) STREAM_URL=data.STREAM_URL;
 			if(data.YOUTUBE_LINK!=null) YOUTUBE_LINK=data.YOUTUBE_LINK;
