@@ -37,7 +37,7 @@ public class DownloadMediaFile extends Command {
 					if(input!=null&&input.equals(".q")) exit=true;
 				}
 			}
-			process.destroy();
+			if(process.isAlive()) process.destroy();
 			return true;
 		}
 	}
