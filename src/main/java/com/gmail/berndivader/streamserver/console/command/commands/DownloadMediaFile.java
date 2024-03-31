@@ -13,7 +13,7 @@ import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 
-@ConsoleCommand(name="dlp",usage="Download media files from various platforms\nUsage: dlp -url:<http source> or dlp help for more.")
+@ConsoleCommand(name="dlp",usage="Download media files from various platforms\nUsage: dlp -url <http source> or dlp --help for more.")
 public class DownloadMediaFile extends Command {
 	
 	private class InterruptHandler implements Callable<Boolean> {
@@ -86,7 +86,6 @@ public class DownloadMediaFile extends Command {
 			try(BufferedReader reader=new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				while(process.isAlive()&&!future.isDone()) {
 					String out=reader.readLine();
-
 					if(out!=null) {
 						ConsoleRunner.println(out);
 					}
