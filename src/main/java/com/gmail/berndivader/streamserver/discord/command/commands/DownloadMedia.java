@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.function.Consumer;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
@@ -14,7 +13,6 @@ import com.gmail.berndivader.streamserver.discord.command.Command;
 
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
@@ -38,13 +36,24 @@ public class DownloadMedia extends Command<Void> {
 				directory.mkdir();
 			}
 			if(!directory.exists()||directory.isFile()) {
-				channel.createEmbed(embed->{
-					embed.setTitle("ERROR DLP!");
-					embed.setColor(Color.RED);
-					embed.setDescription("There was an issue with the download directory configured in Config.DL_MUSIC_PATH. It is either a file or the directory couldnt be created by the bot.");					
+								
+				channel.createMessage(msg->{
+					msg.addEmbed(embed->{
+						embed.setTitle("ERROR DLP!");
+						embed.setColor(Color.RED);
+						embed.setDescription("There was an issue with the download directory configured in Config.DL_MUSIC_PATH. It is either a file or the directory couldnt be created by the bot.");
+					});
 				}).subscribe();
+				
 				return;
 			}
+						
+			Message message=channel.createMessage(msg->{
+				msg.addEmbed(embed->{
+					embed.setTitle("Prepare download media file.");
+					embed.setColor(Color.GREEN);
+				});
+			}).block();
 			
 			ProcessBuilder builder=new ProcessBuilder();
 			builder.directory(directory);
@@ -70,17 +79,38 @@ public class DownloadMedia extends Command<Void> {
 				}
 			}
 			
-			try {	
-				Message message=channel.createMessage(msg->{
+			try {			
+				message.edit(msg->{
 					msg.setContent("Starting download...");
-				}).block();
-				if(message==null) return;
+				}).subscribe();
+				
 				Process process= builder.start();
 				try(BufferedReader reader=new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 					while(process.isAlive()) {
 						String out=reader.readLine();
 						if(out!=null) {
-							if(out.startsWith("[youtube:tab]")||out.startsWith("[download]")) {
+							if(out.startsWith("[download] Destination:")) {
+								String filename=out.substring(23);
+								message.getEmbeds().clear();
+								message.edit(msg->{
+									msg.addEmbed(embed->{
+										embed.setTitle("Downloading");
+										embed.setDescription(filename);
+										embed.setColor(Color.BLUE);
+									});
+								}).subscribe();
+							} else if(out.startsWith("[ExtractAudio] Destination:")) {
+								String filename=out.substring(27);
+								message.getEmbeds().clear();
+								message.edit(msg->{
+									msg.setContent("");
+									msg.addEmbed(embed->{
+										embed.setTitle("Media download finished.");
+										embed.setDescription(filename);
+										embed.setColor(Color.GREEN);
+									});
+								}).subscribe();
+							} else if(out.startsWith("[youtube:tab]")||out.startsWith("[download]")) {
 								message.edit(msg->{
 									msg.setContent(out);
 								}).subscribe();
@@ -104,18 +134,8 @@ public class DownloadMedia extends Command<Void> {
 	public Mono<Void> execute(String string, MessageChannel channel) {
 		
 		Helper.executor.submit(new Runner(string,channel));
-		
-		return channel.createEmbed(new Consumer<EmbedCreateSpec>() {
-
-			@Override
-			public void accept(EmbedCreateSpec embed) {
-				embed.setTitle("Download media file.");
-				embed.setColor(Color.GREEN);
-				embed.setDescription("Media file job started.....");
-			}
-			
-		}).then();
-		
+		return Mono.empty();
+				
 	}
 
 }
