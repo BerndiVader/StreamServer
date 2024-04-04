@@ -5,14 +5,14 @@ import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 
-@ConsoleCommand(name="config", usage="")
+@ConsoleCommand(name="config", usage="save|load -> Save or load current settings to config file")
 public class ConfigCommands extends Command {
 
 	@Override
 	public boolean execute(String[] args) {
 		switch(args[0]) {
 		case "save":
-			if(!Config.saveConfig()) {
+			if(Config.saveConfig()) {
 				ConsoleRunner.println("Configuration saved");
 			} else {
 				ConsoleRunner.println("Failed to save configuration");
