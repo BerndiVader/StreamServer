@@ -86,7 +86,7 @@ public class Config {
 	}
 	
 	public static boolean saveConfig() {
-		boolean error=false;
+		boolean ok=true;
 		try (FileWriter writer=new FileWriter(config_file.getAbsoluteFile())) {
 			data.PLAYLIST_PATH=PLAYLIST_PATH;
 			data.PLAYLIST_PATH_CUSTOM=PLAYLIST_PATH_CUSTOM;
@@ -107,10 +107,10 @@ public class Config {
 			data.DISCORD_BOT_START=DISCORD_BOT_START;
 	        new GsonBuilder().setPrettyPrinting().create().toJson(data,writer);
 		} catch (IOException e) {
-			error=true;
+			ok=false;
 			ConsoleRunner.println(e.getMessage());
 		}		
-		return error;
+		return ok;
 	}
 	
 	public static boolean loadConfig() {
