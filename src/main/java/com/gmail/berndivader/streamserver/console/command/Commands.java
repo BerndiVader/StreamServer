@@ -17,9 +17,11 @@ import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 
 public class Commands {
 	
+	public static Commands instance;
+	
 	final static String PACKAGE_NAME="com/gmail/berndivader/streamserver/console/command/commands";
 	static String fileName;
-	HashMap<String,String>commands;
+	public HashMap<String,Class<Command>>commands;
 	
 	static {
 		try {
@@ -38,13 +40,14 @@ public class Commands {
 	}
 	
 	public Commands() throws FileNotFoundException, IOException, ClassNotFoundException {
-		
+		instance=this;
 		commands=new HashMap<>();
-		loadClasses();
+		loadCommandClasses();
 		
 	}
 	
-	void loadClasses() throws FileNotFoundException, IOException, ClassNotFoundException {
+	@SuppressWarnings("unchecked")
+	void loadCommandClasses() throws FileNotFoundException, IOException, ClassNotFoundException {
 		
 		try(JarInputStream jarStream=new JarInputStream(new FileInputStream(fileName))) {
 			JarEntry entry;
@@ -57,7 +60,7 @@ public class Commands {
 						Class<?>clazz=Class.forName(clazzName);
 						ConsoleCommand anno=clazz.getAnnotation(ConsoleCommand.class);
 						if(anno!=null) {
-							commands.put(anno.name(),clazzName);
+							commands.put(anno.name(),(Class<Command>)clazz);
 						}
 					}
 				}
@@ -67,15 +70,17 @@ public class Commands {
 	}
 	
 	public Command getCommand(String name) {
-		String className=commands.get(name);
-		if(className!=null) {
-			try {
-				return (Command) Class.forName(className).getDeclaredConstructor().newInstance();
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				ConsoleRunner.println(e.getMessage());
-			}
+		Class<Command>clazz=commands.get(name);
+		if(clazz==null) return null;
+		
+		try {
+			return clazz.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			ConsoleRunner.println(e.getMessage());
+			return null;
 		}
-		return null;
+		
 	}
 	
 }

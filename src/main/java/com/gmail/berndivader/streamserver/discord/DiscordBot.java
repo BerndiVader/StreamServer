@@ -23,24 +23,24 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-public class DiscordBot {
-	
-	final Commands commands;
-	
-	final GatewayDiscordClient client;
-	final EventDispatcher dispatcher;
-	public static Status status;
+public final class DiscordBot {
 	
 	public static DiscordBot instance;
 	
+	private final GatewayDiscordClient client;
+	private final EventDispatcher dispatcher;
+	public static Status status;
+	
+	
 	public DiscordBot() {
 		instance=this;
-		commands=new Commands();
-		
+		new Commands();
 		status=Status.DISCONNECTED;
+		
 		client=DiscordClientBuilder.create(Config.DISCORD_TOKEN).build().login()
 				.doOnSubscribe(new Consumer<Subscription>() {
 
@@ -69,8 +69,7 @@ public class DiscordBot {
 					ConsoleRunner.println("[Connection to Discord FAILED!]");
 				}
 				
-			})
-			.block();
+			}).block();
 		
 		dispatcher=client.getEventDispatcher();
 		
@@ -88,7 +87,7 @@ public class DiscordBot {
 					String[]parse=content.split(" ",2);
 					String temp=parse.length==2?parse[1]:"";
 					String[]args=temp.split(" ",2);
-					Command<?>command=commands.getCommand(args[0].toLowerCase());
+					Command<?>command=Commands.instance.newCommandInstance(args[0].toLowerCase());
 					
 					if(command==null) return Mono.empty();
 					
@@ -107,7 +106,7 @@ public class DiscordBot {
 							}).collectList().block().isEmpty()) {
 
 								Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE?message.getAuthor().get().getPrivateChannel():message.getChannel();
-								
+
 								mono.subscribe(new Consumer<MessageChannel>() {
 
 									@Override
@@ -152,8 +151,8 @@ public class DiscordBot {
 	}	
 	
 	public void updateStatus(String comment) {
+		client.updatePresence(StatusUpdate.builder().afk(false).since(0l).status("!".concat(comment)).build()).subscribe();
 		return;
-		//client.updatePresence(StatusUpdate.builder().build().withStatus(comment)).subscribe();
 	}
 	
 	public void close() {

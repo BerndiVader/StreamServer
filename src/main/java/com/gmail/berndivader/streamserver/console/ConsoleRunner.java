@@ -11,17 +11,11 @@ public class ConsoleRunner {
 	
     static Scanner keyboard;
     static PrintStream console;
-    static Commands commands;
     
     public static boolean forceExit,exit;
     public static ConsoleRunner instance;
     
     static {
-    	try {
-			commands=new Commands();
-		} catch (ClassNotFoundException | IOException e) {
-			e.printStackTrace();
-		}
     	keyboard=new Scanner(System.in);
     	console=System.out;
     }
@@ -30,6 +24,11 @@ public class ConsoleRunner {
 		
 		instance=this;
 		exit=false;
+		try {
+			new Commands();
+		} catch (ClassNotFoundException | IOException e) {
+			e.printStackTrace();
+		}
 		
 		while (!exit) {
 	        printReady();
@@ -45,9 +44,8 @@ public class ConsoleRunner {
             	String command=parse[0].toLowerCase();
             	String[]args=new String[] {parse[1]};
             	
-            	Command cmd=commands.getCommand(command.substring(1));
+            	Command cmd=Commands.instance.getCommand(command.substring(1));
             	if(cmd!=null) cmd.execute(args);
-            	
             }
         }
         keyboard.close();

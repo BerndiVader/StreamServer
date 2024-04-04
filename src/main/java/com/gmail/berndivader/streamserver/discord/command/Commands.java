@@ -15,10 +15,11 @@ import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 
 public class Commands {
-
+	
+	public static Commands instance;
 	private final static String PACKAGE_NAME="com/gmail/berndivader/streamserver/discord/command/commands";
 	private static String fileName;
-	private HashMap<String,Class<Command<?>>>commands;
+	public HashMap<String,Class<Command<?>>>commands;
 
 	static {
 		try {
@@ -37,6 +38,7 @@ public class Commands {
 	}
 	
 	public Commands() {
+		instance=this;
 		commands=new HashMap<>();
 		loadCommandClasses();
 	}
@@ -64,7 +66,7 @@ public class Commands {
 		}
 	}
 	
-	public Command<?> getCommand(String name) {
+	public Command<?> newCommandInstance(String name) {
 		if(name.isEmpty()) name="help";
 		Class<Command<?>>command=commands.get(name);
 		if(command==null) return null;
@@ -76,5 +78,5 @@ public class Commands {
 			return null;
 		}
 	}
-	
+		
 }
