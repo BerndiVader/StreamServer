@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.function.Predicate;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
@@ -118,16 +119,28 @@ public class DownloadMedia extends Command<Void> {
 						}
 					}
 				}
+				StringBuilder string=new StringBuilder();
 				try(BufferedReader reader=new BufferedReader(new InputStreamReader(process.getErrorStream()))){
-					reader.lines().forEach(line->ConsoleRunner.printErr(line));
+					reader.lines().filter(filter->{
+						return filter.startsWith("yt-dlp: error: ");
+					}).forEach(error->{
+						string.append(error.substring(14));
+					});
+				}
+				if(!string.isEmpty()) {
+					message.edit(msg->{
+						msg.setContent("").removeEmbeds().addEmbed(embed->{
+							embed.setTitle("ERROR");
+							embed.setDescription(string.toString());
+							embed.setColor(Color.RED);
+						});
+					}).subscribe();
 				}
 				process.destroy();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}			
-			
 		}
-		
 	}
 
 	@Override
