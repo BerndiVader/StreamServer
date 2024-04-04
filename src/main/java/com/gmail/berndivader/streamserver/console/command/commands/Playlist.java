@@ -5,7 +5,7 @@ import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 
-@ConsoleCommand(name="playlist",usage="")
+@ConsoleCommand(name="playlist",usage="[regex] -> Show playlist use regex to filter = valid regex pattern.")
 public class Playlist extends Command {
 
 	@Override

@@ -5,7 +5,7 @@ import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
-@ConsoleCommand(name="m",usage="")
+@ConsoleCommand(name="m",usage="Show current ffmpeg output message.")
 public class MessageInfo extends Command {
 
 	@Override

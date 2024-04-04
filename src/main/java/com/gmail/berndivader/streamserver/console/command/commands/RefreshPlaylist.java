@@ -7,7 +7,7 @@ import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.mysql.UpdatePlaylist;
 
-@ConsoleCommand(name="refresh",usage="")
+@ConsoleCommand(name="refresh",usage="Refresh playlist in database.")
 public class RefreshPlaylist extends Command {
 
 	@Override

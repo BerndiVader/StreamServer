@@ -8,7 +8,7 @@ import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
-@ConsoleCommand(name="p",usage="")
+@ConsoleCommand(name="p",usage="[time|frames|bitrate|quality|fps|drops|size|speed] -> Show ffmpeg progress info.")
 public class ProgressInfo extends Command {
 
 	@Override

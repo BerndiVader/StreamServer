@@ -6,7 +6,7 @@ import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.mysql.AddScheduled;
 
-@ConsoleCommand(name="schedule",usage="")
+@ConsoleCommand(name="schedule",usage="[filename] -> Add file to scheduled playlist.")
 public class Schedule extends Command {
 
 	@Override

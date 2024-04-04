@@ -11,7 +11,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="link")
+@DiscordCommand(name="link",usage="Display youtube stream url.")
 public class YouTubeLink extends Command<Void> {
 
 	@Override

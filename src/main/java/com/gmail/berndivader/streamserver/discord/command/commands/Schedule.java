@@ -13,7 +13,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="schedule")
+@DiscordCommand(name="schedule",usage="[filename] -> Add file to schedule table.")
 public class Schedule extends Command<Void> {
 
 	@Override

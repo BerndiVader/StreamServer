@@ -16,7 +16,7 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="dlp")
+@DiscordCommand(name="dlp",usage="Download media. [--yes-playlist] --url <valid_url>")
 public class DownloadMedia extends Command<Void> {
 	
 	private class Runner implements Runnable {
@@ -91,8 +91,8 @@ public class DownloadMedia extends Command<Void> {
 						if(out!=null) {
 							if(out.startsWith("[download] Destination:")) {
 								String filename=out.substring(23);
-								message.getEmbeds().clear();
 								message.edit(msg->{
+									msg.removeEmbeds();
 									msg.addEmbed(embed->{
 										embed.setTitle("Downloading");
 										embed.setDescription(filename);
@@ -101,8 +101,8 @@ public class DownloadMedia extends Command<Void> {
 								}).subscribe();
 							} else if(out.startsWith("[ExtractAudio] Destination:")) {
 								String filename=out.substring(27);
-								message.getEmbeds().clear();
 								message.edit(msg->{
+									msg.removeEmbeds();
 									msg.setContent("");
 									msg.addEmbed(embed->{
 										embed.setTitle("Media download finished.");

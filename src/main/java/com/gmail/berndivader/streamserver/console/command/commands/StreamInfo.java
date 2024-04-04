@@ -6,7 +6,7 @@ import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
-@ConsoleCommand(name="f",usage="")
+@ConsoleCommand(name="f",usage="[title|artist|date|comment|playtime|file|bitrate|format] -> Show ffmpegprobe gathered info.")
 public class StreamInfo extends Command {
 
 	@Override

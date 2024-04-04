@@ -16,7 +16,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="allscheduled")
+@DiscordCommand(name="allscheduled",usage="List all scheduled files.")
 public class ListScheduled extends Command<Void>{
 
 	@Override

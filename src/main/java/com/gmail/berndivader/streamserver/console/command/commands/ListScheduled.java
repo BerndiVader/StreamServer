@@ -10,7 +10,7 @@ import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.mysql.GetAllScheduled;
 
-@ConsoleCommand(name="listscheduled",usage="")
+@ConsoleCommand(name="listscheduled",usage="Show all scheduled files.")
 public class ListScheduled extends Command {
 
 	@Override

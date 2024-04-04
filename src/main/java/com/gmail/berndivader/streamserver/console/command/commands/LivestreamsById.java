@@ -11,7 +11,7 @@ import com.gmail.berndivader.streamserver.youtube.Youtube;
 import com.gmail.berndivader.streamserver.youtube.packets.EmptyPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
 
-@ConsoleCommand(name="streamby",usage="get livestream by id")
+@ConsoleCommand(name="streamby",usage="Get livestream by id.")
 public class LivestreamsById extends Command{
 
 	@Override

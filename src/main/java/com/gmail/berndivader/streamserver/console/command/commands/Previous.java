@@ -4,7 +4,7 @@ import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
-@ConsoleCommand(name="prev",usage="")
+@ConsoleCommand(name="prev",usage="Play last file.")
 public class Previous extends Command {
 
 	@Override

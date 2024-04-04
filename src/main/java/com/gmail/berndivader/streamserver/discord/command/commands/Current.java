@@ -11,7 +11,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="current")
+@DiscordCommand(name="current",usage="Display current playing file.")
 public class Current extends Command<Void> {
 
 	@Override

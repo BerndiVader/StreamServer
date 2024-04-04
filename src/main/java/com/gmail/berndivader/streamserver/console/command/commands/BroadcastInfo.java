@@ -6,10 +6,7 @@ import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
-@ConsoleCommand(name="b", usage="Show info about the current broadcast\n"
-		+ "status: true if something is streaming\n"
-		+ "file: current streaming file\n"
-		+ "next: next file for streaming")
+@ConsoleCommand(name="b", usage="[status|file|next] -> Info about broadcast status, current file and next file")
 public class BroadcastInfo extends Command {
 
 	@Override

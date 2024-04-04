@@ -13,7 +13,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="play")
+@DiscordCommand(name="play",usage="[filename|next|last|repeat]")
 public class Play extends Command<Void> {
 	
 	int index=-1;

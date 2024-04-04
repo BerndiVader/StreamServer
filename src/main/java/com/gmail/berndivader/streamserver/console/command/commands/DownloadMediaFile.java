@@ -13,7 +13,7 @@ import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 
-@ConsoleCommand(name="dlp",usage="Download media files from various platforms\nUsage: dlp -url <http source> or dlp --help for more.")
+@ConsoleCommand(name="dlp",usage="Download media. Usage: dlp --url <http source> or use --help")
 public class DownloadMediaFile extends Command {
 	
 	private class InterruptHandler implements Callable<Boolean> {

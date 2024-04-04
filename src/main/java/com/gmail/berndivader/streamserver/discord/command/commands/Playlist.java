@@ -12,7 +12,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="playlist")
+@DiscordCommand(name="playlist",usage="[filter] -> Search for files.")
 public class Playlist extends Command<Void> {
 	
 	@Override
