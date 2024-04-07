@@ -16,6 +16,10 @@ configurations {
     compileClasspath.extendsFrom(supplied)
 }
 
+java {
+	toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+}
+
 dependencies {
 	supplied 'com.github.kokorin.jaffree:jaffree:+'
 	supplied 'org.slf4j:slf4j-api:+'

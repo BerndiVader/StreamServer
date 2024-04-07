@@ -117,16 +117,15 @@ public class DownloadMedia extends Command<Void> {
 						}
 					}
 				}
-				StringBuilder strBuilder=new StringBuilder();
+				StringBuilder string=new StringBuilder();
 				try(BufferedReader reader=new BufferedReader(new InputStreamReader(process.getErrorStream()))){
 					reader.lines().filter(filter->{
 						return filter.startsWith("yt-dlp: error: ");
 					}).forEach(error->{
-						strBuilder.append(error.substring(14));
+						string.append(error.substring(14));
 					});
 				}
-				String string=strBuilder.toString();
-				if(!string.isEmpty()) {
+				if(string.length()!=0) {
 					message.edit(msg->{
 						msg.setContent("").removeEmbeds().addEmbed(embed->{
 							embed.setTitle("ERROR");
