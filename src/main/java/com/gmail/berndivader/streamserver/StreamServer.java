@@ -30,7 +30,7 @@ public final class StreamServer {
 		new DiscordBot();
 		new BroadcastRunner();
 		new ConsoleRunner();
-				
+
 		BroadcastRunner.instance.stop();
 		DiscordBot.instance.close();
 		Helper.close();

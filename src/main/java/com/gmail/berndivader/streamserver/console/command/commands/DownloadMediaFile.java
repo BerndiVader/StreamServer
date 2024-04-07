@@ -19,7 +19,7 @@ public class DownloadMediaFile extends Command {
 	private class InterruptHandler implements Callable<Boolean> {
 		
 		private final Process process;
-		private boolean exit=false;
+		private boolean run=true;
 		
 		public InterruptHandler(Process process) {
 			this.process=process;
@@ -29,12 +29,12 @@ public class DownloadMediaFile extends Command {
 		public Boolean call() throws Exception {
 			
 			String input="";
-			while(!exit&&process.isAlive()) {
+			while(run&&process.isAlive()) {
 				if(System.in.available()>0) {
 					byte[]bytes=new byte[System.in.available()];
 					int size=System.in.read(bytes);
 					input=new String(bytes).substring(0,size-1);
-					if(input!=null&&input.equals(".q")) exit=true;
+					if(input!=null&&input.equals(".q")) run=false;
 				}
 			}
 			if(process.isAlive()) process.destroy();
@@ -92,9 +92,13 @@ public class DownloadMediaFile extends Command {
 				}
 			}
 			try(BufferedReader reader=new BufferedReader(new InputStreamReader(process.getErrorStream()))){
-				reader.lines().forEach(line->ConsoleRunner.printErr(line));
+				try {
+					reader.lines().forEach(line->ConsoleRunner.printErr(line));
+				} catch (Exception e) {
+					ConsoleRunner.printErr(e.getMessage());
+				}
 			}
-			process.destroy();
+			if(process.isAlive()) process.destroy();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -4,12 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.function.Predicate;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.config.Config;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 
 import discord4j.core.object.entity.Message;
@@ -20,12 +18,12 @@ import reactor.core.publisher.Mono;
 @DiscordCommand(name="dlp",usage="Download media. [--yes-playlist] --url <valid_url>")
 public class DownloadMedia extends Command<Void> {
 	
-	private class Runner implements Runnable {
+	private class ProcessCallback implements Runnable {
 		
 		private final String line;
 		private final MessageChannel channel;
 		
-		public Runner(String line,MessageChannel channel) {
+		public ProcessCallback(String line,MessageChannel channel) {
 			this.line=line;
 			this.channel=channel;
 		}
@@ -146,9 +144,8 @@ public class DownloadMedia extends Command<Void> {
 	@Override
 	public Mono<Void> execute(String string, MessageChannel channel) {
 		
-		Helper.executor.submit(new Runner(string,channel));
+		Helper.executor.submit(new ProcessCallback(string,channel));
 		return Mono.empty();
-				
 	}
 
 }
