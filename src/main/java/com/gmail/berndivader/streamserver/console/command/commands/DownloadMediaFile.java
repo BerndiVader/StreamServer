@@ -3,7 +3,6 @@ package com.gmail.berndivader.streamserver.console.command.commands;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -82,22 +81,21 @@ public class DownloadMediaFile extends Command {
 			
 			InterruptHandler handler=new InterruptHandler(process);
 			Future<Boolean>future=Helper.executor.submit(handler);
-						
-			try(BufferedReader reader=new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-				while(process.isAlive()&&!future.isDone()) {
-					String out=reader.readLine();
-					if(out!=null) {
-						ConsoleRunner.println(out);
-					}
+			
+			BufferedReader input=process.inputReader();
+			while(process.isAlive()&&!future.isDone()) {
+				if(input!=null&&input.ready()) {
+					ConsoleRunner.println(input.readLine());
 				}
 			}
-			try(BufferedReader reader=new BufferedReader(new InputStreamReader(process.getErrorStream()))){
-				try {
-					reader.lines().forEach(line->ConsoleRunner.printErr(line));
-				} catch (Exception e) {
-					ConsoleRunner.printErr(e.getMessage());
-				}
+			
+			BufferedReader error=process.errorReader();
+			if(error!=null&&error.ready()) {
+				error.lines().forEach(line->{
+					ConsoleRunner.printErr(line);
+				});
 			}
+			
 			if(process.isAlive()) process.destroy();
 		} catch (IOException e) {
 			e.printStackTrace();
