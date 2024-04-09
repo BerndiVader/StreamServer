@@ -20,6 +20,13 @@ java {
 	toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
+if(hasProperty('buildScan')) {
+	buildScan {
+		termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+		termsOfServiceAgree = 'yes'
+	}
+}
+
 dependencies {
 	supplied 'com.github.kokorin.jaffree:jaffree:+'
 	supplied 'org.slf4j:slf4j-api:+'
@@ -43,9 +50,3 @@ jar {
     }
 }
 
-if (hasProperty('buildScan')) {
-	buildScan {
-		termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-		termsOfServiceAgree = 'yes'
-	}
-}

@@ -2,6 +2,8 @@ package com.gmail.berndivader.streamserver;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -142,6 +144,17 @@ public class Utils {
     		Helper.customs=new File[0];
     	}
     	
+	}
+	
+	public static String getStringFromStream(InputStream stream,int length) {
+		byte[]bytes=new byte[length];
+		try {
+			int size=stream.read(bytes,0,length);
+			return new String(bytes).substring(0,size);
+		} catch (IOException e) {
+			ConsoleRunner.printErr(e.getMessage());
+			return "";
+		}
 	}
 
 }
