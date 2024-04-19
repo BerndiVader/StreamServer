@@ -31,8 +31,8 @@ public final class DiscordBot {
 	
 	public static DiscordBot instance;
 	
-	private final GatewayDiscordClient client;
-	private final EventDispatcher dispatcher;
+	public final GatewayDiscordClient client;
+	public final EventDispatcher dispatcher;
 	public static Status status;
 	
 	

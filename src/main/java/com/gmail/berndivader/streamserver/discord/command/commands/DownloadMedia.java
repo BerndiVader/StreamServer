@@ -3,6 +3,8 @@ package com.gmail.berndivader.streamserver.discord.command.commands;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.UUID;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
@@ -10,8 +12,13 @@ import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 
+import discord4j.core.event.domain.interaction.ButtonInteractEvent;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.rest.util.Color;
+import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 
 @DiscordCommand(name="dlp",usage="Download media. [--yes-playlist] --url <valid_url>")
@@ -21,10 +28,13 @@ public class DownloadMedia extends Command<Void> {
 		
 		private final String line;
 		private final MessageChannel channel;
+		private final String uuid;
+		private boolean cancel=false;
 		
 		public ProcessCallback(String line,MessageChannel channel) {
 			this.line=line;
 			this.channel=channel;
+			uuid=UUID.randomUUID().toString();
 		}
 
 		@Override
@@ -76,13 +86,29 @@ public class DownloadMedia extends Command<Void> {
 					}
 				}
 				
-				try {			
+				try {
 					message.edit(msg->{
+						msg.setComponents(ActionRow.of(Button.danger(uuid,"Cancel")));
 						msg.setContent("Starting download...");
 					}).subscribe();
 					
-					Process process= builder.start();
+					Disposable listener=message.getClient().on(ButtonInteractEvent.class,event->{
+						if((cancel=event.getCustomId().equals(uuid))) {
+							return event.edit(msg->{
+								msg.setContent("");
+								msg.addEmbed(embed->{
+									embed.setTitle("Aborted");
+									embed.setDescription("Media download aborted by user.");
+									embed.setColor(Color.RED);
+								});
+								msg.setComponents(new ArrayList<LayoutComponent>());
+							});
+						}
+						return Mono.empty();
+					}).subscribe();
 					
+					Process process=builder.start();
+
 					BufferedReader input=process.inputReader();
 					while(process.isAlive()) {
 						if(input!=null&&input.ready()) {
@@ -107,12 +133,23 @@ public class DownloadMedia extends Command<Void> {
 										embed.setDescription(filename);
 										embed.setColor(Color.GREEN);
 									});
+									msg.setComponents(new ArrayList<LayoutComponent>());
 								}).subscribe();
 							} else if(out.startsWith("[download]")||out.startsWith("[youtube:tab]")) {
 								message.edit(msg->{
 									msg.setContent(out);
 								}).subscribe();
-							} else if(out.endsWith("already been downloaded")) {
+							} else if(out.startsWith("ERROR:")) {
+								message.edit(msg->{
+									msg.setContent("").removeEmbeds().addEmbed(embed->{
+										embed.setTitle("ERROR");
+										embed.setDescription(out);
+										embed.setColor(Color.RED);
+									});
+									msg.setComponents(new ArrayList<LayoutComponent>());
+								}).subscribe();								
+							}
+							if(out.endsWith("already been downloaded")) {
 								String filename=out.substring(27);
 								message.edit(msg->{
 									msg.removeEmbeds();
@@ -122,18 +159,21 @@ public class DownloadMedia extends Command<Void> {
 										embed.setDescription(filename);
 										embed.setColor(Color.GREEN);
 									});
+									msg.setComponents(new ArrayList<LayoutComponent>());
 								}).subscribe();
 							}
 						}
+						if(cancel) process.destroy();
 					}
+					if(listener!=null&&!listener.isDisposed()) listener.dispose();
 
 					StringBuilder string=new StringBuilder();
 					BufferedReader error=process.errorReader();
 					if(error!=null&&error.ready()) {
 						error.lines().filter(line->{
-							return line.startsWith("yt-dlp: error: ");
+							return line.startsWith("yt-dlp: error: ")||line.startsWith("ERROR:");
 						}).forEach(line->{
-							string.append(line.substring(14));
+							string.append(line);
 						});
 						if(string.length()>0) {
 							message.edit(msg->{
@@ -142,10 +182,13 @@ public class DownloadMedia extends Command<Void> {
 									embed.setDescription(string.toString());
 									embed.setColor(Color.RED);
 								});
+								msg.setComponents(new ArrayList<LayoutComponent>());
 							}).subscribe();
 						}
 					}
-					if(process.isAlive()) process.destroy();
+					
+					if(process.isAlive()) process.destroyForcibly();
+					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}				
