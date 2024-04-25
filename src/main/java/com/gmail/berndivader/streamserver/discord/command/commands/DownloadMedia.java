@@ -21,12 +21,12 @@ import discord4j.rest.util.Color;
 import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="dlp",usage="Download media. [--yes-playlist] --url <valid_url>")
+@DiscordCommand(name="dlp",usage="Download media. [--no-default] [--dir] [--yes-playlist] --url <valid_url>")
 public class DownloadMedia extends Command<Void> {
 	
 	private class ProcessCallback implements Runnable {
 		
-		private final String line;
+		private String line;
 		private final MessageChannel channel;
 		private final String uuid;
 		private boolean cancel=false;
@@ -40,6 +40,7 @@ public class DownloadMedia extends Command<Void> {
 		@Override
 		public void run() {
 			File directory=new File(Config.DL_MUSIC_PATH);
+			StringBuilder filename=new StringBuilder();
 			if(!directory.exists()) {
 				directory.mkdir();
 			}
@@ -64,25 +65,52 @@ public class DownloadMedia extends Command<Void> {
 			}).doOnSuccess(message->{
 				ProcessBuilder builder=new ProcessBuilder();
 				builder.directory(directory);
-				builder.command("yt-dlp"
-						,"--ignore-errors"
-						,"--extract-audio"
-						,"--format","bestaudio"
-						,"--audio-format","mp3"
-						,"--audio-quality","160K"
-						,"--output","%(title)s.%(ext)s"
-						,"--restrict-filenames"
-						,"--no-playlist"
-				);
+				if(line.startsWith("--no-default")) {
+					line=line.substring(12);
+					builder.command("yt-dlp"
+							,"--progress-delta","2"
+							,"--restrict-filenames");
+				} else {
+					builder.command("yt-dlp"
+							,"--progress-delta","2"
+							,"--ignore-errors"
+							,"--extract-audio"
+							,"--format","bestaudio"
+							,"--audio-format","mp3"
+							,"--audio-quality","160K"
+							,"--output","%(title)s.%(ext)s"
+							,"--restrict-filenames"
+							,"--no-playlist"
+					);
+				}
 				
 				String[]temp=line.split(" --");
 				for(int i=0;i<temp.length;i++) {
+					if(temp[i].isEmpty()) continue;
 					if(!temp[i].startsWith("--")) temp[i]="--".concat(temp[i]);
 					String[]parse=temp[i].split(" ",2);
 					for(int j=0;j<parse.length;j++) {
-						if(!parse[j].equals("--url")) {
-							builder.command().add(parse[j]);
+						if(parse[j].equals("--url")) continue;
+						if(parse[j].equals("--dir")) {
+							if(parse.length==2) {
+								File dir=new File(Config.DL_MUSIC_PATH.concat("/").concat(parse[j+1]));
+								parse[j+1]="";
+								if(!dir.exists()) dir.mkdir();
+								if(dir.isDirectory()) {
+									builder.directory(dir);
+								} else {
+									message.edit(msg->{
+										msg.addEmbed(embed->{
+											embed.setTitle("Warning!");
+											embed.setColor(Color.BROWN);
+											embed.setDescription("Warning! Download directory is a file, using default.");
+										});
+									}).subscribe();
+								}
+							}
+							continue;
 						}
+						if(!parse[j].isEmpty()) builder.command().add(parse[j]);
 					}
 				}
 				
@@ -110,32 +138,22 @@ public class DownloadMedia extends Command<Void> {
 					Process process=builder.start();
 
 					BufferedReader input=process.inputReader();
+					long time=System.currentTimeMillis();
 					while(process.isAlive()) {
 						if(input!=null&&input.ready()) {
+							time=System.currentTimeMillis();
 							String out=input.readLine();
 							if(out.startsWith("[download] Destination:")) {
-								String filename=out.substring(23);
+								filename.append(out.substring(23));
 								message.edit(msg->{
 									msg.removeEmbeds();
 									msg.addEmbed(embed->{
 										embed.setTitle("Downloading");
-										embed.setDescription(filename);
+										embed.setDescription(filename.toString());
 										embed.setColor(Color.BLUE);
 									});
 								}).subscribe();
-							} else if(out.startsWith("[ExtractAudio] Destination:")) {
-								String filename=out.substring(27);
-								message.edit(msg->{
-									msg.removeEmbeds();
-									msg.setContent("");
-									msg.addEmbed(embed->{
-										embed.setTitle("Media download finished.");
-										embed.setDescription(filename);
-										embed.setColor(Color.GREEN);
-									});
-									msg.setComponents(new ArrayList<LayoutComponent>());
-								}).subscribe();
-							} else if(out.startsWith("[download]")||out.startsWith("[youtube:tab]")) {
+							} else if(out.startsWith("[download]")) {
 								message.edit(msg->{
 									msg.setContent(out);
 								}).subscribe();
@@ -147,29 +165,27 @@ public class DownloadMedia extends Command<Void> {
 										embed.setColor(Color.RED);
 									});
 									msg.setComponents(new ArrayList<LayoutComponent>());
-								}).subscribe();								
-							}
-							if(out.endsWith("already been downloaded")) {
-								String filename=out.substring(27);
-								message.edit(msg->{
-									msg.removeEmbeds();
-									msg.setContent("");
-									msg.addEmbed(embed->{
-										embed.setTitle("Media already been downloaded.");
-										embed.setDescription(filename);
-										embed.setColor(Color.GREEN);
-									});
-									msg.setComponents(new ArrayList<LayoutComponent>());
+									filename.setLength(0);
 								}).subscribe();
 							}
+						} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l) {
+							message.edit(msg->{
+								msg.setContent("").removeEmbeds().addEmbed(embed->{
+									embed.setTitle("TIMEOUT");
+									embed.setDescription("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
+									embed.setColor(Color.RED);
+								});
+								msg.setComponents(new ArrayList<LayoutComponent>());
+								filename.setLength(0);
+							}).subscribe();
+							cancel=true;
 						}
 						if(cancel) process.destroy();
 					}
-					if(listener!=null&&!listener.isDisposed()) listener.dispose();
-
-					StringBuilder string=new StringBuilder();
+					
 					BufferedReader error=process.errorReader();
 					if(error!=null&&error.ready()) {
+						StringBuilder string=new StringBuilder();
 						error.lines().filter(line->{
 							return line.startsWith("yt-dlp: error: ")||line.startsWith("ERROR:");
 						}).forEach(line->{
@@ -185,16 +201,34 @@ public class DownloadMedia extends Command<Void> {
 								msg.setComponents(new ArrayList<LayoutComponent>());
 							}).subscribe();
 						}
+					} else {
+						message.edit(msg->{
+							msg.removeEmbeds();
+							msg.setContent("");
+							msg.addEmbed(embed->{
+								if(filename.length()>0) {
+									embed.setTitle("Media download finished.");
+									embed.setDescription(filename.toString());
+									embed.setColor(Color.GREEN);
+								} else {
+									embed.setTitle("ERROR");
+									embed.setDescription("Media download finished unexpected.");
+									embed.setColor(Color.RED);
+								}
+							});
+							msg.setComponents(new ArrayList<LayoutComponent>());
+						}).subscribe();
 					}
 					
+					if(listener!=null&&!listener.isDisposed()) listener.dispose();
 					if(process.isAlive()) process.destroyForcibly();
 					
 				} catch (IOException e) {
 					e.printStackTrace();
-				}				
+				}
 			}).doOnError(error->{
 				ConsoleRunner.printErr(error.getMessage());
-			}).subscribe();			
+			}).subscribe();
 		}
 	}
 
