@@ -14,6 +14,7 @@ public class ConfigData {
 	String PLAYLIST_PATH_CUSTOM;
 	
 	String DL_MUSIC_PATH;
+	Long DL_TIMEOUT_SECONDS;
 	
 	String DATABASE_CONNECTION;
 	String DATABASE_USER;
