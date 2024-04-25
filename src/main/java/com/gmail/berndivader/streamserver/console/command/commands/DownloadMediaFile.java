@@ -19,6 +19,7 @@ public class DownloadMediaFile extends Command {
 		
 		private final Process process;
 		private boolean run=true;
+		private boolean perma=false;
 		
 		public InterruptHandler(Process process) {
 			this.process=process;
@@ -53,29 +54,48 @@ public class DownloadMediaFile extends Command {
 		
 		ProcessBuilder builder=new ProcessBuilder();
 		builder.directory(directory);
-		builder.command("yt-dlp"
-				,"--ignore-errors"
-				,"--extract-audio"
-				,"--format","bestaudio"
-				,"--audio-format","mp3"
-				,"--audio-quality","160K"
-				,"--output","%(title)s.%(ext)s"
-				,"--restrict-filenames"
-				,"--no-playlist"
+		if(args[0].startsWith("--no-default")) {
+			args[0]=args[0].substring(12);
+			builder.command("yt-dlp"
+					,"--restrict-filenames");
+		} else {
+			builder.command("yt-dlp"
+					,"--ignore-errors"
+					,"--extract-audio"
+					,"--format","bestaudio"
+					,"--audio-format","mp3"
+					,"--audio-quality","160K"
+					,"--output","%(title)s.%(ext)s"
+					,"--restrict-filenames"
+					,"--no-playlist"
 			);
+		}
 		
 		String[]temp=args[0].split(" --");
 		
 		for(int i=0;i<temp.length;i++) {
+			if(temp[i].isEmpty()) continue;
 			if(!temp[i].startsWith("--")) temp[i]="--".concat(temp[i]);
 			String[]parse=temp[i].split(" ",2);
 			for(int j=0;j<parse.length;j++) {
-				if(!parse[j].equals("--url")) {
-					builder.command().add(parse[j]);
+				if(parse[j].equals("--url")) continue;
+				if(parse[j].equals("--dir")) {
+					if(parse.length==2) {
+						File dir=new File(Config.DL_MUSIC_PATH.concat("/").concat(parse[j+1]));
+						parse[j+1]="";
+						if(!dir.exists()) dir.mkdir();
+						if(dir.isDirectory()) {
+							builder.directory(dir);
+						} else {
+							ConsoleRunner.printErr("Warning! Download directory is a file, using default.");
+						}
+					}
+					continue;
 				}
+				if(!parse[j].isEmpty()) builder.command().add(parse[j]);
 			}
 		}
-				
+
 		try {
 			Process process=builder.start();
 			
@@ -83,9 +103,14 @@ public class DownloadMediaFile extends Command {
 			Future<Boolean>future=Helper.executor.submit(handler);
 			
 			BufferedReader input=process.inputReader();
+			long time=System.currentTimeMillis();
 			while(process.isAlive()&&!future.isDone()) {
 				if(input!=null&&input.ready()) {
+					time=System.currentTimeMillis();
 					ConsoleRunner.println(input.readLine());
+				} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
+					ConsoleRunner.printErr("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
+					process.destroy();
 				}
 			}
 			
