@@ -19,7 +19,7 @@ public class DownloadMediaFile extends Command {
 		
 		private final Process process;
 		private boolean run=true;
-		private boolean perma=false;
+		private boolean storeTemp=false;
 		
 		public InterruptHandler(Process process) {
 			this.process=process;
@@ -57,7 +57,9 @@ public class DownloadMediaFile extends Command {
 		if(args[0].startsWith("--no-default")) {
 			args[0]=args[0].substring(12);
 			builder.command("yt-dlp"
-					,"--restrict-filenames");
+					,"--restrict-filenames"
+					,"--output","%(title).200s.%(ext)s"
+			);
 		} else {
 			builder.command("yt-dlp"
 					,"--ignore-errors"
@@ -65,7 +67,7 @@ public class DownloadMediaFile extends Command {
 					,"--format","bestaudio"
 					,"--audio-format","mp3"
 					,"--audio-quality","160K"
-					,"--output","%(title)s.%(ext)s"
+					,"--output","%(title).200s.%(ext)s"
 					,"--restrict-filenames"
 					,"--no-playlist"
 			);

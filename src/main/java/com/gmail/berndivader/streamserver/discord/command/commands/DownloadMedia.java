@@ -69,7 +69,9 @@ public class DownloadMedia extends Command<Void> {
 					line=line.substring(12);
 					builder.command("yt-dlp"
 							,"--progress-delta","2"
-							,"--restrict-filenames");
+							,"--restrict-filenames"
+							,"--output","%(title).200s.%(ext)s"
+					);
 				} else {
 					builder.command("yt-dlp"
 							,"--progress-delta","2"
@@ -78,7 +80,7 @@ public class DownloadMedia extends Command<Void> {
 							,"--format","bestaudio"
 							,"--audio-format","mp3"
 							,"--audio-quality","160K"
-							,"--output","%(title)s.%(ext)s"
+							,"--output","%(title).200s.%(ext)s"
 							,"--restrict-filenames"
 							,"--no-playlist"
 					);
