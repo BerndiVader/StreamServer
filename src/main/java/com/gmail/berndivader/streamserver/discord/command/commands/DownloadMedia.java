@@ -29,7 +29,7 @@ public class DownloadMedia extends Command<Void> {
 		private String line;
 		private final MessageChannel channel;
 		private final String uuid;
-		private boolean cancel=false;
+		private boolean cancel=false,timeout=false;
 		
 		public ProcessCallback(String line,MessageChannel channel) {
 			this.line=line;
@@ -178,44 +178,38 @@ public class DownloadMedia extends Command<Void> {
 									embed.setColor(Color.RED);
 								});
 								msg.setComponents(new ArrayList<LayoutComponent>());
-								filename.setLength(0);
 							}).subscribe();
-							cancel=true;
+							timeout=cancel=true;
 						}
 						if(cancel) process.destroy();
 					}
 					
 					BufferedReader error=process.errorReader();
-					if(error!=null&&error.ready()) {
-						StringBuilder string=new StringBuilder();
-						error.lines().filter(line->{
-							return line.startsWith("yt-dlp: error: ")||line.startsWith("ERROR:");
-						}).forEach(line->{
-							string.append(line);
-						});
-						if(string.length()>0) {
-							message.edit(msg->{
-								msg.setContent("").removeEmbeds().addEmbed(embed->{
-									embed.setTitle("ERROR");
-									embed.setDescription(string.toString());
-									embed.setColor(Color.RED);
-								});
-								msg.setComponents(new ArrayList<LayoutComponent>());
-							}).subscribe();
-						}
+					StringBuilder string=new StringBuilder();
+					error.lines().filter(line->!line.startsWith("WARNING")).forEach(line->string.append(line));
+					
+					if(string.toString().length()>0) {
+						message.edit(msg->{
+							msg.setContent("").removeEmbeds().addEmbed(embed->{
+								embed.setTitle("WARNING");
+								embed.setColor(Color.ORANGE);
+								embed.setDescription("Something went wront. Maybe file name already exsists?\n\n".concat(string.toString()));
+							});
+							msg.setComponents(new ArrayList<LayoutComponent>());
+						}).subscribe();
 					} else {
 						message.edit(msg->{
 							msg.removeEmbeds();
 							msg.setContent("");
 							msg.addEmbed(embed->{
-								if(filename.length()>0) {
+								if(filename.toString().length()>0) {
 									embed.setTitle("Media download finished.");
 									embed.setDescription(filename.toString());
 									embed.setColor(Color.GREEN);
-								} else {
-									embed.setTitle("ERROR");
-									embed.setDescription("Media download finished unexpected.");
-									embed.setColor(Color.RED);
+								} else if(!timeout){
+									embed.setTitle("WARNING");
+									embed.setDescription("Mediafile already downloaded and exists.");
+									embed.setColor(Color.ORANGE);
 								}
 							});
 							msg.setComponents(new ArrayList<LayoutComponent>());
