@@ -22,9 +22,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.gateway.StatusUpdate;
-import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 public final class DiscordBot {
@@ -78,7 +76,7 @@ public final class DiscordBot {
 
 				@Override
 				public Mono<Void> apply(MessageCreateEvent e) {
-
+					
 					boolean isCommand=e.getMessage().getContent().toLowerCase().startsWith(Config.DISCORD_COMMAND_PREFIX);
 					if(!isCommand||!e.getMember().isPresent()) return Mono.empty();
 					
@@ -95,7 +93,7 @@ public final class DiscordBot {
 
 						@Override
 						public Mono<Void> apply(MessageCreateEvent event) {
-														
+
 							if(!event.getMember().get().getRoles().filter(new Predicate<Role>() {
 
 								@Override
@@ -136,19 +134,6 @@ public final class DiscordBot {
 			
 		}).subscribe();
 	}
-	
-	void sendHelp(MessageChannel channel) {
-		channel.createEmbed(new Consumer<EmbedCreateSpec>() {
-
-			@Override
-			public void accept(EmbedCreateSpec spec) {
-				spec.setTitle("Streamserver help text");
-				spec.addField("test",Config.DISCORD_HELP_TEXT,true);
-				spec.setColor(Color.GREEN);
-			}
-			
-		}).subscribe();
-	}	
 	
 	public void updateStatus(String comment) {
 		client.updatePresence(StatusUpdate.builder().afk(false).since(0l).status("!".concat(comment)).build()).subscribe();
