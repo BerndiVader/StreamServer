@@ -19,7 +19,6 @@ public class DownloadMediaFile extends Command {
 		
 		private final Process process;
 		private boolean run=true;
-		private boolean storeTemp=false;
 		
 		public InterruptHandler(Process process) {
 			this.process=process;
@@ -107,7 +106,7 @@ public class DownloadMediaFile extends Command {
 			BufferedReader input=process.inputReader();
 			long time=System.currentTimeMillis();
 			while(process.isAlive()&&!future.isDone()) {
-				if(input!=null&&input.ready()) {
+				if(input.ready()) {
 					time=System.currentTimeMillis();
 					ConsoleRunner.println(input.readLine());
 				} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
@@ -129,5 +128,5 @@ public class DownloadMediaFile extends Command {
 		}
 		return true;
 	}
-
+	
 }
