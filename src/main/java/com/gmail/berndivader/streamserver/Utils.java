@@ -1,5 +1,6 @@
 package com.gmail.berndivader.streamserver;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -10,8 +11,30 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
+import com.google.gson.GsonBuilder;
 
 public class Utils {
+	
+	public class InfoPacket {
+		public String id;
+		public String title;
+		public String thumbnail;
+		public String description;
+		public String channel_url;
+		public String webpage_url;
+		public String channel;
+		public String uploader;
+		public String uploader_url;
+		public String upload_date;
+		public String duration_string;
+		public String format;
+		public Integer filesize_approx;
+		
+		@Override
+		public String toString() {
+	        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+		}
+	}	
 	
 	public static int getFilePosition(String name) {
 		if(!name.isEmpty()) {
@@ -156,5 +179,26 @@ public class Utils {
 			return "";
 		}
 	}
+	
+	public static InfoPacket getDLPinfoPacket(String url,File directory) {
+		//yt-dlp --quiet --no-warnings --dump-single-json
+		ProcessBuilder infoBuilder=new ProcessBuilder();
+		infoBuilder.directory(directory);
+		infoBuilder.command("yt-dlp","--quiet","--no-warnings","--dump-single-json",url);
+		
+		InfoPacket info=null;
+		try {
+			Process infoProc=infoBuilder.start();
+			BufferedReader reader=infoProc.inputReader();
+			while(infoProc.isAlive()) {
+				if(reader.ready()) {
+					info=new GsonBuilder().create().fromJson(infoProc.inputReader().readLine(),InfoPacket.class);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return info;
+	}	
 
 }
