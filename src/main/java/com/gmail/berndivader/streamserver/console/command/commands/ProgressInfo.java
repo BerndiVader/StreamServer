@@ -4,9 +4,9 @@ import java.util.concurrent.TimeUnit;
 
 import com.github.kokorin.jaffree.ffmpeg.FFmpegProgress;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 @ConsoleCommand(name="p",usage="[time|frames|bitrate|quality|fps|drops|size|speed] -> Show ffmpeg progress info.")
 public class ProgressInfo extends Command {
@@ -16,55 +16,55 @@ public class ProgressInfo extends Command {
 		if(BroadcastRunner.isStreaming()) {
 			FFmpegProgress progress=BroadcastRunner.currentProgress;
 			if(progress!=null) {
-				ConsoleRunner.println("===Progress information===");
+				ANSI.println("===Progress information===");
 				long duration=progress.getTime(TimeUnit.SECONDS);
 				for(int i1=0;i1<args.length;i1++) {
 					String option=args[i1];
 					switch(option) {
 						case "time":
-							ConsoleRunner.println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
+							ANSI.println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
 							break;
 						case "frames":
 						case "frame":
-							ConsoleRunner.println("Frames: "+progress.getFrame());
+							ANSI.println("Frames: "+progress.getFrame());
 							break;
 						case "bitrate":
 						case "bits":
-							ConsoleRunner.println("Bitrate: "+progress.getBitrate());
+							ANSI.println("Bitrate: "+progress.getBitrate());
 							break;
 						case "quality":
 						case "q":
-							ConsoleRunner.println("Quality: "+progress.getQ());
+							ANSI.println("Quality: "+progress.getQ());
 							break;
 						case "fps":
-							ConsoleRunner.println("FPS: "+progress.getFps());
+							ANSI.println("FPS: "+progress.getFps());
 							break;
 						case "drops":
-							ConsoleRunner.println("Drops: "+progress.getDrop());
+							ANSI.println("Drops: "+progress.getDrop());
 							break;
 						case "size":
-							ConsoleRunner.println("Size: "+progress.getSize());
+							ANSI.println("Size: "+progress.getSize());
 							break;
 						case "speed":
-							ConsoleRunner.println("Speed: "+progress.getSpeed());
+							ANSI.println("Speed: "+progress.getSpeed());
 							break;
 						default:
-							ConsoleRunner.println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
-							ConsoleRunner.println("Frames: "+progress.getFrame());
-							ConsoleRunner.println("Bitrate: "+progress.getBitrate());
-							ConsoleRunner.println("Quality: "+progress.getQ());
-							ConsoleRunner.println("FPS: "+progress.getFps());
-							ConsoleRunner.println("Drops: "+progress.getDrop());
-							ConsoleRunner.println("Size: "+progress.getSize());
-							ConsoleRunner.println("Speed: "+progress.getSpeed());
+							ANSI.println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
+							ANSI.println("Frames: "+progress.getFrame());
+							ANSI.println("Bitrate: "+progress.getBitrate());
+							ANSI.println("Quality: "+progress.getQ());
+							ANSI.println("FPS: "+progress.getFps());
+							ANSI.println("Drops: "+progress.getDrop());
+							ANSI.println("Size: "+progress.getSize());
+							ANSI.println("Speed: "+progress.getSpeed());
 							break;
 					}
 				}
 			} else {
-				ConsoleRunner.println("No progress available atm.");
+				ANSI.println("No progress available atm.");
 			}
 		} else {
-			ConsoleRunner.println("Currently no stream is running.");
+			ANSI.println("Currently no stream is running.");
 		}
 		return true;
 	}

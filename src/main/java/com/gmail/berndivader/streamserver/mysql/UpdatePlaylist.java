@@ -14,7 +14,7 @@ import java.util.concurrent.TimeoutException;
 import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Format;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
+import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.Utils;
 
@@ -49,9 +49,9 @@ public class UpdatePlaylist implements Callable<Boolean> {
 			connection.setAutoCommit(false);
 			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
 				
-				ConsoleRunner.println("[BEGIN MYSQL PLAYLIST UPDATE]");
+				ANSI.println("[BEGIN MYSQL PLAYLIST UPDATE]");
 				if(isCommand) {
-					ConsoleRunner.print("|");
+					ANSI.print("|");
 				}
 				
 				statement.addBatch("START TRANSACTION;");
@@ -60,7 +60,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 				for(int i1=0;i1<files.length;i1++) {
 					
 					if(isCommand) {
-						ConsoleRunner.print(spinner[i1%spinner.length]);
+						ANSI.print(spinner[i1%spinner.length]);
 					}
 					
 					String path=files[i1].getAbsolutePath().replace("\\","/");
@@ -89,11 +89,11 @@ public class UpdatePlaylist implements Callable<Boolean> {
 			}
 			connection.commit();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			ConsoleRunner.println("\n[FAILED MYSQL PLAYLIST UPDATE]");
+			ANSI.printErr(e.getMessage());
+			ANSI.printErr("\n[FAILED MYSQL PLAYLIST UPDATE]");
 			return false;
 		}
-		ConsoleRunner.println("\n[SUCSESSFUL MYSQL PLAYLIST UPDATE]");
+		ANSI.println("\n[SUCSESSFUL MYSQL PLAYLIST UPDATE]");
 		return true;
 	}
 

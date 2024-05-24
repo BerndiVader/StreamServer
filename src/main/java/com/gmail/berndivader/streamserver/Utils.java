@@ -10,7 +10,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.gmail.berndivader.streamserver.config.Config;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
+import com.gmail.berndivader.streamserver.term.ANSI;
 import com.google.gson.GsonBuilder;
 
 public class Utils {
@@ -77,7 +77,7 @@ public class Utils {
 					list.add(name);
 				}
 			} catch (Exception e) {
-				ConsoleRunner.println(e.getMessage());
+				ANSI.printErr(e.getMessage());
 			}
 		}
 		files=Helper.customs.clone();
@@ -88,7 +88,7 @@ public class Utils {
 					list.add(name);
 				}
 			} catch (Exception e) {
-				ConsoleRunner.println(e.getMessage());
+				ANSI.println(e.getMessage());
 			}
 		}
 		return list;
@@ -175,7 +175,7 @@ public class Utils {
 			int size=stream.read(bytes,0,length);
 			return new String(bytes).substring(0,size);
 		} catch (IOException e) {
-			ConsoleRunner.printErr(e.getMessage());
+			ANSI.printErr(e.getMessage());
 			return "";
 		}
 	}
@@ -196,7 +196,7 @@ public class Utils {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			ANSI.printErr(e.getMessage());
 		}
 		return info;
 	}	

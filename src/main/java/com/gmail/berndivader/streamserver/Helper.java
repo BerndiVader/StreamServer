@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
+import com.gmail.berndivader.streamserver.term.ANSI;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -31,12 +31,12 @@ public class Helper {
 	}
 	
 	public static void close() {
-		ConsoleRunner.print("Shutdown task executor...");
+		ANSI.print("Shutdown task executor...");
 		executor.shutdown();
-		ConsoleRunner.println("DONE!");
-		ConsoleRunner.print("Shutdown scheduled task executor...");
+		ANSI.println("DONE!");
+		ANSI.print("Shutdown scheduled task executor...");
 		scheduledExecutor.shutdown();
-		ConsoleRunner.println("DONE!");
+		ANSI.println("DONE!");
 	}
 
 }

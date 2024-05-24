@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
+import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
 
 public class GetNextScheduled implements Callable<String> {
@@ -35,12 +35,12 @@ public class GetNextScheduled implements Callable<String> {
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			ConsoleRunner.println("\n[MYSQL GET NEXT SCHEDULED FAILED]");
+			ANSI.printErr(e.getMessage());
+			ANSI.printErr("\n[MYSQL GET NEXT SCHEDULED FAILED]");
 			return null;
 		}
 		
-		ConsoleRunner.println("\n[MYSQL GET NEXT SCHEDULED SUCCSEED]");
+		ANSI.println("\n[MYSQL GET NEXT SCHEDULED SUCCSEED]");
 		return filename;
 	}
 

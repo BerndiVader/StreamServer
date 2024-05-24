@@ -7,10 +7,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import com.gmail.berndivader.streamserver.Helper;
+import com.gmail.berndivader.streamserver.Utils;
+import com.gmail.berndivader.streamserver.Utils.InfoPacket;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.config.Config;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 @ConsoleCommand(name="dlp",usage="Download media. Usage: dlp --url <http source> or use --help")
 public class DownloadMediaFile extends Command {
@@ -57,10 +59,14 @@ public class DownloadMediaFile extends Command {
 			args[0]=args[0].substring(12);
 			builder.command("yt-dlp"
 					,"--restrict-filenames"
+					,"--embed-metadata"
+					,"--embed-thumbnail"
 					,"--output","%(title).200s.%(ext)s"
 			);
 		} else {
 			builder.command("yt-dlp"
+					,"--embed-metadata"
+					,"--embed-thumbnail"
 					,"--ignore-errors"
 					,"--extract-audio"
 					,"--format","bestaudio"
@@ -73,13 +79,17 @@ public class DownloadMediaFile extends Command {
 		}
 		
 		String[]temp=args[0].split(" --");
+		String url=null;
 		
 		for(int i=0;i<temp.length;i++) {
 			if(temp[i].isEmpty()) continue;
 			if(!temp[i].startsWith("--")) temp[i]="--".concat(temp[i]);
 			String[]parse=temp[i].split(" ",2);
 			for(int j=0;j<parse.length;j++) {
-				if(parse[j].equals("--url")) continue;
+				if(parse[j].equals("--url")) {
+					url=parse[j+1];
+					continue;
+				}
 				if(parse[j].equals("--dir")) {
 					if(parse.length==2) {
 						File dir=new File(Config.DL_MUSIC_PATH.concat("/").concat(parse[j+1]));
@@ -88,13 +98,19 @@ public class DownloadMediaFile extends Command {
 						if(dir.isDirectory()) {
 							builder.directory(dir);
 						} else {
-							ConsoleRunner.printErr("Warning! Download directory is a file, using default.");
+							ANSI.printErr("Warning! Download directory is a file, using default.");
 						}
 					}
 					continue;
 				}
 				if(!parse[j].isEmpty()) builder.command().add(parse[j]);
 			}
+		}
+		
+		InfoPacket infoPacket=null;
+		if(url!=null) infoPacket=Utils.getDLPinfoPacket(url,builder.directory());
+		if(infoPacket!=null) {
+			ANSI.println(infoPacket.toString());
 		}
 
 		try {
@@ -108,9 +124,9 @@ public class DownloadMediaFile extends Command {
 			while(process.isAlive()&&!future.isDone()) {
 				if(input.ready()) {
 					time=System.currentTimeMillis();
-					ConsoleRunner.println(input.readLine());
+					ANSI.println(input.readLine());
 				} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
-					ConsoleRunner.printErr("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
+					ANSI.printErr("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
 					process.destroy();
 				}
 			}
@@ -118,13 +134,13 @@ public class DownloadMediaFile extends Command {
 			BufferedReader error=process.errorReader();
 			if(error!=null&&error.ready()) {
 				error.lines().forEach(line->{
-					ConsoleRunner.printErr(line);
+					ANSI.printErr(line);
 				});
 			}
 			
 			if(process.isAlive()) process.destroy();
 		} catch (IOException e) {
-			e.printStackTrace();
+			ANSI.printErr(e.getMessage());
 		}
 		return true;
 	}

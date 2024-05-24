@@ -2,8 +2,8 @@ package com.gmail.berndivader.streamserver.console.command.commands;
 
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.config.Config;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 @ConsoleCommand(name="config", usage="save|load -> Save or load current settings to config file")
 public class ConfigCommands extends Command {
@@ -13,16 +13,16 @@ public class ConfigCommands extends Command {
 		switch(args[0]) {
 		case "save":
 			if(Config.saveConfig()) {
-				ConsoleRunner.println("Configuration saved");
+				ANSI.println("Configuration saved");
 			} else {
-				ConsoleRunner.println("Failed to save configuration");
+				ANSI.println("Failed to save configuration");
 			}
 			break;
 		case "load":
 			if(Config.loadConfig()) {
-				ConsoleRunner.println("Configuration reloaded");
+				ANSI.println("Configuration reloaded");
 			} else {
-				ConsoleRunner.println("Failed to load configuration");
+				ANSI.println("Failed to load configuration");
 			}
 			break;
 		}

@@ -7,9 +7,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.mysql.GetAllScheduled;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -30,7 +30,7 @@ public class ListScheduled extends Command<Void>{
 				try {
 					files=scheduled.future.get(20,TimeUnit.SECONDS);
 				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					ConsoleRunner.println(e.getMessage());
+					ANSI.printErr(e.getMessage());
 				}
 				embed.setTitle("SCHEDULED FILES");
 				if(files!=null&&!files.isEmpty()) {

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
+import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
 
 public class GetAllScheduled implements Callable<ArrayList<String>> {
@@ -33,12 +33,12 @@ public class GetAllScheduled implements Callable<ArrayList<String>> {
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			ConsoleRunner.println("\n[MYSQL GET SCHEDULED LIST FAILED]");
+			ANSI.printErr(e.getMessage());
+			ANSI.printErr("[MYSQL GET SCHEDULED LIST FAILED]");
 			return null;
 		}
 		
-		ConsoleRunner.println("\n[MYSQL GET SCHEDULED LIST SUCCSEED]");
+		ANSI.println("\n[MYSQL GET SCHEDULED LIST SUCCSEED]");
 		return files;
 	}
 

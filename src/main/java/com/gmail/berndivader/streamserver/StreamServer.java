@@ -9,6 +9,7 @@ import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
 import com.gmail.berndivader.streamserver.mysql.WipeDatabase;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 public final class StreamServer {
 	
@@ -26,7 +27,7 @@ public final class StreamServer {
 				break;
 			}
 		}
-				
+		
 		new DiscordBot();
 		new BroadcastRunner();
 		new ConsoleRunner();
@@ -36,10 +37,10 @@ public final class StreamServer {
 		Helper.close();
 		
 		if(ConsoleRunner.forceExit) {
-			ConsoleRunner.println("[FORCE EXIT]");
+			ANSI.println("[RED][FORCE EXIT][/RED]");
 			System.exit(0);
 		} else {
-			ConsoleRunner.println("[FINISH ALL RUNNING TASKS, THEN EXIT]");
+			ANSI.println("[BLUE][FINISH ALL RUNNING TASKS, THEN EXIT][/BLUE]");
 		}
 	}
 	

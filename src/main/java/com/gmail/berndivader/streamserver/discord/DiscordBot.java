@@ -9,9 +9,9 @@ import java.util.function.Predicate;
 import org.reactivestreams.Subscription;
 
 import com.gmail.berndivader.streamserver.config.Config;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.command.Commands;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
@@ -45,7 +45,7 @@ public final class DiscordBot {
 					@Override
 					public void accept(Subscription t) {
 						status=Status.CONNECTING;
-						ConsoleRunner.println("[Try to connect to Discord...]");
+						ANSI.println("[Try to connect to Discord...]");
 					}
 					
 				})
@@ -54,7 +54,7 @@ public final class DiscordBot {
 				@Override
 				public void accept(GatewayDiscordClient t) {
 					status=Status.CONNECTED;
-					ConsoleRunner.println("[Connection to Discord OPEN!]");
+					ANSI.println("[Connection to Discord OPEN!]");
 				}
 				
 			})
@@ -63,8 +63,8 @@ public final class DiscordBot {
 				@Override
 				public void accept(Throwable error) {
 					status=Status.FAILED;
-					ConsoleRunner.println(error.getMessage());
-					ConsoleRunner.println("[Connection to Discord FAILED!]");
+					ANSI.printErr(error.getMessage());
+					ANSI.printErr("[Connection to Discord FAILED!]");
 				}
 				
 			}).block();
@@ -129,7 +129,7 @@ public final class DiscordBot {
 			@Override
 			public void accept(Void t) {
 				status=Status.DISCONNECTED;
-				ConsoleRunner.println("[Connection to Discord CLOSED!]");
+				ANSI.println("[Connection to Discord CLOSED!]");
 			}
 			
 		}).subscribe();

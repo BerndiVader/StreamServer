@@ -12,7 +12,7 @@ import java.util.jar.JarInputStream;
 
 import com.gmail.berndivader.streamserver.StreamServer;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 public class Commands {
 	
@@ -74,7 +74,7 @@ public class Commands {
 			return command.getDeclaredConstructor().newInstance();
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			ConsoleRunner.println(e.getMessage());
+			ANSI.printErr(e.getMessage());
 			return null;
 		}
 	}

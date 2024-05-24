@@ -11,8 +11,8 @@ import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.Utils.InfoPacket;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.config.Config;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.discord.command.Command;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 import discord4j.core.event.domain.interaction.ButtonInteractEvent;
 import discord4j.core.object.component.ActionRow;
@@ -84,11 +84,15 @@ public class DownloadMedia extends Command<Void> {
 					builder.command("yt-dlp"
 							,"--progress-delta","2"
 							,"--restrict-filenames"
+							,"--embed-metadata"
+							,"--embed-thumbnail"
 							,"--output","%(title).200s.%(ext)s"
 					);
 				} else {
 					builder.command("yt-dlp"
 							,"--progress-delta","2"
+							,"--embed-metadata"
+							,"--embed-thumbnail"
 							,"--ignore-errors"
 							,"--extract-audio"
 							,"--format","bestaudio"
@@ -135,8 +139,8 @@ public class DownloadMedia extends Command<Void> {
 				}
 				
 				InfoPacket infoPacket=null;
-				if(!url.isEmpty()) infoPacket=Utils.getDLPinfoPacket(url, directory);
-
+				if(!url.isEmpty()) infoPacket=Utils.getDLPinfoPacket(url,builder.directory());
+				
 				try {
 					message.edit(msg->{
 						msg.setComponents(ActionRow.of(Button.danger(uuid,"Cancel")))
@@ -244,7 +248,7 @@ public class DownloadMedia extends Command<Void> {
 					e.printStackTrace();
 				}
 			}).doOnError(error->{
-				ConsoleRunner.printErr(error.getMessage());
+				ANSI.printErr(error.getMessage());
 			}).subscribe();
 		}
 	}

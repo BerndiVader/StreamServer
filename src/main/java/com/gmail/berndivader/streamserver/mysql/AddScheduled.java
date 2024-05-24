@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.gmail.berndivader.streamserver.Helper;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 public class AddScheduled implements Runnable {
 	
@@ -43,10 +43,10 @@ public class AddScheduled implements Runnable {
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
-			ConsoleRunner.println("\n[MYSQL FAILED TO ADD FOR SCHEDULE]");
+			ANSI.printErr("\n[MYSQL FAILED TO ADD FOR SCHEDULE]");
 			return;
 		}
-		ConsoleRunner.println(exists?"\n[MYSQL TRACK ADDED FOR SCHEDULE]":"\n[MYSQL TRACK ALREADY ON SCHEDULE]");
+		ANSI.println(exists?"\n[MYSQL TRACK ADDED FOR SCHEDULE]":"\n[MYSQL TRACK ALREADY ON SCHEDULE]");
 	}
 
 }

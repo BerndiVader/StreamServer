@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.command.Command;
+import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.youtube.Youtube;
 import com.gmail.berndivader.streamserver.youtube.packets.EmptyPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
@@ -23,7 +24,7 @@ public class LivestreamsById extends Command{
 			try {
 				packet=future.get(15l,TimeUnit.SECONDS);
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				e.printStackTrace();
+				ANSI.printErr(e.getMessage());
 				return false;
 			}
 			if(packet==null||packet instanceof EmptyPacket) return false;

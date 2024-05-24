@@ -1,2 +1,1 @@
-StreamServer console help
-=========================
+[YELLOW]StreamServer console help[/YELLOW][BR][WHITE]=========================[/WHITE][BR]

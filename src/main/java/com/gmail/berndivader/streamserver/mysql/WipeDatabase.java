@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.Helper;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 public class WipeDatabase implements Runnable {
 	
@@ -32,7 +33,7 @@ public class WipeDatabase implements Runnable {
 				wipe.executeBatch();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			ANSI.printErr(e.getMessage());
 		}
 	}
 	

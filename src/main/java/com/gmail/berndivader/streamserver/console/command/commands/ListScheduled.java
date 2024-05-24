@@ -6,9 +6,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.mysql.GetAllScheduled;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 @ConsoleCommand(name="listscheduled",usage="Show all scheduled files.")
 public class ListScheduled extends Command {
@@ -22,7 +22,7 @@ public class ListScheduled extends Command {
 			files = scheduled.future.get(20, TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ANSI.printErr(e.getMessage());
 		}
 		if(files!=null&&!files.isEmpty()) {
 			StringBuilder builder=new StringBuilder();
@@ -34,9 +34,9 @@ public class ListScheduled extends Command {
 			builder.append("\n");
 			builder.append(size);
 			builder.append(" files found.");
-			ConsoleRunner.println(builder.toString());
+			ANSI.println(builder.toString());
 		} else {
-			ConsoleRunner.println("No scheduled files found.");
+			ANSI.println("No scheduled files found.");
 		}
 		
 		return true;

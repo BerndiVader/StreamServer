@@ -10,7 +10,7 @@ import java.net.URISyntaxException;
 import java.util.Scanner;
 
 import com.gmail.berndivader.streamserver.StreamServer;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
+import com.gmail.berndivader.streamserver.term.ANSI;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -56,7 +56,7 @@ public class Config {
             URI uri=StreamServer.class.getProtectionDomain().getCodeSource().getLocation().toURI();
             working_dir=new File(uri.getPath().replace(new File(uri).getName(),""));
         } catch (URISyntaxException ex) {
-        	ConsoleRunner.println(ex.getMessage());
+        	ANSI.printErr(ex.getMessage());
         }
 		config_dir=new File(working_dir.getAbsolutePath()+"/config");
 		config_file=new File(config_dir.getAbsolutePath()+"/config.json");
@@ -71,12 +71,12 @@ public class Config {
 	
 	public Config() {
 		instance=this;
-		ConsoleRunner.print("Load or create config...");
+		ANSI.print("Load or create config...");
 		if(loadConfig()) {
-			ConsoleRunner.println("DONE!");
+			ANSI.println("DONE!");
 		} else {
-			ConsoleRunner.println("FAILED!");
-			ConsoleRunner.println("Using default values!");
+			ANSI.println("FAILED!");
+			ANSI.println("Using default values!");
 		}
 	}
 	
@@ -110,7 +110,7 @@ public class Config {
 	        new GsonBuilder().setPrettyPrinting().create().toJson(data,writer);
 		} catch (IOException e) {
 			ok=false;
-			ConsoleRunner.println(e.getMessage());
+			ANSI.printErr(e.getMessage());
 		}		
 		return ok;
 	}
@@ -139,10 +139,10 @@ public class Config {
 			if(data.DISCORD_BOT_START!=null) DISCORD_BOT_START=data.DISCORD_BOT_START;
 		} catch (IOException e) {
 			ok=false;
-			ConsoleRunner.println(e.getMessage());
+			ANSI.printErr(e.getMessage());
 		}
 		if (!ok) {
-			ConsoleRunner.println("Configuration couldnt be loaded.");
+			ANSI.println("Configuration couldnt be loaded.");
 		}
 		return ok;
 	}
@@ -155,7 +155,7 @@ public class Config {
 			try {
 				is.close();
 			} catch (IOException e1) {
-				ConsoleRunner.println(e1.getMessage());
+				ANSI.printErr(e1.getMessage());
 			}
 		};
 		return output;

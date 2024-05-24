@@ -13,7 +13,7 @@ import java.util.jar.JarInputStream;
 
 import com.gmail.berndivader.streamserver.StreamServer;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 public class Commands {
 	
@@ -34,7 +34,7 @@ public class Commands {
 						StreamServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
 						StandardCharsets.ISO_8859_1.toString());
 			} catch (UnsupportedEncodingException e1) {
-				e1.printStackTrace();
+				ANSI.printErr(e1.getMessage());
 			}
 		}
 	}
@@ -77,7 +77,7 @@ public class Commands {
 			return clazz.getDeclaredConstructor().newInstance();
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			ConsoleRunner.println(e.getMessage());
+			ANSI.printErr(e.getMessage());
 			return null;
 		}
 		

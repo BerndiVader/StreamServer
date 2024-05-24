@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
+import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
 
 public class UpdateCurrent implements Runnable{
@@ -28,7 +28,7 @@ public class UpdateCurrent implements Runnable{
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
 				
-				ConsoleRunner.println("[BEGIN MYSQL CURRENT UPDATE]");
+				ANSI.println("[BEGIN MYSQL CURRENT UPDATE]");
 				
 				statement.addBatch("START TRANSACTION;");
 				statement.addBatch("DELETE FROM `current`;");
@@ -44,11 +44,11 @@ public class UpdateCurrent implements Runnable{
 			
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
-			ConsoleRunner.println("\n[FAILED MYSQL CURRENT UPDATE]");
+			ANSI.printErr(e.getMessage());
+			ANSI.printErr("\n[FAILED MYSQL CURRENT UPDATE]");
 			return;
 		}
-		ConsoleRunner.println("\n[SUCSESSFUL MYSQL CURRENT UPDATE]");
+		ANSI.println("\n[SUCSESSFUL MYSQL CURRENT UPDATE]");
 		
 	}
 

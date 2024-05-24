@@ -20,10 +20,10 @@ import com.github.kokorin.jaffree.ffprobe.Format;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.config.Config;
-import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.mysql.GetNextScheduled;
 import com.gmail.berndivader.streamserver.mysql.UpdateCurrent;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 public class BroadcastRunner extends TimerTask {
 	
@@ -39,14 +39,14 @@ public class BroadcastRunner extends TimerTask {
 	public static BroadcastRunner instance;
 	
 	public BroadcastRunner() {
-		ConsoleRunner.print("Starting BroadcastRunner...");
+		ANSI.print("Starting BroadcastRunner...");
 		
 		instance=this;
 		stop=false;
 		
 		Utils.refreshFilelist();
 		Utils.shuffleFilelist(Helper.files);
-		ConsoleRunner.println("DONE!");
+		ANSI.println("DONE!");
 
 		index=0;
 		runStream();
@@ -56,22 +56,22 @@ public class BroadcastRunner extends TimerTask {
 	}
 	
 	public void stop() throws InterruptedException {
-		ConsoleRunner.print("Stopping BroadcastRunner...");
+		ANSI.print("Stopping BroadcastRunner...");
 		
 		stop=true;
     	if(future!=null&&(!future.isCancelled()||!future.isDone())) {
-    		ConsoleRunner.print("[Stop broadcasting...");
+    		ANSI.print("[Stop broadcasting...");
     		future.graceStop();
     		try {
 				future.get(30,TimeUnit.SECONDS);
-				ConsoleRunner.print("DONE!]...");
+				ANSI.print("DONE!]...");
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				e.printStackTrace();
-				ConsoleRunner.print("FAILED!]...");
+				ANSI.printErr(e.getMessage());
+				ANSI.printErr("FAILED!]...");
 			}
     	}
 		
-		ConsoleRunner.println("DONE!");
+    	ANSI.println("DONE!");
 	}
 	
 	@Override
@@ -92,7 +92,7 @@ public class BroadcastRunner extends TimerTask {
 		try {
 			filename=scheduled.future.get(20,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			e.printStackTrace();
+			ANSI.printErr(e.getMessage());
 		}
 		if(filename!=null) {
 			int filepos=-1;
@@ -140,7 +140,7 @@ public class BroadcastRunner extends TimerTask {
 		
 		DiscordBot.instance.updateStatus(title);
 		
-		ConsoleRunner.println("Now playing: "
+		ANSI.println("Now playing: "
 			+currentFormat.getTag("title")
 			+":"+currentFormat.getTag("artist")
 			+":"+currentFormat.getTag("date")
@@ -184,11 +184,11 @@ public class BroadcastRunner extends TimerTask {
 			try {
 				future.get(20,TimeUnit.SECONDS);
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				e.printStackTrace();
+				ANSI.printErr(e.getMessage());
 			}
 		}
 		future=createStream(file);
-		ConsoleRunner.println(file.getName());
+		ANSI.println(file.getName());
 	}
 	
 	public static void broadcastPlaylistPosition(int idx) {
