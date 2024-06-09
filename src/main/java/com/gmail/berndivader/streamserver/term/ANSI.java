@@ -6,6 +6,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import com.gmail.berndivader.streamserver.config.Config;
+
 public enum ANSI {
 
 	BR("\012"),
@@ -31,6 +33,10 @@ public enum ANSI {
 	WHITE("\033[37m"),
 	WHITEOFF("\033[39m"),
 	SYSTEM("\033[39m"),
+	
+	PROMPT("\033[0m\n>"),
+	ERROR(""),
+	WARNING(""),
 	
 	RESET("\033[0m");
 	
@@ -77,24 +83,49 @@ public enum ANSI {
 		});
 	}
 	
-	public static void printAnsi(String string) {
+	public static String merge(ANSI...ansis) {
+		StringBuilder out=new StringBuilder();
+		Stream.of(ansis).forEach(ansi->{
+			out.append(ansi.str());
+		});
+		return out.toString();
+	}
+	
+	public static void printRaw(String string) {
 		console.print(parse(string));
 	}
 	
-	public static void printErr(String string) {
-		console.printf("\033[1;91m%s\033[0m\n>\033[34m",parse(string));
+	public static void printWarn(String string) {
+		console.printf("%s[WARNING]%s%s",merge(ANSI.BOLD,ANSI.YELLOW),parse(string),ANSI.PROMPT.str());
 	}
 	
+	public static void printErr(String string, Throwable error) {
+		StringBuilder out=new StringBuilder();
+		
+		StackTraceElement[]elements=error.getStackTrace();
+		Stream.of(elements).forEach(element->{
+			out.append(element.getFileName())
+				.append(element.getModuleName())
+				.append(element.getModuleVersion())
+				.append(element.getMethodName())
+				.append(element.getLineNumber());
+		});
+		console.printf("%s[ERROR]%s%n%s",parse("[RESET][BELL][RED]"),parse(string),error.getMessage());
+		
+		if(Config.DEBUG) error.printStackTrace();
+		console.print(ANSI.PROMPT.str());
+	}
+		
 	public static void println(String string) {
-		console.printf("\033[0m%s\n>\033[34m",parse(string));
+		console.printf("%s%s%s",ANSI.RESET.str(),parse(string),ANSI.BR.str());
 	}
 	
 	public static void print(String string) {
-		console.printf("\033[0m%s",parse(string));
+		console.printf("%s%s",ANSI.RESET.str(),parse(string));
 	}
 	
-	public static void printReady() {
-		console.printf("\033[0m\n%s",">\033[34m");
+	public static void prompt() {
+		console.print(ANSI.PROMPT.str());
 	}	
 	
 }
