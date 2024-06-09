@@ -15,7 +15,7 @@ public final class StreamServer {
 	
 	private StreamServer() {}
 	
-	public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException {
+	public static void main(String[] args) {
 		
 		new Config();
 		new DatabaseConnection();
@@ -23,7 +23,11 @@ public final class StreamServer {
 		if(args.length!=0) {
 			switch(args[0]) {
 			case"--db-wipe":
-				new WipeDatabase();
+				try {
+					new WipeDatabase();
+				} catch (InterruptedException | ExecutionException | TimeoutException e) {
+					ANSI.printErr("Failed to clear MYSQL tables.", e);
+				}
 				break;
 			}
 		}
@@ -32,15 +36,19 @@ public final class StreamServer {
 		new BroadcastRunner();
 		new ConsoleRunner();
 
-		BroadcastRunner.instance.stop();
-		DiscordBot.instance.close();
-		Helper.close();
+		try {
+			if(BroadcastRunner.instance!=null) BroadcastRunner.instance.stop();
+			if(DiscordBot.instance!=null) DiscordBot.instance.close();
+		} catch (Exception e) {
+			ANSI.printErr("Exception while shutting down.", e);
+		}
 		
+		Helper.close();
 		if(ConsoleRunner.forceExit) {
 			ANSI.println("[RED][FORCE EXIT][/RED]");
 			System.exit(0);
 		} else {
-			ANSI.println("[BLUE][FINISH ALL RUNNING TASKS, THEN EXIT][/BLUE]");
+			ANSI.println("[GREEN][FINISH ALL RUNNING TASKS, THEN EXIT][/GREEN]");
 		}
 	}
 	
