@@ -8,6 +8,8 @@ public class ConfigData {
 	String YOUTUBE_LINK;
 	String YOUTUBE_KEY;
 	
+	Boolean YOUTUBE_USE_COOKIES=false;
+	
 	Boolean STREAM_BOT_START;
 	
 	String PLAYLIST_PATH;

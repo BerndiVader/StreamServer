@@ -22,6 +22,9 @@ public class Config {
 	public static String YOUTUBE_LINK="https://youtu.be/xxxxxxx";
 	public static String YOUTUBE_KEY="yt-api-key";
 	
+	public static Boolean YOUTUBE_USE_COOKIES=false;
+	public static File YOUTUBE_COOKIES;
+	
 	public static Boolean STREAM_BOT_START=true;
 	
 	public static String PLAYLIST_PATH="./playlist";
@@ -44,6 +47,8 @@ public class Config {
 	public static String HELP_TEXT;
 	public static String DISCORD_HELP_TEXT;
 	
+	public static Boolean DEBUG=false;
+	
 	public static File working_dir,config_dir,config_file;
 	public static ConfigData data;
 	
@@ -56,7 +61,7 @@ public class Config {
             URI uri=StreamServer.class.getProtectionDomain().getCodeSource().getLocation().toURI();
             working_dir=new File(uri.getPath().replace(new File(uri).getName(),""));
         } catch (URISyntaxException ex) {
-        	ANSI.printErr(ex.getMessage());
+        	ANSI.printErr("URISyntaxException",ex);
         }
 		config_dir=new File(working_dir.getAbsolutePath()+"/config");
 		config_file=new File(config_dir.getAbsolutePath()+"/config.json");
@@ -67,16 +72,18 @@ public class Config {
 		if(!config_file.exists()) {
 			createDefault();
 		}
+		File cookies=new File(config_dir.getAbsolutePath().concat("/cookies.txt"));
+		if(cookies.exists()) YOUTUBE_COOKIES=cookies;
 	}
 	
 	public Config() {
 		instance=this;
-		ANSI.print("Load or create config...");
+		ANSI.println("[WHITE]Load or create config...");
 		if(loadConfig()) {
-			ANSI.println("DONE!");
+			ANSI.println("[GREEN]DONE![/GREEN]");
+			saveConfig();
 		} else {
-			ANSI.println("FAILED!");
-			ANSI.println("Using default values!");
+			ANSI.printWarn("Failed loading or creating config file. Using default values.");
 		}
 	}
 	
@@ -97,6 +104,7 @@ public class Config {
 			data.STREAM_URL=STREAM_URL;
 			data.YOUTUBE_LINK=YOUTUBE_LINK;
 			data.YOUTUBE_KEY=YOUTUBE_KEY;
+			data.YOUTUBE_USE_COOKIES=YOUTUBE_USE_COOKIES;
 			data.STREAM_BOT_START=STREAM_BOT_START;
 			data.DATABASE_CONNECTION=DATABASE_CONNECTION;
 			data.DATABASE_USER=DATABASE_USER;
@@ -110,13 +118,12 @@ public class Config {
 	        new GsonBuilder().setPrettyPrinting().create().toJson(data,writer);
 		} catch (IOException e) {
 			ok=false;
-			ANSI.printErr(e.getMessage());
+			ANSI.printErr("Error while saving config file.",e);
 		}		
 		return ok;
 	}
 	
 	public static boolean loadConfig() {
-		boolean ok=true;
 		try (FileReader reader=new FileReader(config_file.getAbsoluteFile())) {
 			data=new Gson().fromJson(reader,ConfigData.class);
 			if(data.PLAYLIST_PATH!=null) PLAYLIST_PATH=data.PLAYLIST_PATH;
@@ -127,6 +134,7 @@ public class Config {
 			if(data.STREAM_URL!=null) STREAM_URL=data.STREAM_URL;
 			if(data.YOUTUBE_LINK!=null) YOUTUBE_LINK=data.YOUTUBE_LINK;
 			if(data.YOUTUBE_KEY!=null) YOUTUBE_KEY=data.YOUTUBE_KEY;
+			if(data.YOUTUBE_USE_COOKIES!=null) YOUTUBE_USE_COOKIES=data.YOUTUBE_USE_COOKIES;
 			if(data.STREAM_BOT_START!=null) STREAM_BOT_START=data.STREAM_BOT_START;
 			if(data.DATABASE_CONNECTION!=null) DATABASE_CONNECTION=data.DATABASE_CONNECTION;
 			if(data.DATABASE_USER!=null) DATABASE_USER=data.DATABASE_USER;
@@ -138,13 +146,10 @@ public class Config {
 			if(data.DISCORD_RESPONSE_TO_PRIVATE!=null) DISCORD_RESPONSE_TO_PRIVATE=data.DISCORD_RESPONSE_TO_PRIVATE;
 			if(data.DISCORD_BOT_START!=null) DISCORD_BOT_START=data.DISCORD_BOT_START;
 		} catch (IOException e) {
-			ok=false;
-			ANSI.printErr(e.getMessage());
+			ANSI.printErr("Error while loading config file.",e);
+			return false;
 		}
-		if (!ok) {
-			ANSI.println("Configuration couldnt be loaded.");
-		}
-		return ok;
+		return true;
 	}
 	
 	static String inputstreamToString(InputStream is) {
@@ -155,7 +160,7 @@ public class Config {
 			try {
 				is.close();
 			} catch (IOException e1) {
-				ANSI.printErr(e1.getMessage());
+				ANSI.printErr("Error while reading from an InputStream",e1);
 			}
 		};
 		return output;

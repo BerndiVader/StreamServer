@@ -86,29 +86,43 @@ public class DownloadMediaFile extends Command {
 			if(!temp[i].startsWith("--")) temp[i]="--".concat(temp[i]);
 			String[]parse=temp[i].split(" ",2);
 			for(int j=0;j<parse.length;j++) {
-				if(parse[j].equals("--url")) {
-					url=parse[j+1];
-					continue;
-				}
-				if(parse[j].equals("--dir")) {
-					if(parse.length==2) {
-						File dir=new File(Config.DL_MUSIC_PATH.concat("/").concat(parse[j+1]));
-						parse[j+1]="";
-						if(!dir.exists()) dir.mkdir();
-						if(dir.isDirectory()) {
-							builder.directory(dir);
-						} else {
-							ANSI.printErr("Warning! Download directory is a file, using default.");
+				switch(parse[j]) {
+					case("--url"):
+						if(parse.length==2) {
+							url=parse[j+1];
+							parse[j+1]="";
 						}
-					}
-					continue;
+						break;
+					case("--dir"):
+						if(parse.length==2) {
+							File dir=new File(Config.DL_MUSIC_PATH.concat("/").concat(parse[j+1]));
+							parse[j+1]="";
+							if(!dir.exists()) dir.mkdir();
+							if(dir.isDirectory()) {
+								builder.directory(dir);
+							} else {
+								ANSI.printWarn("Warning! Download directory is a file, using default.");
+							}
+						}
+						break;
+					case("--cookies"):
+						if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
+							builder.command().add("--cookies");
+							builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
+						}
+						break;
+					default:
+						if(!parse[j].isEmpty()) builder.command().add(parse[j]);
+						break;
 				}
-				if(!parse[j].isEmpty()) builder.command().add(parse[j]);
 			}
 		}
 		
 		InfoPacket infoPacket=null;
-		if(url!=null) infoPacket=Utils.getDLPinfoPacket(url,builder.directory());
+		if(url!=null&&!url.isEmpty()) {
+			builder.command().add(url);
+			infoPacket=Utils.getDLPinfoPacket(url,builder.directory());
+		}
 		if(infoPacket!=null) {
 			ANSI.println(infoPacket.toString());
 		}
@@ -126,7 +140,7 @@ public class DownloadMediaFile extends Command {
 					time=System.currentTimeMillis();
 					ANSI.println(input.readLine());
 				} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
-					ANSI.printErr("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
+					ANSI.printWarn("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
 					process.destroy();
 				}
 			}
@@ -134,13 +148,13 @@ public class DownloadMediaFile extends Command {
 			BufferedReader error=process.errorReader();
 			if(error!=null&&error.ready()) {
 				error.lines().forEach(line->{
-					ANSI.printErr(line);
+					ANSI.printWarn(line);
 				});
 			}
 			
 			if(process.isAlive()) process.destroy();
 		} catch (IOException e) {
-			ANSI.printErr(e.getMessage());
+			ANSI.printErr("Error while looping yt-dlp process.",e);
 		}
 		return true;
 	}

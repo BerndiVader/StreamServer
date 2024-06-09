@@ -112,7 +112,17 @@ public class DownloadMedia extends Command<Void> {
 					String[]parse=temp[i].split(" ",2);
 					for(int j=0;j<parse.length;j++) {
 						if(parse[j].equals("--url")) {
-							if(parse.length==2) url=parse[1];
+							if(parse.length==2) {
+								url=parse[1];
+								parse[1]="";
+							}
+							continue;
+						}
+						if(parse[j].equals("--cookies")) {
+							if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
+								builder.command().add("--cookies");
+								builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
+							}
 							continue;
 						}
 						if(parse[j].equals("--dir")) {
@@ -139,7 +149,10 @@ public class DownloadMedia extends Command<Void> {
 				}
 				
 				InfoPacket infoPacket=null;
-				if(!url.isEmpty()) infoPacket=Utils.getDLPinfoPacket(url,builder.directory());
+				if(!url.isEmpty()) {
+					builder.command().add(url);
+					infoPacket=Utils.getDLPinfoPacket(url,builder.directory());
+				}
 				
 				try {
 					message.edit(msg->{
@@ -248,7 +261,7 @@ public class DownloadMedia extends Command<Void> {
 					e.printStackTrace();
 				}
 			}).doOnError(error->{
-				ANSI.printErr(error.getMessage());
+				ANSI.printErr("Error while downloading media in discord command.",error);
 			}).subscribe();
 		}
 	}
