@@ -44,8 +44,7 @@ public class UpdateCurrent implements Runnable{
 			
 			
 		} catch (SQLException e) {
-			ANSI.printErr(e.getMessage());
-			ANSI.printErr("\n[FAILED MYSQL CURRENT UPDATE]");
+			ANSI.printErr("Update now playing entry failed.",e);
 			return;
 		}
 		ANSI.println("\n[SUCSESSFUL MYSQL CURRENT UPDATE]");

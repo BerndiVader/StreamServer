@@ -22,8 +22,7 @@ public class DatabaseConnection {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 		} catch (ClassNotFoundException e) {
-			ANSI.printErr("FAILED!");
-			ANSI.printErr(e.getMessage());
+			ANSI.printErr("Missing jdbc driver.",e);
 			INIT=false;
 		}
 		
@@ -36,15 +35,13 @@ public class DatabaseConnection {
 							INIT=result.getString("infotext").equals("YouTube Broadcast Bot Database");
 							ANSI.println(INIT?"DONE!":"FAILED!");
 						} else {
-							ANSI.printErr("FAILED!");
-							ANSI.printErr("Not able to identify the database!");
+							ANSI.printWarn("Not able to identify the database!");
 							INIT=false;
 						}
 					}
 				}
 			} catch (SQLException e) {
-				ANSI.printErr("FAILED!");
-				ANSI.printErr(e.getMessage());
+				ANSI.printErr("Creating mysql connection failed.",e);
 				INIT=false;
 			}
 		}

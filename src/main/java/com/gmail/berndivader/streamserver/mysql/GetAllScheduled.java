@@ -33,8 +33,7 @@ public class GetAllScheduled implements Callable<ArrayList<String>> {
 				}
 			}
 		} catch (SQLException e) {
-			ANSI.printErr(e.getMessage());
-			ANSI.printErr("[MYSQL GET SCHEDULED LIST FAILED]");
+			ANSI.printErr("Get all scheduled files failed.",e);
 			return null;
 		}
 		

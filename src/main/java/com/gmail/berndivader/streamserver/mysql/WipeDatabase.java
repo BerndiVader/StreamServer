@@ -33,7 +33,7 @@ public class WipeDatabase implements Runnable {
 				wipe.executeBatch();
 			}
 		} catch (SQLException e) {
-			ANSI.printErr(e.getMessage());
+			ANSI.printErr("Reset database failed.",e);
 		}
 	}
 	

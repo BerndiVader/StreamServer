@@ -89,8 +89,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 			}
 			connection.commit();
 		} catch (SQLException e) {
-			ANSI.printErr(e.getMessage());
-			ANSI.printErr("\n[FAILED MYSQL PLAYLIST UPDATE]");
+			ANSI.printErr("Update playlist failed.",e);
 			return false;
 		}
 		ANSI.println("\n[SUCSESSFUL MYSQL PLAYLIST UPDATE]");

@@ -34,7 +34,7 @@ public class Commands {
 						StreamServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
 						StandardCharsets.ISO_8859_1.toString());
 			} catch (UnsupportedEncodingException e1) {
-				ANSI.printErr(e1.getMessage());
+				ANSI.printErr("Error, there is no UTF-8 nor a ISO-8859 encoding avaible.",e1);
 			}
 		}
 	}
@@ -77,7 +77,7 @@ public class Commands {
 			return clazz.getDeclaredConstructor().newInstance();
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			ANSI.printErr(e.getMessage());
+			ANSI.printErr("Error getting console command class.",e);
 			return null;
 		}
 		

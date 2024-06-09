@@ -74,7 +74,7 @@ public class Commands {
 			return command.getDeclaredConstructor().newInstance();
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			ANSI.printErr(e.getMessage());
+			ANSI.printErr("Error while collect discord commands.",e);
 			return null;
 		}
 	}

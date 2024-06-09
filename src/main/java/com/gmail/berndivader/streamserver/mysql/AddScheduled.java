@@ -42,8 +42,7 @@ public class AddScheduled implements Runnable {
 			}
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
-			ANSI.printErr("\n[MYSQL FAILED TO ADD FOR SCHEDULE]");
+			ANSI.printErr("Failed to add a file to the scheduled playlist",e);
 			return;
 		}
 		ANSI.println(exists?"\n[MYSQL TRACK ADDED FOR SCHEDULE]":"\n[MYSQL TRACK ALREADY ON SCHEDULE]");

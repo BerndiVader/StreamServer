@@ -30,7 +30,7 @@ public class ListScheduled extends Command<Void>{
 				try {
 					files=scheduled.future.get(20,TimeUnit.SECONDS);
 				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					ANSI.printErr(e.getMessage());
+					ANSI.printErr("Error while waiting for get all scheduled future.",e);
 				}
 				embed.setTitle("SCHEDULED FILES");
 				if(files!=null&&!files.isEmpty()) {

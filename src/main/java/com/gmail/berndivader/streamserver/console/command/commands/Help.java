@@ -12,10 +12,10 @@ public class Help extends Command {
 	@Override
 	public boolean execute(String[] args) {
 		
-		ANSI.printAnsi(Config.HELP_TEXT);
+		ANSI.printRaw(Config.HELP_TEXT);
 		Commands.instance.commands.forEach((name,clazz)->{
 			ConsoleCommand annotation=clazz.getAnnotation(ConsoleCommand.class);
-			if(annotation!=null) ANSI.printAnsi("[BOLD][RED]"+annotation.name().concat("[/RED][/BOLD] [BLUE]-[/BLUE] [GREEN]".concat(annotation.usage()).concat("[/GREEN][BR]")));
+			if(annotation!=null) ANSI.printRaw("[BOLD][RED]"+annotation.name().concat("[/RED][/BOLD] [BLUE]-[/BLUE] [GREEN]".concat(annotation.usage()).concat("[/GREEN][BR]")));
 		});
 		return true;
 	}

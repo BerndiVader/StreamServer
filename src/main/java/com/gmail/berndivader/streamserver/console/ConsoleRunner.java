@@ -18,11 +18,11 @@ public class ConsoleRunner {
 		try {
 			new Commands();
 		} catch (ClassNotFoundException | IOException e) {
-			ANSI.printErr(e.getMessage());
+			ANSI.printErr("Error instantiating console commands.",e);
 		}
 		
 		while (!exit) {
-	        ANSI.printReady();
+	        ANSI.prompt();
             String input=ANSI.keyboard.nextLine();
             
             if(input!=null&&input.startsWith(".")) {

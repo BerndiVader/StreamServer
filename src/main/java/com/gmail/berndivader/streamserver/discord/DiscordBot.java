@@ -63,8 +63,7 @@ public final class DiscordBot {
 				@Override
 				public void accept(Throwable error) {
 					status=Status.FAILED;
-					ANSI.printErr(error.getMessage());
-					ANSI.printErr("[Connection to Discord FAILED!]");
+					ANSI.printErr("Connection to Discord failed.",error);
 				}
 				
 			}).block();

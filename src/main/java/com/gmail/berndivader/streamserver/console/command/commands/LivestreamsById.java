@@ -24,7 +24,7 @@ public class LivestreamsById extends Command{
 			try {
 				packet=future.get(15l,TimeUnit.SECONDS);
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				ANSI.printErr(e.getMessage());
+				ANSI.printErr("Error while waiting for streamby future.",e);
 				return false;
 			}
 			if(packet==null||packet instanceof EmptyPacket) return false;

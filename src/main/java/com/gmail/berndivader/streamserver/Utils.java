@@ -77,7 +77,7 @@ public class Utils {
 					list.add(name);
 				}
 			} catch (Exception e) {
-				ANSI.printErr(e.getMessage());
+				ANSI.printErr("getFilelistAsList method failed.",e);
 			}
 		}
 		files=Helper.customs.clone();
@@ -175,7 +175,7 @@ public class Utils {
 			int size=stream.read(bytes,0,length);
 			return new String(bytes).substring(0,size);
 		} catch (IOException e) {
-			ANSI.printErr(e.getMessage());
+			ANSI.printErr("getStringFromStream method failed.",e);
 			return "";
 		}
 	}
@@ -196,7 +196,7 @@ public class Utils {
 				}
 			}
 		} catch (IOException e) {
-			ANSI.printErr(e.getMessage());
+			ANSI.printErr("getDLPinfoPacket method failed.",e);
 		}
 		return info;
 	}	

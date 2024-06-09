@@ -66,8 +66,7 @@ public class BroadcastRunner extends TimerTask {
 				future.get(30,TimeUnit.SECONDS);
 				ANSI.print("DONE!]...");
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				ANSI.printErr(e.getMessage());
-				ANSI.printErr("FAILED!]...");
+				ANSI.printWarn(e.getMessage());
 			}
     	}
 		
@@ -92,7 +91,7 @@ public class BroadcastRunner extends TimerTask {
 		try {
 			filename=scheduled.future.get(20,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr(e.getMessage());
+			ANSI.printErr("Get next scheduled file failed.",e);
 		}
 		if(filename!=null) {
 			int filepos=-1;
@@ -184,7 +183,7 @@ public class BroadcastRunner extends TimerTask {
 			try {
 				future.get(20,TimeUnit.SECONDS);
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				ANSI.printErr(e.getMessage());
+				ANSI.printErr("Failed to stop broadcast task.",e);
 			}
 		}
 		future=createStream(file);

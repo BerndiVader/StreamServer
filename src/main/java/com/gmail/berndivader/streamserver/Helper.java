@@ -31,12 +31,12 @@ public class Helper {
 	}
 	
 	public static void close() {
-		ANSI.print("Shutdown task executor...");
+		ANSI.print("[WHITE]Shutdown task executor...");
 		executor.shutdown();
-		ANSI.println("DONE!");
-		ANSI.print("Shutdown scheduled task executor...");
+		ANSI.println("[GREEN]DONE!");
+		ANSI.print("[WHITE]Shutdown scheduled task executor...");
 		scheduledExecutor.shutdown();
-		ANSI.println("DONE!");
+		ANSI.println("[GREEN]DONE![/GREEN]");
 	}
 
 }

@@ -35,8 +35,7 @@ public class GetNextScheduled implements Callable<String> {
 				}
 			}
 		} catch (SQLException e) {
-			ANSI.printErr(e.getMessage());
-			ANSI.printErr("\n[MYSQL GET NEXT SCHEDULED FAILED]");
+			ANSI.printErr("Get next scheduled file failed.",e);
 			return null;
 		}
 		
