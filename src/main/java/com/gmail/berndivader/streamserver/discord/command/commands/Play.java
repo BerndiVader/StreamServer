@@ -3,7 +3,6 @@ package com.gmail.berndivader.streamserver.discord.command.commands;
 import java.util.function.Consumer;
 
 import com.gmail.berndivader.streamserver.Helper;
-import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
@@ -28,9 +27,9 @@ public class Play extends Command<Void> {
 		} else if(s.toLowerCase().equals("repeat")) {
 			BroadcastRunner.restartStream();
 		} else {
-			index=Utils.getFilePosition(s);
+			index=Helper.getFilePosition(s);
 			if(index==-1) {
-				index=Utils.getCustomFilePosition(s);
+				index=Helper.getCustomFilePosition(s);
 				if(index>-1) {
 					BroadcastRunner.broadcastFilename(Helper.customs[index]);
 				}

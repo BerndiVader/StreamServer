@@ -7,11 +7,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import com.gmail.berndivader.streamserver.Helper;
-import com.gmail.berndivader.streamserver.Utils;
-import com.gmail.berndivader.streamserver.Utils.InfoPacket;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.command.Command;
+import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 @ConsoleCommand(name="dlp",usage="Download media. Usage: dlp --url <http source> or use --help")
@@ -80,7 +79,7 @@ public class DownloadMediaFile extends Command {
 		
 		String[]temp=args[0].split(" --");
 		String url=null;
-		
+				
 		for(int i=0;i<temp.length;i++) {
 			if(temp[i].isEmpty()) continue;
 			if(!temp[i].startsWith("--")) temp[i]="--".concat(temp[i]);
@@ -121,7 +120,7 @@ public class DownloadMediaFile extends Command {
 		InfoPacket infoPacket=null;
 		if(url!=null&&!url.isEmpty()) {
 			builder.command().add(url);
-			infoPacket=Utils.getDLPinfoPacket(url,builder.directory());
+			infoPacket=Helper.getDLPinfoPacket(url,builder.directory());
 		}
 		if(infoPacket!=null) {
 			ANSI.println(infoPacket.toString());

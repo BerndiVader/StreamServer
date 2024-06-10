@@ -3,7 +3,7 @@ package com.gmail.berndivader.streamserver.discord.command.commands;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-import com.gmail.berndivader.streamserver.Utils;
+import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 
@@ -24,7 +24,7 @@ public class Playlist extends Command<Void> {
 			regex=regex.replaceFirst("custom ","");
 		}
 		
-		ArrayList<String>list=Utils.getFilelistAsList(regex);
+		ArrayList<String>list=Helper.getFilelistAsList(regex);
 		int size=list.size();
 		
 		ArrayList<String>messages=new ArrayList<String>();

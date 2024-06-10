@@ -1,7 +1,6 @@
 package com.gmail.berndivader.streamserver.console.command.commands;
 
 import com.gmail.berndivader.streamserver.Helper;
-import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.mysql.AddScheduled;
@@ -16,12 +15,12 @@ public class Schedule extends Command {
 			if(!filename.endsWith(".mp4")) {
 				filename=filename+".mp4";
 			}
-			int index=Utils.getFilePosition(filename);
+			int index=Helper.getFilePosition(filename);
 			if(index>-1) {
 				filename=Helper.files[index].getName();
 				new AddScheduled(filename);
 			} else {
-				index=Utils.getCustomFilePosition(filename);
+				index=Helper.getCustomFilePosition(filename);
 				if(index>-1) {
 					filename=Helper.customs[index].getName();
 					new AddScheduled(filename);

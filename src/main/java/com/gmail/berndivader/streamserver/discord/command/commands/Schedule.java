@@ -3,7 +3,6 @@ package com.gmail.berndivader.streamserver.discord.command.commands;
 import java.util.function.Consumer;
 
 import com.gmail.berndivader.streamserver.Helper;
-import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.mysql.AddScheduled;
@@ -19,9 +18,9 @@ public class Schedule extends Command<Void> {
 	@Override
 	public Mono<Void> execute(String p, MessageChannel channel) {
 		
-		int index=Utils.getFilePosition(p);
+		int index=Helper.getFilePosition(p);
 		if(index==-1) {
-			index=Utils.getCustomFilePosition(p);
+			index=Helper.getCustomFilePosition(p);
 			if(index>-1) {
 				new AddScheduled(Helper.customs[index].getName());
 			}

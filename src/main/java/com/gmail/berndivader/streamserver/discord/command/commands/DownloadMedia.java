@@ -7,11 +7,10 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import com.gmail.berndivader.streamserver.Helper;
-import com.gmail.berndivader.streamserver.Utils;
-import com.gmail.berndivader.streamserver.Utils.InfoPacket;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.command.Command;
+import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 import discord4j.core.event.domain.interaction.ButtonInteractEvent;
@@ -151,7 +150,7 @@ public class DownloadMedia extends Command<Void> {
 				InfoPacket infoPacket=null;
 				if(!url.isEmpty()) {
 					builder.command().add(url);
-					infoPacket=Utils.getDLPinfoPacket(url,builder.directory());
+					infoPacket=Helper.getDLPinfoPacket(url,builder.directory());
 				}
 				
 				try {

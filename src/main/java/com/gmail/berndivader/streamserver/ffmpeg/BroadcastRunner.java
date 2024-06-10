@@ -18,7 +18,6 @@ import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Format;
 import com.gmail.berndivader.streamserver.Helper;
-import com.gmail.berndivader.streamserver.Utils;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.mysql.GetNextScheduled;
@@ -44,8 +43,8 @@ public class BroadcastRunner extends TimerTask {
 		instance=this;
 		stop=false;
 		
-		Utils.refreshFilelist();
-		Utils.shuffleFilelist(Helper.files);
+		Helper.refreshFilelist();
+		Helper.shuffleFilelist(Helper.files);
 		ANSI.println("DONE!");
 
 		index=0;
@@ -95,13 +94,13 @@ public class BroadcastRunner extends TimerTask {
 		}
 		if(filename!=null) {
 			int filepos=-1;
-			filepos=Utils.getFilePosition(filename.toLowerCase());
+			filepos=Helper.getFilePosition(filename.toLowerCase());
 			
 			if(filepos>-1) {
 				future=createStream(Helper.files[filepos]);
 				currentPlaying=Helper.files[filepos];
 			} else {
-				filepos=Utils.getCustomFilePosition(filename.toLowerCase());
+				filepos=Helper.getCustomFilePosition(filename.toLowerCase());
 				if(filepos>-1) {
     				future=createStream(Helper.customs[filepos]);
     				currentPlaying=Helper.customs[filepos];
@@ -112,8 +111,8 @@ public class BroadcastRunner extends TimerTask {
 			currentPlaying=Helper.files[index];
 			index++;
 			if(index>Helper.files.length-1) {
-				Utils.refreshFilelist();
-				Utils.shuffleFilelist(Helper.files);				
+				Helper.refreshFilelist();
+				Helper.shuffleFilelist(Helper.files);				
 				index=0;
 			}
 		}

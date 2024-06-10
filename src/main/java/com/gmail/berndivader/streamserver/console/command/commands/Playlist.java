@@ -1,6 +1,6 @@
 package com.gmail.berndivader.streamserver.console.command.commands;
 
-import com.gmail.berndivader.streamserver.Utils;
+import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.term.ANSI;
@@ -12,7 +12,7 @@ public class Playlist extends Command {
 	public boolean execute(String[] args) {
 		String regex=args[0];
 		if(regex.startsWith("custom ")) regex=regex.replaceFirst("custom ", "");
-		ANSI.println(Utils.getFilelistAsString(regex));
+		ANSI.println(Helper.getFilelistAsString(regex));
 		return true;
 	}
 

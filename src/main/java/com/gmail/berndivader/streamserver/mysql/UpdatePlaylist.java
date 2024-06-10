@@ -16,7 +16,6 @@ import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Format;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
-import com.gmail.berndivader.streamserver.Utils;
 
 public class UpdatePlaylist implements Callable<Boolean> {
 	
@@ -42,7 +41,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 
 	@Override
 	public Boolean call() throws Exception {
-		Utils.refreshFilelist();
+		Helper.refreshFilelist();
 		File[]files=Helper.files.clone();
 		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
