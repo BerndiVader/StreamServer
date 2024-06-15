@@ -268,7 +268,7 @@ public class DownloadMedia extends Command<Void> {
 	@Override
 	public Mono<Void> execute(String string, MessageChannel channel) {
 		
-		Helper.executor.submit(new ProcessCallback(string,channel));
+		Helper.EXECUTOR.submit(new ProcessCallback(string,channel));
 		return Mono.empty();
 	}
 	

@@ -17,7 +17,7 @@ public class GetAllScheduled implements Callable<ArrayList<String>> {
 	
 	public GetAllScheduled() {
 		
-		future=Helper.executor.submit(this);
+		future=Helper.EXECUTOR.submit(this);
 		
 	}
 

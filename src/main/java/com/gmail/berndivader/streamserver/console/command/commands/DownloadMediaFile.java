@@ -130,7 +130,7 @@ public class DownloadMediaFile extends Command {
 			Process process=builder.start();
 			
 			InterruptHandler handler=new InterruptHandler(process);
-			Future<Boolean>future=Helper.executor.submit(handler);
+			Future<Boolean>future=Helper.EXECUTOR.submit(handler);
 			
 			BufferedReader input=process.inputReader();
 			long time=System.currentTimeMillis();

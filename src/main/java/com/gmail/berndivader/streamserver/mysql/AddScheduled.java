@@ -19,7 +19,7 @@ public class AddScheduled implements Runnable {
 		this.title=filename.substring(0,filename.length()-4);
 		this.filename=filename;
 		
-		Helper.executor.submit(this);
+		Helper.EXECUTOR.submit(this);
 	}
 
 	@Override

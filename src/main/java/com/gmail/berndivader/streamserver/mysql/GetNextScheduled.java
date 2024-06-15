@@ -16,7 +16,7 @@ public class GetNextScheduled implements Callable<String> {
 	
 	public GetNextScheduled() {
 		
-		future=Helper.executor.submit(this);
+		future=Helper.EXECUTOR.submit(this);
 		
 	}
 

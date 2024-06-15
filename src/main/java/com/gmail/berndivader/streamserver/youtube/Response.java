@@ -26,7 +26,7 @@ public abstract class Response<T> implements Callable<T> {
 	@Override
 	public T call() throws Exception {
 		HttpUriRequest request=new HttpGet(query);
-		JsonObject json=Helper.httpClient.execute(request,new ResponseHandler<JsonObject>() {
+		JsonObject json=Helper.HTTP_CLIENT.execute(request,new ResponseHandler<JsonObject>() {
 			@Override
 			public JsonObject handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
 				String text="";

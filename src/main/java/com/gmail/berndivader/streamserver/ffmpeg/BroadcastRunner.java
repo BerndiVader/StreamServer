@@ -50,7 +50,7 @@ public class BroadcastRunner extends TimerTask {
 		index=0;
 		runStream();
 		
-		Helper.scheduledExecutor.scheduleAtFixedRate(this, 0l, 1l, TimeUnit.SECONDS);
+		Helper.SCHEDULED_EXECUTOR.scheduleAtFixedRate(this, 0l, 1l, TimeUnit.SECONDS);
 		
 	}
 	

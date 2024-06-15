@@ -19,7 +19,7 @@ public class Youtube {
 		String query=URL.concat("search?part=snippet&eventType=live&maxResults=1&type=video&prettyPrint=true&channelId=").concat(id).concat("&key=").concat(Config.YOUTUBE_KEY);
 		System.out.println(query);
 		
-		return Helper.executor.submit(new Response<Packet>(query) {
+		return Helper.EXECUTOR.submit(new Response<Packet>(query) {
 			
 			@Override
 			protected Packet handle(JsonObject json) {

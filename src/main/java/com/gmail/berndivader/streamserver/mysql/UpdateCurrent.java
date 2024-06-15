@@ -18,7 +18,7 @@ public class UpdateCurrent implements Runnable{
 		this.title=title;
 		this.info=info;
 		
-		Helper.executor.submit(this);
+		Helper.EXECUTOR.submit(this);
 		
 	}
 

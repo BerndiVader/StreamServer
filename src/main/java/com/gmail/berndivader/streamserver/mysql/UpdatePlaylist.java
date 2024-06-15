@@ -24,7 +24,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
     boolean isCommand;
 	
 	public UpdatePlaylist(boolean fromConsole) throws InterruptedException, ExecutionException, TimeoutException {
-		Future<Boolean>future=Helper.executor.submit(this);
+		Future<Boolean>future=Helper.EXECUTOR.submit(this);
 		
 		if(isCommand=fromConsole) {
 			future.get(20,TimeUnit.MINUTES);

@@ -23,19 +23,19 @@ import com.google.gson.GsonBuilder;
 
 public class Helper {
 	
-	public static ExecutorService executor;
-	public static ScheduledExecutorService scheduledExecutor;
-	public static CloseableHttpClient httpClient;
-	public static Gson gson;
+	public final static ExecutorService EXECUTOR;
+	public final static ScheduledExecutorService SCHEDULED_EXECUTOR;
+	public final static CloseableHttpClient HTTP_CLIENT;
+	public final static Gson gson;
 	public static File[] files;
 	public static File[] customs;
 	
 	static {
 		files=new File[0];
 		customs=new File[0];
-		executor=Executors.newFixedThreadPool(10);
-		scheduledExecutor=Executors.newScheduledThreadPool(5);
-		httpClient=HttpClients.createMinimal();
+		EXECUTOR=Executors.newFixedThreadPool(10);
+		SCHEDULED_EXECUTOR=Executors.newScheduledThreadPool(5);
+		HTTP_CLIENT=HttpClients.createMinimal();
 		gson=new GsonBuilder().create();
 	}	
 	
@@ -206,10 +206,10 @@ public class Helper {
 	
 	public static void close() {
 		ANSI.print("[WHITE]Shutdown task executor...");
-		executor.shutdown();
+		EXECUTOR.shutdown();
 		ANSI.println("[GREEN]DONE!");
 		ANSI.print("[WHITE]Shutdown scheduled task executor...");
-		scheduledExecutor.shutdown();
+		SCHEDULED_EXECUTOR.shutdown();
 		ANSI.println("[GREEN]DONE![/GREEN]");
 	}
 

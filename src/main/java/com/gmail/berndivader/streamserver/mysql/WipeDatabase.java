@@ -16,7 +16,7 @@ public class WipeDatabase implements Runnable {
 	
 	public WipeDatabase() throws InterruptedException, ExecutionException, TimeoutException {
 		
-		Future<?>future=Helper.executor.submit(this);
+		Future<?>future=Helper.EXECUTOR.submit(this);
 		future.get(10,TimeUnit.SECONDS);
 		
 	}
