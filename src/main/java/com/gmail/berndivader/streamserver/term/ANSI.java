@@ -33,12 +33,13 @@ public enum ANSI {
 	WHITE("\033[37m"),
 	WHITEOFF("\033[39m"),
 	SYSTEM("\033[39m"),
-	
-	PROMPT("\033[0m\n>"),
-	ERROR(""),
-	WARNING(""),
+		
+	PROMPT("\033[0m\012>"),
+	ERROR("\033[0m\007\033[1m\033[31m[ERROR]"),
+	WARNING("\033[1m\033[33m[WARNING]"),
 	
 	RESET("\033[0m");
+	
 	
     public static Scanner keyboard;
     public static PrintStream console;
@@ -96,24 +97,19 @@ public enum ANSI {
 	}
 	
 	public static void printWarn(String string) {
-		console.printf("%s[WARNING]%s%s",merge(ANSI.BOLD,ANSI.YELLOW),parse(string),ANSI.PROMPT.str());
+		if(!string.isBlank()) {
+			console.printf("%s%s",ANSI.WARNING.str(),parse(string));
+		} else {
+			console.print(parse(string));
+		}
+		console.print(ANSI.PROMPT.str());
 	}
 	
 	public static void printErr(String string, Throwable error) {
-		StringBuilder out=new StringBuilder();
-		
-		StackTraceElement[]elements=error.getStackTrace();
-		Stream.of(elements).forEach(element->{
-			out.append(element.getFileName())
-				.append(element.getModuleName())
-				.append(element.getModuleVersion())
-				.append(element.getMethodName())
-				.append(element.getLineNumber());
-		});
-		console.printf("%s[ERROR]%s%n%s",parse("[RESET][BELL][RED]"),parse(string),error.getMessage());
-		
+		console.printf("%s%s%s%n%s",ANSI.ERROR.str(),parse(string),ANSI.BOLDOFF.str(),error.getMessage());
 		if(Config.DEBUG) error.printStackTrace();
 		console.print(ANSI.PROMPT.str());
+		
 	}
 		
 	public static void println(String string) {
