@@ -72,8 +72,7 @@ public class Config {
 		if(!config_file.exists()) {
 			createDefault();
 		}
-		File cookies=new File(config_dir.getAbsolutePath().concat("/cookies.txt"));
-		if(cookies.exists()) YOUTUBE_COOKIES=cookies;
+		YOUTUBE_COOKIES=new File(config_dir.getAbsolutePath().concat("/cookies.txt"));
 	}
 	
 	public Config() {
