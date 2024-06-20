@@ -6,6 +6,8 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -202,6 +204,84 @@ public class Helper {
 			ANSI.printErr("getDLPinfoPacket method failed.",e);
 		}
 		return info;
+	}
+	
+	public static Entry<ProcessBuilder,InfoPacket> prepareDownloadBuilder(File directory,String args) {
+		ProcessBuilder builder=new ProcessBuilder();
+		builder.directory(directory);
+				
+		if(args.contains("--no-default")) {
+			args=args.replace("--no-default","");
+			builder.command("yt-dlp"
+					,"--progress-delta","2"
+					,"--restrict-filenames"
+					,"--embed-metadata"
+					,"--embed-thumbnail"
+					,"--output","%(title).200s.%(ext)s"
+			);
+		} else {
+			builder.command("yt-dlp"
+					,"--progress-delta","2"
+					,"--embed-metadata"
+					,"--embed-thumbnail"
+					,"--ignore-errors"
+					,"--extract-audio"
+					,"--format","bestaudio"
+					,"--audio-format","mp3"
+					,"--audio-quality","160K"
+					,"--output","%(title).200s.%(ext)s"
+					,"--restrict-filenames"
+					,"--no-playlist"
+			);
+		}
+		
+		String[]temp=args.split("--");
+		String url=null;
+		
+		for(int i=0;i<temp.length;i++) {
+			if(temp[i].isEmpty()) continue;
+						
+			String[]parse=temp[i].trim().split(" ",2);
+			for(int j=0;j<parse.length;j++) {
+				switch(parse[j]) {
+					case("url"):
+						if(parse.length==2) {
+							url=parse[j+1];
+							parse[j+1]="";
+						}
+						break;
+					case("dir"):
+						if(parse.length==2) {
+							File dir=new File(Config.DL_MUSIC_PATH.concat("/").concat(parse[j+1]));
+							parse[j+1]="";
+							if(!dir.exists()) dir.mkdir();
+							if(dir.isDirectory()) {
+								builder.directory(dir);
+							} else {
+								ANSI.printWarn("Warning! Download directory is a file, using default.");
+							}
+						}
+						break;
+					case("cookies"):
+						if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
+							builder.command().add("--cookies");
+							builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
+						}
+						break;
+					default:
+						if(!parse[j].isEmpty()) builder.command().add(parse[j]);
+						break;
+				}
+			}
+		}
+		
+		InfoPacket infoPacket=null;
+		if(url!=null&&!url.isEmpty()) {
+			builder.command().add(url);
+			infoPacket=Helper.getDLPinfoPacket(url,builder.directory());
+		}
+		
+		return Map.entry(builder,infoPacket);
 	}
 	
 	public static void close() {

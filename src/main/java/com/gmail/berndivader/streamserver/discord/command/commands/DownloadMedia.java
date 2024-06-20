@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.gmail.berndivader.streamserver.Helper;
@@ -22,7 +23,7 @@ import discord4j.rest.util.Color;
 import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="dlp",usage="Download media. [--no-default] [--dir] [--yes-playlist] --url <valid_url>")
+@DiscordCommand(name="dl",usage="Download media. [--no-default] [--dir] [--yes-playlist] --url <valid_url>")
 public class DownloadMedia extends Command<Void> {
 
 	private class ProcessCallback implements Runnable {
@@ -76,82 +77,9 @@ public class DownloadMedia extends Command<Void> {
 				});
 			}).doOnSuccess(message->{
 				
-				ProcessBuilder builder=new ProcessBuilder();
-				builder.directory(directory);
-				if(line.startsWith("--no-default")) {
-					line=line.substring(12);
-					builder.command("yt-dlp"
-							,"--progress-delta","2"
-							,"--restrict-filenames"
-							,"--embed-metadata"
-							,"--embed-thumbnail"
-							,"--output","%(title).200s.%(ext)s"
-					);
-				} else {
-					builder.command("yt-dlp"
-							,"--progress-delta","2"
-							,"--embed-metadata"
-							,"--embed-thumbnail"
-							,"--ignore-errors"
-							,"--extract-audio"
-							,"--format","bestaudio"
-							,"--audio-format","mp3"
-							,"--audio-quality","160K"
-							,"--output","%(title).200s.%(ext)s"
-							,"--restrict-filenames"
-							,"--no-playlist"
-					);
-				}
-				
-				String[]temp=line.split(" --");
-				String url="";
-				for(int i=0;i<temp.length;i++) {
-					if(temp[i].isEmpty()) continue;
-					if(!temp[i].startsWith("--")) temp[i]="--".concat(temp[i]);
-					String[]parse=temp[i].split(" ",2);
-					for(int j=0;j<parse.length;j++) {
-						if(parse[j].equals("--url")) {
-							if(parse.length==2) {
-								url=parse[1];
-								parse[1]="";
-							}
-							continue;
-						}
-						if(parse[j].equals("--cookies")) {
-							if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
-								builder.command().add("--cookies");
-								builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
-							}
-							continue;
-						}
-						if(parse[j].equals("--dir")) {
-							if(parse.length==2) {
-								File dir=new File(Config.DL_MUSIC_PATH.concat("/").concat(parse[j+1]));
-								parse[j+1]="";
-								if(!dir.exists()) dir.mkdir();
-								if(dir.isDirectory()) {
-									builder.directory(dir);
-								} else {
-									message.edit(msg->{
-										msg.addEmbed(embed->{
-											embed.setTitle("Warning!")
-											.setColor(Color.BROWN)
-											.setDescription("Warning! Download directory is a file, using default.");
-										});
-									}).subscribe();
-								}
-							}
-							continue;
-						}
-						if(!parse[j].isEmpty()) builder.command().add(parse[j]);
-					}
-				}
-				
-				InfoPacket infoPacket=null;
-				if(!url.isEmpty()) {
-					builder.command().add(url);
-					infoPacket=Helper.getDLPinfoPacket(url,builder.directory());
-				}
+				Entry<ProcessBuilder,InfoPacket>entry=Helper.prepareDownloadBuilder(directory,line);
+				ProcessBuilder builder=entry.getKey();
+				InfoPacket infoPacket=entry.getValue();
 				
 				try {
 					message.edit(msg->{
