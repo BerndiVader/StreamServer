@@ -26,9 +26,9 @@ public class WipeDatabase implements Runnable {
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			try(Statement wipe=connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				wipe.addBatch("START TRANSACTION;");
-				wipe.addBatch("TRUNCATE TABLE current;");
-				wipe.addBatch("TRUNCATE TABLE playlist;");
-				wipe.addBatch("TRUNCATE TABLE scheduled;");
+				wipe.addBatch("TRUNCATE TABLE `current`;");
+				wipe.addBatch("TRUNCATE TABLE `playlist`;");
+				wipe.addBatch("TRUNCATE TABLE `scheduled`;");
 				wipe.addBatch("COMMIT;");
 				wipe.executeBatch();
 			}
