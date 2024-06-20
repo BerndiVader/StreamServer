@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -206,10 +207,10 @@ public class Helper {
 		return info;
 	}
 	
-	public static Entry<ProcessBuilder,InfoPacket> prepareDownloadBuilder(File directory,String args) {
+	public static Entry<ProcessBuilder, Optional<InfoPacket>> prepareDownloadBuilder(File directory,String args) {
 		ProcessBuilder builder=new ProcessBuilder();
 		builder.directory(directory);
-				
+		
 		if(args.contains("--no-default")) {
 			args=args.replace("--no-default","");
 			builder.command("yt-dlp"
@@ -242,18 +243,18 @@ public class Helper {
 			if(temp[i].isEmpty()) continue;
 						
 			String[]parse=temp[i].trim().split(" ",2);
-			for(int j=0;j<parse.length;j++) {
-				switch(parse[j]) {
+			if(parse.length>0) {
+				switch(parse[0]) {
 					case("url"):
 						if(parse.length==2) {
-							url=parse[j+1];
-							parse[j+1]="";
+							url=parse[1];
+							parse[1]="";
 						}
 						break;
 					case("dir"):
 						if(parse.length==2) {
-							File dir=new File(Config.DL_MUSIC_PATH.concat("/").concat(parse[j+1]));
-							parse[j+1]="";
+							File dir=new File(Config.DL_MUSIC_PATH.concat("/").concat(parse[1]));
+							parse[1]="";
 							if(!dir.exists()) dir.mkdir();
 							if(dir.isDirectory()) {
 								builder.directory(dir);
@@ -269,10 +270,10 @@ public class Helper {
 						}
 						break;
 					default:
-						if(!parse[j].isEmpty()) builder.command().add(parse[j]);
+						if(!parse[0].isEmpty()) builder.command().add(parse[0]);
 						break;
 				}
-			}
+			}			
 		}
 		
 		InfoPacket infoPacket=null;
@@ -281,7 +282,7 @@ public class Helper {
 			infoPacket=Helper.getDLPinfoPacket(url,builder.directory());
 		}
 		
-		return Map.entry(builder,infoPacket);
+		return Map.entry(builder,Optional.ofNullable(infoPacket));
 	}
 	
 	public static void close() {
