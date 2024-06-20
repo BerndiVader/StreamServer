@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -53,12 +54,12 @@ public class DownloadMediaFile extends Command {
 			return false;
 		}
 		
-		Entry<ProcessBuilder,InfoPacket>entry=Helper.prepareDownloadBuilder(directory,args[0]);
-		InfoPacket infoPacket=entry.getValue();
+		Entry<ProcessBuilder,Optional<InfoPacket>>entry=Helper.prepareDownloadBuilder(directory,args[0]);
 		ProcessBuilder builder=entry.getKey();
+		Optional<InfoPacket>infoPacket=entry.getValue();
 		
-		if(infoPacket!=null) {
-			ANSI.println(infoPacket.toString());
+		if(infoPacket.isPresent()) {
+			ANSI.println(infoPacket.get().toString());
 		}
 
 		try {

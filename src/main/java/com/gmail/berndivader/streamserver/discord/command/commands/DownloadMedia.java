@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.gmail.berndivader.streamserver.Helper;
@@ -77,9 +78,9 @@ public class DownloadMedia extends Command<Void> {
 				});
 			}).doOnSuccess(message->{
 				
-				Entry<ProcessBuilder,InfoPacket>entry=Helper.prepareDownloadBuilder(directory,line);
+				Entry<ProcessBuilder, Optional<InfoPacket>>entry=Helper.prepareDownloadBuilder(directory,line);
 				ProcessBuilder builder=entry.getKey();
-				InfoPacket infoPacket=entry.getValue();
+				Optional<InfoPacket>infoPacket=entry.getValue();
 				
 				try {
 					message.edit(msg->{
