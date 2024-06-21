@@ -16,7 +16,7 @@ import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 @ConsoleCommand(name="dl",usage="Download media. Usage: dl --url <http source> or use --help")
-public class DownloadMediaFile extends Command {
+public class DownloadMedia extends Command {
 	
 	private class InterruptHandler implements Callable<Boolean> {
 		
