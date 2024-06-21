@@ -29,7 +29,7 @@ public class Helper {
 	public final static ExecutorService EXECUTOR;
 	public final static ScheduledExecutorService SCHEDULED_EXECUTOR;
 	public final static CloseableHttpClient HTTP_CLIENT;
-	public final static Gson gson;
+	public final static Gson GSON;
 	public static File[] files;
 	public static File[] customs;
 	
@@ -39,7 +39,7 @@ public class Helper {
 		EXECUTOR=Executors.newFixedThreadPool(10);
 		SCHEDULED_EXECUTOR=Executors.newScheduledThreadPool(5);
 		HTTP_CLIENT=HttpClients.createMinimal();
-		gson=new GsonBuilder().create();
+		GSON=new GsonBuilder().setPrettyPrinting().create();
 	}	
 	
 	public static int getFilePosition(String name) {
@@ -198,7 +198,7 @@ public class Helper {
 			BufferedReader reader=infoProc.inputReader();
 			while(infoProc.isAlive()) {
 				if(reader.ready()) {
-					info=new GsonBuilder().create().fromJson(infoProc.inputReader().readLine(),InfoPacket.class);
+					info=GSON.fromJson(infoProc.inputReader().readLine(),InfoPacket.class);
 				}
 			}
 		} catch (IOException e) {
