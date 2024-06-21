@@ -19,11 +19,12 @@ class DatabaseTools
     {
         $connection=DatabaseTools::getConnection();
         $result=$connection->query("select * from downloadables where uuid = '".$uuid."'");
+        $connection->close();
+        
         if($result->num_rows>0)
         {
             $array=$result->fetch_array(MYSQLI_ASSOC);
         }
-        $connection->close();
         $result->close();
         return $array;
     }
