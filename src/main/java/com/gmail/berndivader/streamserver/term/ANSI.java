@@ -11,11 +11,14 @@ import com.gmail.berndivader.streamserver.config.Config;
 public enum ANSI {
 
 	BR("\012"),
+	CR("\015"),
+	DL("\033[2K"),
 	BELL("\007"),
 	BOLD("\033[1m"),
 	BOLDOFF("\033[22m"),
 	BLINK("\033[5m"),
 	BLINKOFF("\033[25m"),
+	
 	BLACK("\033[30m"),
 	BLACKOFF("\033[39m"),
 	RED("\033[31m"),
