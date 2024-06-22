@@ -6,6 +6,8 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -19,6 +21,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import com.gmail.berndivader.streamserver.config.Config;
+import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.google.gson.Gson;
@@ -186,12 +189,37 @@ public class Helper {
 		}
 	}
 	
-	public static InfoPacket getDLPinfoPacket(String url,File directory) {
+	public static String createDownloadLink(File file) {
+
+		ANSI.println(file.getAbsolutePath());
+		
+		ProcessBuilder builder=new ProcessBuilder();
+		builder.directory(new File("./"));
+		builder.command("ffprobe","-v","quiet","-print_format","json","-show_format",file.getAbsolutePath());
+		
+		FFProbePacket packet=new FFProbePacket();
+		try {
+			Process process=builder.start();
+			BufferedReader reader=process.inputReader();
+			while(process.isAlive()) {
+				if(reader.ready()) {
+					packet=GSON.fromJson(process.inputReader().readLine(),FFProbePacket.class);
+				}
+			}
+		} catch (Exception e) {
+			ANSI.printErr("createDownloadlink method failed.", e);
+		}
+		
+		ANSI.println(packet.toString());
+		return null;
+	}
+	
+	public static InfoPacket getDLPinfoPacket(List<String>commands,File directory,String url) {
 		//yt-dlp --quiet --no-warnings --dump-single-json
 		ProcessBuilder infoBuilder=new ProcessBuilder();
 		infoBuilder.directory(directory);
-		infoBuilder.command("yt-dlp","--quiet","--no-warnings","--dump-single-json",url);
-		
+		infoBuilder.command(commands);
+		infoBuilder.command().addAll(Arrays.asList("--quiet","--no-warnings","--dump-json",url));
 		InfoPacket info=null;
 		try {
 			Process infoProc=infoBuilder.start();
@@ -210,6 +238,12 @@ public class Helper {
 	public static Entry<ProcessBuilder, Optional<InfoPacket>> prepareDownloadBuilder(File directory,String args) {
 		ProcessBuilder builder=new ProcessBuilder();
 		builder.directory(directory);
+		boolean downloadable=false;
+		
+		if(args.contains("--downloadable")) {
+			args=args.replace("--downloadable","");
+			downloadable=true;
+		}
 		
 		if(args.contains("--no-default")) {
 			args=args.replace("--no-default","");
@@ -278,8 +312,9 @@ public class Helper {
 		
 		InfoPacket infoPacket=null;
 		if(url!=null&&!url.isEmpty()) {
+			infoPacket=Helper.getDLPinfoPacket(new ArrayList<String>(builder.command()),builder.directory(),url);
 			builder.command().add(url);
-			infoPacket=Helper.getDLPinfoPacket(url,builder.directory());
+			infoPacket.downloadable=downloadable;
 		}
 		
 		return Map.entry(builder,Optional.ofNullable(infoPacket));
