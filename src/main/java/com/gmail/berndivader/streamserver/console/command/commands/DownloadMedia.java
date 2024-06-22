@@ -17,7 +17,7 @@ import com.gmail.berndivader.streamserver.term.ANSI;
 
 @ConsoleCommand(name="dl",usage="Download media. Usage: dl --url <http source> or use --help")
 public class DownloadMedia extends Command {
-	
+		
 	private class InterruptHandler implements Callable<Boolean> {
 		
 		private final Process process;
@@ -53,7 +53,7 @@ public class DownloadMedia extends Command {
 		if(directory.isFile()) {
 			return false;
 		}
-		
+				
 		Entry<ProcessBuilder,Optional<InfoPacket>>entry=Helper.prepareDownloadBuilder(directory,args[0]);
 		ProcessBuilder builder=entry.getKey();
 		Optional<InfoPacket>infoPacket=entry.getValue();
@@ -71,7 +71,7 @@ public class DownloadMedia extends Command {
 			while(process.isAlive()&&!future.isDone()) {
 				if(input.ready()) {
 					time=System.currentTimeMillis();
-					ANSI.println(input.readLine());
+					ANSI.printRaw("[CR][DL]"+input.readLine());
 				} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
 					ANSI.printWarn("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
 					process.destroy();
