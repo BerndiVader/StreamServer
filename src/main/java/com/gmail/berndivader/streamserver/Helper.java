@@ -42,7 +42,7 @@ public class Helper {
 		EXECUTOR=Executors.newFixedThreadPool(10);
 		SCHEDULED_EXECUTOR=Executors.newScheduledThreadPool(5);
 		HTTP_CLIENT=HttpClients.createMinimal();
-		GSON=new GsonBuilder().setPrettyPrinting().create();
+		GSON=new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 	}	
 	
 	public static int getFilePosition(String name) {
@@ -182,7 +182,7 @@ public class Helper {
 		byte[]bytes=new byte[length];
 		try {
 			int size=stream.read(bytes,0,length);
-			return new String(bytes).substring(0,size);
+			return new String(bytes).substring(0,size-1);
 		} catch (IOException e) {
 			ANSI.printErr("getStringFromStream method failed.",e);
 			return "";
@@ -220,7 +220,8 @@ public class Helper {
 		infoBuilder.directory(directory);
 		infoBuilder.command(commands);
 		infoBuilder.command().addAll(Arrays.asList("--quiet","--no-warnings","--dump-json",url));
-		InfoPacket info=null;
+		
+		InfoPacket info=new InfoPacket();
 		try {
 			Process infoProc=infoBuilder.start();
 			BufferedReader reader=infoProc.inputReader();
@@ -252,7 +253,7 @@ public class Helper {
 					,"--restrict-filenames"
 					,"--embed-metadata"
 					,"--embed-thumbnail"
-					,"--output","%(title).200s.%(ext)s"
+					,"--output","%(title).64s.%(ext)s"
 			);
 		} else {
 			builder.command("yt-dlp"
@@ -264,14 +265,14 @@ public class Helper {
 					,"--format","bestaudio"
 					,"--audio-format","mp3"
 					,"--audio-quality","160K"
-					,"--output","%(title).200s.%(ext)s"
+					,"--output","%(title).64s.%(ext)s"
 					,"--restrict-filenames"
 					,"--no-playlist"
 			);
 		}
 		
 		String[]temp=args.split("--");
-		String url=null;
+		String url="";
 		
 		for(int i=0;i<temp.length;i++) {
 			if(temp[i].isEmpty()) continue;
@@ -310,12 +311,9 @@ public class Helper {
 			}			
 		}
 		
-		InfoPacket infoPacket=null;
-		if(url!=null&&!url.isEmpty()) {
-			infoPacket=Helper.getDLPinfoPacket(new ArrayList<String>(builder.command()),builder.directory(),url);
-			builder.command().add(url);
-			infoPacket.downloadable=downloadable;
-		}
+		InfoPacket infoPacket=Helper.getDLPinfoPacket(new ArrayList<String>(builder.command()),builder.directory(),url);
+		if(!url.isEmpty()) builder.command().add(url);
+		infoPacket.downloadable=downloadable;
 		
 		return Map.entry(builder,Optional.ofNullable(infoPacket));
 	}

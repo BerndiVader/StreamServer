@@ -18,12 +18,17 @@ public class InfoPacket {
 		public String duration_string=UNKNOWN;
 		public String format=UNKNOWN;
 		public String filename=UNKNOWN;
+		public String local_filename=UNKNOWN;
 		public Integer filesize_approx=-1;
 		public Boolean downloadable=false;
 		
 		@Override
 		public String toString() {
 	        return Helper.GSON.toJson(this);
+		}
+		
+		public boolean isSet(String field) {
+			return !field.equals(UNKNOWN);
 		}
 
 	}
