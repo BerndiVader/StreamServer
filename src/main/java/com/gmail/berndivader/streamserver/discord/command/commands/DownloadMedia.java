@@ -85,7 +85,16 @@ public class DownloadMedia extends Command<Void> {
 				try {
 					message.edit(msg->{
 						msg.setComponents(ActionRow.of(Button.danger(uuid,"Cancel")))
-						.setContent("Starting download...");
+						.setContent("Starting download...").addEmbed(embed->{
+							infoPacket.ifPresent(info->{
+								embed.setTitle(info.title)
+									.setAuthor(info.uploader,info.channel_url,info.thumbnail)
+									.setImage(info.thumbnail)
+									.setColor(Color.BLUE)
+									.setUrl(info.webpage_url)
+									.setFooter(info.format,info.thumbnail);
+							});
+						});
 					}).subscribe();
 					
 					Disposable listener=message.getClient().on(ButtonInteractEvent.class,event->{
@@ -105,7 +114,6 @@ public class DownloadMedia extends Command<Void> {
 					Process process=builder.start();
 
 					BufferedReader input=process.inputReader();
-					StringBuilder filename=new StringBuilder();
 					long time=System.currentTimeMillis();
 					status=Status.RUNNING;
 					
@@ -116,34 +124,14 @@ public class DownloadMedia extends Command<Void> {
 						}
 						if(input.ready()) {
 							time=System.currentTimeMillis();
-							String out=input.readLine();
-							if(out.startsWith("[download] Destination:")) {
-								filename.append(out.substring(23));
-								message.edit(msg->{
-									msg.removeEmbeds()
-									.addEmbed(embed->{
-										embed.setTitle("Downloading")
-										.setDescription(filename.toString())
-										.setColor(Color.BLUE);
-									});
-								}).subscribe();
-							} else if(out.startsWith("[ExtractAudio] Destination:")) {
-								filename.setLength(0);
-								filename.append(out.replace("[ExtractAudio] Destination: ",""));
-							} else if(out.startsWith("[download]")) {
-								message.edit(msg->{
-									msg.setContent(out);
-								}).subscribe();
-							} else if(out.startsWith("ERROR:")) {
-								message.edit(msg->{
-									msg.setContent("").removeEmbeds().addEmbed(embed->{
-										embed.setTitle("ERROR")
-										.setDescription(out)
-										.setColor(Color.RED);
-									});
-									msg.setComponents(new ArrayList<LayoutComponent>());
-								}).subscribe();
+							String line=input.readLine();
+							if(line.contains("[EmbedThumbnail]")) {
+								infoPacket.ifPresent(info->{
+									String[]temp=line.split("\"");
+									if(temp.length>0) info.local_filename=temp[1];
+								});
 							}
+							message.edit(msg->msg.setContent(line));
 						} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l) status=Status.TIMEOUT;
 					}
 					
@@ -154,26 +142,34 @@ public class DownloadMedia extends Command<Void> {
 					if(errorBuilder.length()>0) status=Status.ERROR;
 					
 					message.edit(msg->{
-						msg.setComponents(new ArrayList<LayoutComponent>())
-						.setContent("")
-						.addEmbed(embed->{
+						msg.setComponents(new ArrayList<LayoutComponent>());
+						msg.addEmbed(embed->{
 							switch(status) {
 							case TIMEOUT:
+								msg.setContent("");
 								embed.setTitle("TIMEOUT")
 								.setDescription("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.")
 								.setColor(Color.RED);
 								break;
 							case FINISHED:
-								embed.setTitle("Media download finished.")
-								.setDescription(filename.toString())
-								.setColor(Color.GREEN);
+								msg.setContent("FINISHED");
+								infoPacket.ifPresent(info->{
+									embed.setTitle(info.title)
+										.setAuthor(info.uploader,info.channel_url,info.thumbnail)
+										.setImage(info.thumbnail)
+										.setColor(Color.GREEN)
+										.setUrl(info.webpage_url)
+										.setFooter(info.format,info.thumbnail);
+								});
 								break;
 							case ERROR:
+								msg.setContent("");
 								embed.setTitle("ERROR")
 								.setColor(Color.ORANGE)
 								.setDescription("Something went wront.\n\n".concat(errorBuilder.toString()));
 								break;
 							default:
+								msg.setContent("");
 								embed.setTitle("WARNING")
 								.setDescription("Mediafile already downloaded and exists.")
 								.setColor(Color.ORANGE);

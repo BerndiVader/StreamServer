@@ -2,7 +2,6 @@ package com.gmail.berndivader.streamserver.console.command.commands;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -30,14 +29,9 @@ public class DownloadMedia extends Command {
 		@Override
 		public Boolean call() throws Exception {
 			
-			String input="";
 			while(run&&process.isAlive()) {
-				if(System.in.available()>0) {
-					byte[]bytes=new byte[System.in.available()];
-					int size=System.in.read(bytes);
-					input=new String(bytes).substring(0,size-1);
-					if(input!=null&&input.equals(".q")) run=false;
-				}
+				int avail=System.in.available();
+				if(avail>0) if(Helper.getStringFromStream(System.in,avail).equals(".q")) run=false;
 			}
 			if(process.isAlive()) process.destroy();
 			return true;
@@ -47,20 +41,14 @@ public class DownloadMedia extends Command {
 	@Override
 	public boolean execute(String[] args) {
 		File directory=new File(Config.DL_MUSIC_PATH);
-		if(!directory.exists()) {
-			directory.mkdir();
-		}
-		if(directory.isFile()) {
-			return false;
-		}
+		if(!directory.exists()) directory.mkdir();
+		if(directory.isFile()) return false;
 				
 		Entry<ProcessBuilder,Optional<InfoPacket>>entry=Helper.prepareDownloadBuilder(directory,args[0]);
 		ProcessBuilder builder=entry.getKey();
-		Optional<InfoPacket>infoPacket=entry.getValue();
 		
-		if(infoPacket.isPresent()) {
-			ANSI.println(infoPacket.get().toString());
-		}
+		Optional<InfoPacket>infoPacket=entry.getValue();
+		infoPacket.ifPresent(info->ANSI.println(info.toString()));
 
 		try {
 			Process process=builder.start();
@@ -70,23 +58,30 @@ public class DownloadMedia extends Command {
 			
 			while(process.isAlive()&&!future.isDone()) {
 				if(input.ready()) {
+					String line=input.readLine();
+					if(line.contains("[EmbedThumbnail]")) {
+						infoPacket.ifPresent(info->{
+							String[]temp=line.split("\"");
+							if(temp.length>0) info.local_filename=temp[1];
+						});
+					}
 					time=System.currentTimeMillis();
-					ANSI.printRaw("[CR][DL]"+input.readLine());
+					ANSI.printRaw("[CR][DL]"+line);
 				} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
+					ANSI.printRaw("[BR]");
 					ANSI.printWarn("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
 					process.destroy();
 				}
 			}
-			
+						
 			BufferedReader error=process.errorReader();
 			if(error!=null&&error.ready()) {
-				error.lines().forEach(line->{
-					ANSI.printWarn(line);
-				});
+				ANSI.printRaw("[BR]");
+				error.lines().forEach(line->ANSI.printWarn(line));
 			}
-			
 			if(process.isAlive()) process.destroy();
-		} catch (IOException e) {
+		} catch (Exception e) {
+			ANSI.printRaw("[BR]");
 			ANSI.printErr("Error while looping yt-dlp process.",e);
 		}
 		return true;

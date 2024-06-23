@@ -47,9 +47,7 @@ public final class StreamServer {
 		if(ConsoleRunner.forceExit) {
 			ANSI.println("[RED][FORCE EXIT][/RED]");
 			System.exit(0);
-		} else {
-			ANSI.println("[GREEN][FINISH ALL RUNNING TASKS, THEN EXIT][/GREEN]");
-		}
+		} else ANSI.println("[GREEN][FINISH ALL RUNNING TASKS, THEN EXIT][/GREEN]");
 	}
 	
 }
