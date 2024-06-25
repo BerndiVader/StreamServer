@@ -189,10 +189,7 @@ public class Helper {
 		}
 	}
 	
-	public static String createDownloadLink(File file) {
-
-		ANSI.println(file.getAbsolutePath());
-		
+	public static FFProbePacket createDownloadLink(File file) {		
 		ProcessBuilder builder=new ProcessBuilder();
 		builder.directory(new File("./"));
 		builder.command("ffprobe","-v","quiet","-print_format","json","-show_format",file.getAbsolutePath());
@@ -209,9 +206,7 @@ public class Helper {
 		} catch (Exception e) {
 			ANSI.printErr("createDownloadlink method failed.", e);
 		}
-		
-		ANSI.println(packet.toString());
-		return null;
+		return packet;
 	}
 	
 	public static InfoPacket getDLPinfoPacket(List<String>commands,File directory,String url) {
