@@ -2,9 +2,11 @@ package com.gmail.berndivader.streamserver.discord.command.commands;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,6 +15,7 @@ import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
+import com.gmail.berndivader.streamserver.mysql.MakeDownloadable;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 import discord4j.core.event.domain.interaction.ButtonInteractEvent;
@@ -86,15 +89,20 @@ public class DownloadMedia extends Command<Void> {
 					message.edit(msg->{
 						msg.setComponents(ActionRow.of(Button.danger(uuid,"Cancel")))
 						.setContent("Starting download...").addEmbed(embed->{
+							embed.setTitle("Downloading....");
 							infoPacket.ifPresent(info->{
-								embed.setTitle(info.title)
-									.setAuthor(info.uploader,info.channel_url,info.thumbnail)
-									.setImage(info.thumbnail)
-									.setColor(Color.BLUE)
-									.setUrl(info.webpage_url)
-									.setFooter(info.format,info.thumbnail);
+								embed.setUrl(info.webpage_url);
+								embed.setDescription(info.title);
+								embed.setImage(info.thumbnail);
+								embed.setColor(Color.BLUE);
+								embed.setFooter(info.format,null);
 							});
 						});
+					}).doOnCancel(()->{
+						ANSI.printRaw("[BR]CANCELLED[BR]");
+					})
+					.doOnError(e->{
+						ANSI.printErr(e.getMessage(),e.getCause());
 					}).subscribe();
 					
 					Disposable listener=message.getClient().on(ButtonInteractEvent.class,event->{
@@ -125,7 +133,7 @@ public class DownloadMedia extends Command<Void> {
 						if(input.ready()) {
 							time=System.currentTimeMillis();
 							String line=input.readLine();
-							if(line.contains("[EmbedThumbnail]")) {
+							if(line.contains("[Metadata]")) {
 								infoPacket.ifPresent(info->{
 									String[]temp=line.split("\"");
 									if(temp.length>0) info.local_filename=temp[1];
@@ -153,13 +161,32 @@ public class DownloadMedia extends Command<Void> {
 								break;
 							case FINISHED:
 								msg.setContent("FINISHED");
+								embed.setTitle("Download finished....");
 								infoPacket.ifPresent(info->{
-									embed.setTitle(info.title)
-										.setAuthor(info.uploader,info.channel_url,info.thumbnail)
-										.setImage(info.thumbnail)
-										.setColor(Color.GREEN)
-										.setUrl(info.webpage_url)
-										.setFooter(info.format,info.thumbnail);
+									embed.setUrl(info.webpage_url);
+									embed.setDescription(info.title);
+									embed.setImage(info.thumbnail);
+									embed.setColor(Color.GREEN);
+									embed.setFooter(info.format,null);
+
+									if(info.downloadable) {
+										File file=new File(builder.directory().getAbsolutePath()+"/"+info.local_filename);
+										if(file.exists()&&file.isFile()&&file.canRead()) {
+											MakeDownloadable downloadable= new MakeDownloadable(file);
+											boolean ok=false;
+											try {
+												ok=downloadable.future.get(2,TimeUnit.MINUTES);
+											} catch (InterruptedException | ExecutionException | TimeoutException e) {
+												ANSI.printErr(e.getMessage(),e);
+												ok=false;
+											}
+											if(ok) {
+												embed.addField("Downloadlink",downloadable.getDownloadLink(),false);
+											} else {
+												embed.addField("Downloadlink","Failed to create download link.",false);
+											}
+										}
+									}
 								});
 								break;
 							case ERROR:
@@ -181,7 +208,7 @@ public class DownloadMedia extends Command<Void> {
 					if(listener!=null&&!listener.isDisposed()) listener.dispose();
 					if(process.isAlive()) process.destroyForcibly();
 					
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}).doOnError(error->{

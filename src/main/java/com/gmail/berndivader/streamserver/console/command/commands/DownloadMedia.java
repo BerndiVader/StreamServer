@@ -6,12 +6,14 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
+import com.gmail.berndivader.streamserver.mysql.MakeDownloadable;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 @ConsoleCommand(name="dl",usage="Download media. Usage: dl --url <http source> or use --help")
@@ -59,7 +61,7 @@ public class DownloadMedia extends Command {
 			while(process.isAlive()&&!future.isDone()) {
 				if(input.ready()) {
 					String line=input.readLine();
-					if(line.contains("[EmbedThumbnail]")) {
+					if(line.contains("[Metadata]")) {
 						infoPacket.ifPresent(info->{
 							String[]temp=line.split("\"");
 							if(temp.length>0) info.local_filename=temp[1];
@@ -80,6 +82,22 @@ public class DownloadMedia extends Command {
 				error.lines().forEach(line->ANSI.printWarn(line));
 			}
 			if(process.isAlive()) process.destroy();
+			
+			if(infoPacket.isPresent()) {
+				InfoPacket info=infoPacket.get();
+				if(info.downloadable) {
+					File file=new File(builder.directory().getAbsolutePath()+"/"+info.local_filename);
+					if(file.exists()&&file.isFile()&&file.canRead()) {
+						MakeDownloadable downloadable= new MakeDownloadable(file);
+						boolean ok=downloadable.future.get(2,TimeUnit.MINUTES);
+						if(ok) {
+							ANSI.println("[BR][BOLD][GREEN]"+downloadable.getDownloadLink()+"[RESET]");
+						} else {
+							ANSI.println("[BR]Failed to create download link.");
+						}
+					}
+				}
+			}
 		} catch (Exception e) {
 			ANSI.printRaw("[BR]");
 			ANSI.printErr("Error while looping yt-dlp process.",e);

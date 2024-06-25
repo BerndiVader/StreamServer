@@ -1,13 +1,11 @@
 package com.gmail.berndivader.streamserver.mysql;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.UUID;
 
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.term.ANSI;
@@ -60,15 +58,6 @@ public class DatabaseConnection {
 				ANSI.printErr("Failed to check for Downloadables table.",e);
 			}
 		}
-	}
-	
-	public static String makeDownloadable(String path) {
-		File file=new File(path);
-		if(file.exists()&&file.isFile()&&file.canRead()) {
-			UUID uuid=UUID.randomUUID();
-			
-		}
-		return null;
 	}
 	
 	public static Connection getNewConnection() throws SQLException {
