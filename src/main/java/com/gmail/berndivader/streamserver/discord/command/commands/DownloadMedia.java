@@ -131,7 +131,7 @@ public class DownloadMedia extends Command<Void> {
 									if(temp.length>0) info.local_filename=temp[1];
 								});
 							}
-							message.edit(msg->msg.setContent(line));
+							message.edit(msg->msg.setContent(line)).subscribe();
 						} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l) status=Status.TIMEOUT;
 					}
 					
