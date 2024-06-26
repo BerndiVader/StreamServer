@@ -16,7 +16,7 @@ import com.gmail.berndivader.streamserver.config.Config;
 
 public class MakeDownloadable implements Callable<Boolean>{
 	
-	private static final String sql="INSERT INTO `downloadables` (`uuid`, `path`, timestamp) VALUES(?, ?, ?);";
+	private static final String sql="INSERT INTO `downloadables` (`uuid`, `path`, timestamp, downloads) VALUES(?, ?, ?, ?);";
 	private File file;
 	private Optional<UUID>optUUID=Optional.ofNullable(null);
 	public Future<Boolean>future;
@@ -28,9 +28,8 @@ public class MakeDownloadable implements Callable<Boolean>{
 	}
 	
 	public String getDownloadLink() {
-		String link="";
-		if(optUUID.isPresent()) link=Config.DL_URL+"/download.php?uuid="+optUUID.get().toString();
-		return link;
+		if(optUUID.isPresent()) return Config.DL_URL+"/download.php?uuid="+optUUID.get().toString();
+		return "";
 	}
 
 	@Override
@@ -41,7 +40,8 @@ public class MakeDownloadable implements Callable<Boolean>{
 				statement.addBatch("START TRANSACTION;");
 				statement.setString(1,uuid.toString());
 				statement.setString(2,file.getAbsolutePath());
-				statement.setLong(3,System.currentTimeMillis());
+				statement.setLong(3,System.currentTimeMillis()/1000l);
+				statement.setInt(4,0);
 				statement.addBatch();
 				statement.addBatch("COMMIT;");
 				statement.executeBatch();
