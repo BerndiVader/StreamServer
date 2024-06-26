@@ -250,6 +250,22 @@ public class Helper {
 					,"--embed-thumbnail"
 					,"--output","%(title).64s.%(ext)s"
 			);
+		} else if(args.contains("--auto ")) {
+			args=args.replace("--auto","");
+			builder.command("yt-dlp"
+					,"--progress-delta","2"
+					,"--restrict-filenames"
+					,"--embed-metadata"
+					,"--embed-thumbnail"
+					,"--output","%(title).64s.%(ext)s"
+			);
+			if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
+				builder.command().add("--cookies");
+				builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
+			}
+			File dir=getOrCreateMediaDir("temp");
+			if(dir!=null) builder.directory(dir);
+			downloadable=true;
 		} else {
 			builder.command("yt-dlp"
 					,"--progress-delta","2"
@@ -283,10 +299,9 @@ public class Helper {
 						break;
 					case("dir"):
 						if(parse.length==2) {
-							File dir=new File(Config.DL_MUSIC_PATH.concat("/").concat(parse[1]));
+							File dir=getOrCreateMediaDir(parse[1]);
 							parse[1]="";
-							if(!dir.exists()) dir.mkdir();
-							if(dir.isDirectory()) {
+							if(dir!=null) {
 								builder.directory(dir);
 							} else {
 								ANSI.printWarn("Warning! Download directory is a file, using default.");
@@ -311,6 +326,13 @@ public class Helper {
 		infoPacket.downloadable=downloadable;
 		
 		return Map.entry(builder,Optional.ofNullable(infoPacket));
+	}
+	
+	public static File getOrCreateMediaDir(String name) {
+		File dir=new File(Config.DL_MUSIC_PATH.concat("/").concat(name));
+		if(!dir.exists()) dir.mkdir();
+		if(dir.isDirectory()) return dir;
+		return null;
 	}
 	
 	public static void close() {
