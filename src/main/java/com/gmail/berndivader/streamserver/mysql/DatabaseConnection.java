@@ -50,7 +50,7 @@ public class DatabaseConnection {
 			try(Connection connection=getNewConnection()) {
 				try(Statement statement=connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 					statement.addBatch("START TRANSACTION;");
-					statement.addBatch("CREATE TABLE IF NOT EXISTS `downloadables` (`uuid` VARCHAR(36) NOT NULL, `path` VARCHAR(256) NOT NULL, `timestamp` INT NOT NULL, `downloads` INT NOT NULL);");
+					statement.addBatch("CREATE TABLE IF NOT EXISTS `downloadables` (`uuid` VARCHAR(36) NOT NULL, `path` VARCHAR(256) NOT NULL, `timestamp` BIGINT NOT NULL, `downloads` INT NOT NULL);");
 					statement.addBatch("COMMIT;");
 					statement.executeBatch();
 				}
