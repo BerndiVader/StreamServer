@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
+import com.gmail.berndivader.streamserver.config.Config;
 
 public class GetNextScheduled implements Callable<String> {
 	
@@ -39,7 +40,7 @@ public class GetNextScheduled implements Callable<String> {
 			return null;
 		}
 		
-		ANSI.println("\n[MYSQL GET NEXT SCHEDULED SUCCSEED]");
+		if(Config.DEBUG) ANSI.println("\n[MYSQL GET NEXT SCHEDULED SUCCSEED]");
 		return filename;
 	}
 

@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
+import com.gmail.berndivader.streamserver.config.Config;
 
 public class UpdateCurrent implements Runnable{
 	
@@ -47,7 +48,7 @@ public class UpdateCurrent implements Runnable{
 			ANSI.printErr("Update now playing entry failed.",e);
 			return;
 		}
-		ANSI.println("\n[SUCSESSFUL MYSQL CURRENT UPDATE]");
+		if(Config.DEBUG) ANSI.println("\n[SUCSESSFUL MYSQL CURRENT UPDATE]");
 		
 	}
 

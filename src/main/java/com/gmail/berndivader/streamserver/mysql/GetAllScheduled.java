@@ -10,6 +10,7 @@ import java.util.concurrent.Future;
 
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
+import com.gmail.berndivader.streamserver.config.Config;
 
 public class GetAllScheduled implements Callable<ArrayList<String>> {
 	
@@ -37,7 +38,7 @@ public class GetAllScheduled implements Callable<ArrayList<String>> {
 			return null;
 		}
 		
-		ANSI.println("\n[MYSQL GET SCHEDULED LIST SUCCSEED]");
+		if(Config.DEBUG) ANSI.println("\n[MYSQL GET SCHEDULED LIST SUCCSEED]");
 		return files;
 	}
 

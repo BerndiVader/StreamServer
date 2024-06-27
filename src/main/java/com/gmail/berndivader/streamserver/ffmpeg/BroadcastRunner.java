@@ -45,13 +45,12 @@ public class BroadcastRunner extends TimerTask {
 		
 		Helper.refreshFilelist();
 		Helper.shuffleFilelist(Helper.files);
-		ANSI.println("DONE!");
 
 		index=0;
 		runStream();
 		
 		Helper.SCHEDULED_EXECUTOR.scheduleAtFixedRate(this, 0l, 1l, TimeUnit.SECONDS);
-		
+		ANSI.println("DONE!");		
 	}
 	
 	public void stop() throws InterruptedException {

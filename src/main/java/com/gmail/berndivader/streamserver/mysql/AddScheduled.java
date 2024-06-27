@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.gmail.berndivader.streamserver.Helper;
+import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 public class AddScheduled implements Runnable {
@@ -45,7 +46,7 @@ public class AddScheduled implements Runnable {
 			ANSI.printErr("Failed to add a file to the scheduled playlist",e);
 			return;
 		}
-		ANSI.println(exists?"\n[MYSQL TRACK ADDED FOR SCHEDULE]":"\n[MYSQL TRACK ALREADY ON SCHEDULE]");
+		if(Config.DEBUG) ANSI.println(exists?"\n[MYSQL TRACK ADDED FOR SCHEDULE]":"\n[MYSQL TRACK ALREADY ON SCHEDULE]");
 	}
 
 }

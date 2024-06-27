@@ -16,6 +16,7 @@ import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Format;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
+import com.gmail.berndivader.streamserver.config.Config;
 
 public class UpdatePlaylist implements Callable<Boolean> {
 	
@@ -91,7 +92,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 			ANSI.printErr("Update playlist failed.",e);
 			return false;
 		}
-		ANSI.println("\n[SUCSESSFUL MYSQL PLAYLIST UPDATE]");
+		if(Config.DEBUG) ANSI.println("\n[SUCSESSFUL MYSQL PLAYLIST UPDATE]");
 		return true;
 	}
 
