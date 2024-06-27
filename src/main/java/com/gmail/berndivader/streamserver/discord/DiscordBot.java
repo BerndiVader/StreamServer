@@ -29,15 +29,18 @@ public final class DiscordBot {
 	
 	public static DiscordBot instance;
 	
-	public final GatewayDiscordClient client;
-	public final EventDispatcher dispatcher;
+	private final GatewayDiscordClient client;
+	private EventDispatcher dispatcher;
 	public static Status status;
 	
+	static {
+		status=Status.DISCONNECTED;
+	}
 	
 	public DiscordBot() {
 		instance=this;
 		new Commands();
-		status=Status.DISCONNECTED;
+		DiscordBot.status=Status.DISCONNECTED;
 		
 		client=DiscordClientBuilder.create(Config.DISCORD_TOKEN).build().login()
 				.doOnSubscribe(new Consumer<Subscription>() {
@@ -66,10 +69,11 @@ public final class DiscordBot {
 					ANSI.printErr("Connection to Discord failed.",error);
 				}
 				
-			}).block();
+		}).block();
+		
+		if(status!=Status.CONNECTED) return;
 		
 		dispatcher=client.getEventDispatcher();
-		
 		dispatcher.on(MessageCreateEvent.class)
 			.flatMap(new Function<MessageCreateEvent,Mono<Void>>() {
 
