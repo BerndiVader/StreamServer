@@ -6,6 +6,7 @@ import java.util.concurrent.TimeoutException;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.mysql.UpdatePlaylist;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 @ConsoleCommand(name="refresh",usage="Refresh playlist in database.")
 public class RefreshPlaylist extends Command {
@@ -15,8 +16,7 @@ public class RefreshPlaylist extends Command {
 		try {
 			new UpdatePlaylist(true);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ANSI.printErr("Failed to update mysql playlist table.",e);
 		}
 		return true;
 	}

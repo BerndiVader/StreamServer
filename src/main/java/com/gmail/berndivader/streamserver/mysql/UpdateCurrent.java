@@ -4,32 +4,35 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.config.Config;
 
-public class UpdateCurrent implements Runnable{
+public class UpdateCurrent implements Callable<Boolean>{
 	
 	String sql="INSERT INTO `current` (`title`, `info`) VALUES(?, ?);";
 	String title,info;
+	
+	public Future<Boolean>future;
 	
 	public UpdateCurrent(String title, String info) {
 		
 		this.title=title;
 		this.info=info;
 		
-		Helper.EXECUTOR.submit(this);
-		
+		future=Helper.EXECUTOR.submit(this);
 	}
 
 	@Override
-	public void run() {
+	public Boolean call() {
 		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
 				
-				ANSI.println("[BEGIN MYSQL CURRENT UPDATE]");
+				if(Config.DEBUG) ANSI.println("[BEGIN MYSQL CURRENT UPDATE]");
 				
 				statement.addBatch("START TRANSACTION;");
 				statement.addBatch("DELETE FROM `current`;");
@@ -46,9 +49,10 @@ public class UpdateCurrent implements Runnable{
 			
 		} catch (SQLException e) {
 			ANSI.printErr("Update now playing entry failed.",e);
-			return;
+			return false;
 		}
 		if(Config.DEBUG) ANSI.println("\n[SUCSESSFUL MYSQL CURRENT UPDATE]");
+		return true;
 		
 	}
 

@@ -4,27 +4,30 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
-public class AddScheduled implements Runnable {
+public class AddScheduled implements Callable<Boolean> {
 	
 	String sql_insert="INSERT INTO `scheduled` (`title`, `filename`) VALUES(?, ?);";
 	String sql_testfor="SELECT `filename` from `scheduled` where `filename` = ?";
 	String title,filename;
+	public Future<Boolean>future;
 	
 	public AddScheduled(String filename) {
 		
 		this.title=filename.substring(0,filename.length()-4);
 		this.filename=filename;
 		
-		Helper.EXECUTOR.submit(this);
+		future=Helper.EXECUTOR.submit(this);
 	}
 
 	@Override
-	public void run() {
+	public Boolean call() {
 		
 		boolean exists=false;
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
@@ -44,9 +47,10 @@ public class AddScheduled implements Runnable {
 			
 		} catch (SQLException e) {
 			ANSI.printErr("Failed to add a file to the scheduled playlist",e);
-			return;
+			return false;
 		}
 		if(Config.DEBUG) ANSI.println(exists?"\n[MYSQL TRACK ADDED FOR SCHEDULE]":"\n[MYSQL TRACK ALREADY ON SCHEDULE]");
+		return true;
 	}
 
 }
