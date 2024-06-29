@@ -31,9 +31,10 @@ public class DownloadMedia extends Command {
 		@Override
 		public Boolean call() throws Exception {
 			
+			int avail=0;
 			while(run&&process.isAlive()) {
-				int avail=System.in.available();
-				if(avail>0) if(Helper.getStringFromStream(System.in,avail).equals(".q")) run=false;
+				avail=System.in.available();
+				if(avail>0) run=!Helper.getStringFromStream(System.in,avail).equals(".q");
 			}
 			if(process.isAlive()) process.destroy();
 			return true;
