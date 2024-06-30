@@ -53,7 +53,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 				
 				ANSI.println("[BEGIN MYSQL PLAYLIST UPDATE]");
 				if(isCommand) {
-					ANSI.print("|");
+					ANSI.print("[GREEN]|");
 				}
 				
 				statement.addBatch("START TRANSACTION;");
@@ -89,7 +89,6 @@ public class UpdatePlaylist implements Callable<Boolean> {
 				statement.executeBatch();
 				
 			}
-			connection.commit();
 		} catch (SQLException e) {
 			ANSI.printErr("Update playlist failed.",e);
 			return false;
