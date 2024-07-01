@@ -1,6 +1,8 @@
 package com.gmail.berndivader.streamserver;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.config.Config;
@@ -20,20 +22,23 @@ public final class StreamServer {
 		new Config();
 		new DatabaseConnection();
 		
-		if(args.length!=0) {
-			switch(args[0]) {
-			case"--db-wipe":
-				try {
-					new WipeDatabase();
-				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					ANSI.printErr("Failed to clear MYSQL tables.", e);
+		if(args.length>0) {
+			Arrays.stream(args).forEach(arg->{
+				switch(args[0]) {
+				case"--db-wipe":
+					try {
+						WipeDatabase wipe=new WipeDatabase();
+						wipe.future.get(20l,TimeUnit.SECONDS);
+					} catch (InterruptedException | ExecutionException | TimeoutException e) {
+						ANSI.printErr("Failed to clear MYSQL tables.", e);
+					}
+					break;
 				}
-				break;
-			}
+			});
 		}
 		
-		new DiscordBot();
-		new BroadcastRunner();
+		//new DiscordBot();
+		//new BroadcastRunner();
 		new ConsoleRunner();
 
 		try {

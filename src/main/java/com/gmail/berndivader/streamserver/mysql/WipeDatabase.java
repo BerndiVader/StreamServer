@@ -4,37 +4,39 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
-public class WipeDatabase implements Runnable {
+public class WipeDatabase implements Callable<Boolean> {
 	
-	public WipeDatabase() throws InterruptedException, ExecutionException, TimeoutException {
+	public Future<Boolean>future;
+	
+	public WipeDatabase() {
 		
-		Future<?>future=Helper.EXECUTOR.submit(this);
-		future.get(10,TimeUnit.SECONDS);
+		future=Helper.EXECUTOR.submit(this);
 		
 	}
 
 	@Override
-	public void run() {
+	public Boolean call() {
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			try(Statement wipe=connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				wipe.addBatch("START TRANSACTION;");
 				wipe.addBatch("TRUNCATE TABLE `current`;");
 				wipe.addBatch("TRUNCATE TABLE `playlist`;");
 				wipe.addBatch("TRUNCATE TABLE `scheduled`;");
+				wipe.addBatch("TRUNCATE TABLE `downloadables`;");
 				wipe.addBatch("COMMIT;");
 				wipe.executeBatch();
 			}
 		} catch (SQLException e) {
 			ANSI.printErr("Reset database failed.",e);
+			return false;
 		}
+		return true;
 	}
 	
 }
