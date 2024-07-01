@@ -21,6 +21,10 @@ public class FFProbePacket {
 	@Override
 	public String toString() {
         return Helper.GSON.toJson(this);
-	}	
+	}
+	
+	public boolean isSet(String field) {
+		return !field.equals(UNKNOWN);
+	}
 
 }
