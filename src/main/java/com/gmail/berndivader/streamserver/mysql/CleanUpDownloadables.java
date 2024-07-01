@@ -14,8 +14,8 @@ import com.gmail.berndivader.streamserver.config.Config;
 
 public class CleanUpDownloadables implements Callable<Boolean>{
 	
-	private static final String SELECT_SQL="SELECT * FROM `downloadables` WHERE timestamp < UNIX_TIMESTAMP(NOW()-INTERVAL "+Config.DL_INTERVAL_VALUE+" "+Config.DL_INTERVAL_FORMAT+");";
-	private static final String DELETE_SQL="DELETE FROM `downloadables` WHERE timestamp < UNIX_TIMESTAMP(NOW()-INTERVAL "+Config.DL_INTERVAL_VALUE+" "+Config.DL_INTERVAL_FORMAT+");";
+	private static final String SELECT_SQL="SELECT path FROM downloadables WHERE timestamp < UNIX_TIMESTAMP(NOW()-INTERVAL "+Config.DL_INTERVAL_VALUE+" "+Config.DL_INTERVAL_FORMAT+");";
+	private static final String DELETE_SQL="DELETE FROM downloadables WHERE timestamp < UNIX_TIMESTAMP(NOW()-INTERVAL "+Config.DL_INTERVAL_VALUE+" "+Config.DL_INTERVAL_FORMAT+");";
 	public Future<Boolean>future;
 	
 	public CleanUpDownloadables() {
