@@ -103,12 +103,12 @@ public class DownloadMedia extends Command {
 					File file=new File(builder.directory().getAbsolutePath()+"/"+info.local_filename);
 					if(file.exists()&&file.isFile()&&file.canRead()) {
 						MakeDownloadable downloadable= new MakeDownloadable(file);
-						boolean ok=downloadable.future.get(2,TimeUnit.MINUTES);
-						if(ok) {
-							ANSI.println("[BR][BOLD][GREEN]"+downloadable.getDownloadLink()+"[RESET]");
-						} else {
+						Optional<String>optLink=downloadable.future.get(2,TimeUnit.MINUTES);
+						optLink.ifPresentOrElse(link->{
+							ANSI.println("[BR][BOLD][GREEN]"+link+"[RESET]");
+						},()->{
 							ANSI.printWarn("[BR]Failed to create download link.");
-						}
+						});
 					}
 				}
 			}

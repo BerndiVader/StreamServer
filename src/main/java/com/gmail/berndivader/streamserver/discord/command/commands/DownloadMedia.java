@@ -173,20 +173,20 @@ public class DownloadMedia extends Command<Void> {
 										File file=new File(builder.directory().getAbsolutePath()+"/"+info.local_filename);
 										if(file.exists()&&file.isFile()&&file.canRead()) {
 											MakeDownloadable downloadable= new MakeDownloadable(file);
-											boolean ok=false;
+											Optional<String>optLink=Optional.ofNullable(null);
 											try {
-												ok=downloadable.future.get(2,TimeUnit.MINUTES);
+												optLink=downloadable.future.get(2,TimeUnit.MINUTES);
 											} catch (InterruptedException | ExecutionException | TimeoutException e) {
 												ANSI.printErr(e.getMessage(),e);
-												ok=false;
 											}
-											if(ok) {
-												embed.addField("Downloadlink",downloadable.getDownloadLink(),false);
-											} else {
+											optLink.ifPresentOrElse(link->{
+												embed.addField("Downloadlink",link,false);
+											},()->{
 												embed.addField("Downloadlink","Failed to create download link.",false);
-											}
+											});
 										}
 									}
+									
 								});
 								break;
 							case ERROR:

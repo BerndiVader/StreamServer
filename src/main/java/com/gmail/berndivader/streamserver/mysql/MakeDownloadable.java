@@ -14,12 +14,11 @@ import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.config.Config;
 
-public class MakeDownloadable implements Callable<Boolean>{
+public class MakeDownloadable implements Callable<Optional<String>>{
 	
 	private static final String sql="INSERT INTO `downloadables` (`uuid`, `path`, timestamp, downloads) VALUES(?, ?, ?, ?);";
 	private File file;
-	private Optional<UUID>optUUID=Optional.ofNullable(null);
-	public Future<Boolean>future;
+	public Future<Optional<String>>future;
 	
 	public MakeDownloadable(File file) {
 		
@@ -27,13 +26,8 @@ public class MakeDownloadable implements Callable<Boolean>{
 		this.future=Helper.EXECUTOR.submit(this);
 	}
 	
-	public String getDownloadLink() {
-		if(optUUID.isPresent()) return Config.DL_URL+"/download.php?uuid="+optUUID.get().toString();
-		return "";
-	}
-
 	@Override
-	public Boolean call() {
+	public Optional<String> call() {
 		UUID uuid=UUID.randomUUID();
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
@@ -48,10 +42,9 @@ public class MakeDownloadable implements Callable<Boolean>{
 			}
 		} catch (SQLException e) {
 			ANSI.printErr("Failed to create downloadable media file.",e);
-			return false;
+			return Optional.ofNullable(null);
 		}
-		optUUID=Optional.ofNullable(uuid);
-		return true;
+		return Optional.of(Config.DL_URL+"/download.php?uuid="+uuid.toString());
 	}
 
 }
