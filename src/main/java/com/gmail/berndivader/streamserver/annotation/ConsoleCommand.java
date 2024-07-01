@@ -7,6 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 public @interface ConsoleCommand {
 	public String name();
 	public String usage();
+	public Requireds[] requireds() default {Requireds.NONE};
 }
 
 

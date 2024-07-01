@@ -1,7 +1,6 @@
 package com.gmail.berndivader.streamserver.console.command;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -13,6 +12,9 @@ import java.util.jar.JarInputStream;
 
 import com.gmail.berndivader.streamserver.StreamServer;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
+import com.gmail.berndivader.streamserver.discord.DiscordBot;
+import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
+import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 public class Commands {
@@ -39,15 +41,18 @@ public class Commands {
 		}
 	}
 	
-	public Commands() throws FileNotFoundException, IOException, ClassNotFoundException {
+	public Commands() {
 		instance=this;
 		commands=new HashMap<>();
-		loadCommandClasses();
-		
+		try {
+			loadCommandClasses();
+		} catch (IOException | ClassNotFoundException e) {
+			ANSI.printErr("Failed to instantiate console commands.",e);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	void loadCommandClasses() throws FileNotFoundException, IOException, ClassNotFoundException {
+	void loadCommandClasses() throws IOException, ClassNotFoundException {
 		
 		try(JarInputStream jarStream=new JarInputStream(new FileInputStream(fileName))) {
 			JarEntry entry;
@@ -60,7 +65,24 @@ public class Commands {
 						Class<?>clazz=Class.forName(clazzName);
 						ConsoleCommand anno=clazz.getAnnotation(ConsoleCommand.class);
 						if(anno!=null) {
-							commands.put(anno.name(),(Class<Command>)clazz);
+							boolean add=true;
+							for(int i=0;i<anno.requireds().length;i++) {
+								switch(anno.requireds()[i]) {
+									case BROADCASTRUNNER:
+										add&=BroadcastRunner.instance!=null;
+										break;
+									case DISCORDBOT:
+										add&=DiscordBot.instance!=null;
+										break;
+									case DATABASE:
+										add&=DatabaseConnection.INIT;
+										break;
+									default:
+										add=true;
+										break;
+								}
+							}
+							if(add) commands.put(anno.name(),(Class<Command>)clazz);
 						}
 					}
 				}

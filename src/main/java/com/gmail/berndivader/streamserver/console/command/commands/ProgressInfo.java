@@ -4,11 +4,12 @@ import java.util.concurrent.TimeUnit;
 
 import com.github.kokorin.jaffree.ffmpeg.FFmpegProgress;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
-@ConsoleCommand(name="p",usage="[time|frames|bitrate|quality|fps|drops|size|speed] -> Show ffmpeg progress info.")
+@ConsoleCommand(name="p",usage="[time|frames|bitrate|quality|fps|drops|size|speed] -> Show ffmpeg progress info.",requireds={Requireds.BROADCASTRUNNER})
 public class ProgressInfo extends Command {
 
 	@Override

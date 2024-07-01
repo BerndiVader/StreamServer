@@ -26,20 +26,22 @@ public final class StreamServer {
 			Arrays.stream(args).forEach(arg->{
 				switch(args[0]) {
 				case"--db-wipe":
-					try {
-						WipeDatabase wipe=new WipeDatabase();
-						wipe.future.get(20l,TimeUnit.SECONDS);
-					} catch (InterruptedException | ExecutionException | TimeoutException e) {
-						ANSI.printErr("Failed to clear MYSQL tables.", e);
+					if(DatabaseConnection.INIT) {
+						try {
+							WipeDatabase wipe=new WipeDatabase();
+							wipe.future.get(20l,TimeUnit.SECONDS);
+						} catch (InterruptedException | ExecutionException | TimeoutException e) {
+							ANSI.printErr("Failed to clear MYSQL tables.", e);
+						}
 					}
 					break;
 				}
 			});
 		}
 		
-		if(Config.DISCORD_BOT_START) new DiscordBot();
 		if(Config.STREAM_BOT_START) new BroadcastRunner();
-
+		if(Config.DISCORD_BOT_START) new DiscordBot();
+		
 		new ConsoleRunner();
 
 		try {

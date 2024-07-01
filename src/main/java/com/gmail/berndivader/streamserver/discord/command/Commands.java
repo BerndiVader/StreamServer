@@ -12,6 +12,9 @@ import java.util.jar.JarInputStream;
 
 import com.gmail.berndivader.streamserver.StreamServer;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
+import com.gmail.berndivader.streamserver.discord.DiscordBot;
+import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
+import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 public class Commands {
@@ -32,7 +35,7 @@ public class Commands {
 						StreamServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
 						StandardCharsets.ISO_8859_1.toString());
 			} catch (UnsupportedEncodingException e1) {
-				e1.printStackTrace();
+				ANSI.printErr("Error, there is no UTF-8 nor a ISO-8859 encoding avaible.",e1);
 			}
 		}
 	}
@@ -40,11 +43,15 @@ public class Commands {
 	public Commands() {
 		instance=this;
 		commands=new HashMap<>();
-		loadCommandClasses();
+		try {
+			loadCommandClasses();
+		} catch (ClassNotFoundException | IOException e) {
+			ANSI.printErr("Failed to instantiate console commands.",e);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void loadCommandClasses() {
+	private void loadCommandClasses() throws IOException, ClassNotFoundException {
 		try(JarInputStream jarStream=new JarInputStream(new FileInputStream(fileName))) {
 			JarEntry entry;
 			while(jarStream.available()==1) {
@@ -56,13 +63,28 @@ public class Commands {
 						Class<?>clazz=Class.forName(clazzName);
 						DiscordCommand anno=clazz.getAnnotation(DiscordCommand.class);
 						if(anno!=null) {
-							commands.put(anno.name(),(Class<Command<?>>)clazz);
+							boolean add=true;
+							for(int i=0;i<anno.requireds().length;i++) {
+								switch(anno.requireds()[i]) {
+									case BROADCASTRUNNER:
+										add&=BroadcastRunner.instance!=null;
+										break;
+									case DISCORDBOT:
+										add&=DiscordBot.instance!=null;
+										break;
+									case DATABASE:
+										add&=DatabaseConnection.INIT;
+										break;
+									default:
+										add=true;
+										break;
+								}
+							}
+							if(add) commands.put(anno.name(),(Class<Command<?>>)clazz);
 						}
 					}
 				}
 			}
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
 		}
 	}
 	

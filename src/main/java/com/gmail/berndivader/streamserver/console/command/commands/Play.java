@@ -2,10 +2,11 @@ package com.gmail.berndivader.streamserver.console.command.commands;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
-@ConsoleCommand(name="play",usage="[filename] -> Play file")
+@ConsoleCommand(name="play",usage="[filename] -> Play file",requireds={Requireds.BROADCASTRUNNER,Requireds.DATABASE})
 public class Play extends Command {
 
 	@Override

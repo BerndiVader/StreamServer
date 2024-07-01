@@ -2,10 +2,11 @@ package com.gmail.berndivader.streamserver.console.command.commands;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.mysql.AddScheduled;
 
-@ConsoleCommand(name="schedule",usage="[filename] -> Add file to scheduled playlist.")
+@ConsoleCommand(name="schedule",usage="[filename] -> Add file to scheduled playlist.",requireds= {Requireds.DATABASE})
 public class Schedule extends Command {
 
 	@Override

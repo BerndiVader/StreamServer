@@ -6,11 +6,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.mysql.GetAllScheduled;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
-@ConsoleCommand(name="listscheduled",usage="Show all scheduled files.")
+@ConsoleCommand(name="listscheduled",usage="Show all scheduled files.",requireds={Requireds.DATABASE})
 public class ListScheduled extends Command {
 
 	@Override

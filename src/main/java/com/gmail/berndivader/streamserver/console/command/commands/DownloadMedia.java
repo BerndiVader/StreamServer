@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
@@ -19,7 +20,7 @@ import com.gmail.berndivader.streamserver.mysql.CleanUpDownloadables;
 import com.gmail.berndivader.streamserver.mysql.MakeDownloadable;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
-@ConsoleCommand(name="dl",usage="Download media. Usage: dl --url <http source> or use --help")
+@ConsoleCommand(name="dl",usage="Download media. Usage: dl --url <http source> or use --help",requireds = {Requireds.DATABASE})
 public class DownloadMedia extends Command {
 		
 	private class InterruptHandler implements Callable<Boolean> {

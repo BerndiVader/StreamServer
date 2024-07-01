@@ -1,7 +1,5 @@
 package com.gmail.berndivader.streamserver.console;
 
-import java.io.IOException;
-
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.console.command.Commands;
 import com.gmail.berndivader.streamserver.term.ANSI;
@@ -15,11 +13,8 @@ public class ConsoleRunner {
 		
 		instance=this;
 		exit=false;
-		try {
-			new Commands();
-		} catch (ClassNotFoundException | IOException e) {
-			ANSI.printErr("Error instantiating console commands.",e);
-		}
+		
+		new Commands();
 		
 		while (!exit) {
 	        ANSI.prompt();

@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
@@ -12,7 +13,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="play",usage="[filename|next|last|repeat]")
+@DiscordCommand(name="play",usage="[filename|next|last|repeat]",requireds={Requireds.BROADCASTRUNNER})
 public class Play extends Command<Void> {
 	
 	int index=-1;

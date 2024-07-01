@@ -7,6 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 public @interface DiscordCommand {
 	public String name();
 	public String usage();
+	public Requireds[] requireds() default {Requireds.NONE};
 }
 
 
