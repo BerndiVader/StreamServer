@@ -5,14 +5,17 @@ import java.io.File;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
+import com.gmail.berndivader.streamserver.mysql.CleanUpDownloadables;
 import com.gmail.berndivader.streamserver.mysql.MakeDownloadable;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
@@ -43,6 +46,14 @@ public class DownloadMedia extends Command {
 
 	@Override
 	public boolean execute(String[] args) {
+		
+		CleanUpDownloadables cleanUp=new CleanUpDownloadables();
+		try {
+			cleanUp.future.get(20l,TimeUnit.SECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			ANSI.printErr("Failed to run cleanup process.",e);
+		}
+		
 		File directory=new File(Config.DL_MUSIC_PATH);
 		if(!directory.exists()) directory.mkdir();
 		if(directory.isFile()) return false;
@@ -84,6 +95,8 @@ public class DownloadMedia extends Command {
 			}
 			if(process.isAlive()) process.destroy();
 			
+			ANSI.printRaw("[BR]");
+			
 			if(infoPacket.isPresent()) {
 				InfoPacket info=infoPacket.get();
 				if(info.downloadable) {
@@ -94,7 +107,7 @@ public class DownloadMedia extends Command {
 						if(ok) {
 							ANSI.println("[BR][BOLD][GREEN]"+downloadable.getDownloadLink()+"[RESET]");
 						} else {
-							ANSI.println("[BR]Failed to create download link.");
+							ANSI.printWarn("[BR]Failed to create download link.");
 						}
 					}
 				}
