@@ -12,17 +12,19 @@ import com.gmail.berndivader.streamserver.term.ANSI;
 
 public class DatabaseConnection {
 	
-	public boolean INIT;
+	public static boolean INIT=false;
 	public static DatabaseConnection instance;
 	
 	public DatabaseConnection() {
-		instance=this;
-		INIT=true;
-		ANSI.print("Try connection to mysql database...");
+		DatabaseConnection.instance=this;
+		ANSI.print("[BLUE]Test connection to mysql server...");
 		
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
+			ANSI.println("[GREEN]OK[/GREEN]");
+			INIT=true;
 		} catch (ClassNotFoundException e) {
+			ANSI.println("[RED]FAILED[/RED][BR][YELLOW]Database functions disabled.[/YELLOW]");
 			ANSI.printErr("Missing jdbc driver.",e);
 			INIT=false;
 		}
@@ -34,7 +36,11 @@ public class DatabaseConnection {
 						if(result!=null) {
 							result.first();
 							INIT=result.getString("infotext").equals("YouTube Broadcast Bot Database");
-							ANSI.println(INIT?"DONE!":"FAILED!");
+							if(INIT) {
+								ANSI.println("[BR][GREEN]Database found.[/GREEN]");
+							} else {
+								ANSI.printWarn("Not able to identify the database!");
+							}
 						} else {
 							ANSI.printWarn("Not able to identify the database!");
 							INIT=false;
@@ -42,7 +48,7 @@ public class DatabaseConnection {
 					}
 				}
 			} catch (SQLException e) {
-				ANSI.printErr("Creating mysql connection failed.",e);
+				ANSI.printErr("Connection to database failed!",e);
 				INIT=false;
 			}
 		}
@@ -50,12 +56,13 @@ public class DatabaseConnection {
 			try(Connection connection=getNewConnection()) {
 				try(Statement statement=connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 					statement.addBatch("START TRANSACTION;");
-					statement.addBatch("CREATE TABLE IF NOT EXISTS `downloadables` (`uuid` VARCHAR(36) NOT NULL, `path` VARCHAR(256) NOT NULL, `timestamp` BIGINT NOT NULL, `downloads` INT NOT NULL);");
+					statement.addBatch("CREATE TABLE IF NOT EXISTS `downloadables` (`uuid` VARCHAR(36) NOT NULL, `path` VARCHAR(256) NOT NULL, `timestamp` BIGINT NOT NULL, `downloads` INT NOT NULL, `ffprobe` VARCHAR(4095));");
 					statement.addBatch("COMMIT;");
 					statement.executeBatch();
 				}
 			} catch (SQLException e) {
-				ANSI.printErr("Failed to check for Downloadables table.",e);
+				ANSI.printErr("Failed to check for downloadables table.",e);
+				INIT=false;
 			}
 		}
 	}

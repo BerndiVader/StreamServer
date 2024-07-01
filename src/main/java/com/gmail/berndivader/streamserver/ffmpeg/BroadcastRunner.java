@@ -135,7 +135,7 @@ public class BroadcastRunner extends TimerTask {
 		String info=currentFormat.getTag("artist")+":"+currentFormat.getTag("date")+":"+currentFormat.getTag("comment");
 		new UpdateCurrent(title, info);
 		
-		DiscordBot.instance.updateStatus(title);
+		if(DiscordBot.instance!=null) DiscordBot.instance.updateStatus(title);
 		
 		ANSI.println("Now playing: "
 			+currentFormat.getTag("title")
