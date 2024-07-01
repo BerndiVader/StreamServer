@@ -32,6 +32,8 @@ public class Config {
 	public static String DL_MUSIC_PATH="./music";
 	public static Long DL_TIMEOUT_SECONDS=1800l;
 	public static String DL_URL="https://path.to.php";
+	public static String DL_INTERVAL_FORMAT="DAY";
+	public static Integer DL_INTERVAL_VALUE=14;
 	
 	public static String DATABASE_CONNECTION="jdbc:mysql://x.x.xxx.xxx:3306/ytbot";
 	public static String DATABASE_USER="default";
@@ -100,6 +102,8 @@ public class Config {
 			data.DL_MUSIC_PATH=DL_MUSIC_PATH;
 			data.DL_TIMEOUT_SECONDS=DL_TIMEOUT_SECONDS;
 			data.DL_URL=DL_URL;
+			data.DL_INTERVAL_FORMAT=DL_INTERVAL_FORMAT;
+			data.DL_INTERVAL_VALUE=DL_INTERVAL_VALUE;
 			data.STREAM_KEY=STREAM_KEY;
 			data.STREAM_URL=STREAM_URL;
 			data.YOUTUBE_LINK=YOUTUBE_LINK;
@@ -131,6 +135,8 @@ public class Config {
 			if(data.DL_MUSIC_PATH!=null) DL_MUSIC_PATH=data.DL_MUSIC_PATH;
 			if(data.DL_TIMEOUT_SECONDS!=null) DL_TIMEOUT_SECONDS=data.DL_TIMEOUT_SECONDS;
 			if(data.DL_URL!=null) DL_URL=data.DL_URL;
+			if(data.DL_INTERVAL_FORMAT!=null) DL_INTERVAL_FORMAT=data.DL_INTERVAL_FORMAT;
+			if(data.DL_INTERVAL_VALUE!=null) DL_INTERVAL_VALUE=data.DL_INTERVAL_VALUE;
 			if(data.STREAM_KEY!=null) STREAM_KEY=data.STREAM_KEY;
 			if(data.STREAM_URL!=null) STREAM_URL=data.STREAM_URL;
 			if(data.YOUTUBE_LINK!=null) YOUTUBE_LINK=data.YOUTUBE_LINK;
