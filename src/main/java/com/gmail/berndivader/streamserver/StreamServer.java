@@ -37,8 +37,9 @@ public final class StreamServer {
 			});
 		}
 		
-		//new DiscordBot();
-		//new BroadcastRunner();
+		if(Config.DISCORD_BOT_START) new DiscordBot();
+		if(Config.STREAM_BOT_START) new BroadcastRunner();
+
 		new ConsoleRunner();
 
 		try {

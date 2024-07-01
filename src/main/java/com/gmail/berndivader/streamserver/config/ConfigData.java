@@ -8,9 +8,10 @@ public class ConfigData {
 	String YOUTUBE_LINK;
 	String YOUTUBE_KEY;
 	
-	Boolean YOUTUBE_USE_COOKIES=false;
+	Boolean YOUTUBE_USE_COOKIES;
 	
 	Boolean STREAM_BOT_START;
+	Boolean DISCORD_BOT_START;
 	
 	String PLAYLIST_PATH;
 	String PLAYLIST_PATH_CUSTOM;
@@ -30,6 +31,5 @@ public class ConfigData {
 	String DISCORD_ROLE;
 	String DISCORD_COMMAND_PREFIX;
 	Boolean DISCORD_RESPONSE_TO_PRIVATE;
-	Boolean DISCORD_BOT_START;
 	
 }

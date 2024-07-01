@@ -27,7 +27,7 @@ import com.gmail.berndivader.streamserver.term.ANSI;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class Helper {
+public final class Helper {
 	
 	public final static ExecutorService EXECUTOR;
 	public final static ScheduledExecutorService SCHEDULED_EXECUTOR;
@@ -36,6 +36,8 @@ public class Helper {
 	public static File[] files;
 	public static File[] customs;
 	
+	private Helper() {}
+	
 	static {
 		files=new File[0];
 		customs=new File[0];
@@ -43,7 +45,7 @@ public class Helper {
 		SCHEDULED_EXECUTOR=Executors.newScheduledThreadPool(5);
 		HTTP_CLIENT=HttpClients.createMinimal();
 		GSON=new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-	}	
+	}
 	
 	public static int getFilePosition(String name) {
 		if(!name.isEmpty()) {

@@ -25,6 +25,7 @@ public class Config {
 	public static File YOUTUBE_COOKIES;
 	
 	public static Boolean STREAM_BOT_START=true;
+	public static Boolean DISCORD_BOT_START=true;
 	
 	public static String PLAYLIST_PATH="./playlist";
 	public static String PLAYLIST_PATH_CUSTOM="./custom";
@@ -44,7 +45,6 @@ public class Config {
 	public static String DISCORD_ROLE="Schef";
 	public static String DISCORD_COMMAND_PREFIX=".mtv";
 	public static Boolean DISCORD_RESPONSE_TO_PRIVATE=true;
-	public static Boolean DISCORD_BOT_START=true;
 	
 	public static String HELP_TEXT;
 	public static String DISCORD_HELP_TEXT;
