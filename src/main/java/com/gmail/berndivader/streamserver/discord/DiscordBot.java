@@ -81,17 +81,17 @@ public final class DiscordBot {
 				@Override
 				public Mono<Void> apply(MessageCreateEvent e) {
 					
-					boolean isCommand=e.getMessage().getContent().toLowerCase().startsWith(Config.DISCORD_COMMAND_PREFIX);
-					if(!isCommand||!e.getMember().isPresent()) return Mono.empty();
+					if(!e.getMember().isPresent()) return Mono.empty();
 					
 					Message message=e.getMessage();
 					String content=message.getContent();
 					String[]parse=content.split(" ",2);
-					String temp=parse.length==2?parse[1]:"";
-					String[]args=temp.split(" ",2);
-					Command<?>command=Commands.instance.newCommandInstance(args[0].toLowerCase());
+					if(!parse[0].startsWith(".")) return Mono.empty();
 					
+					String cmd=parse[0].toLowerCase().substring(1);
+					Command<?>command=Commands.instance.newCommandInstance(cmd);
 					if(command==null) return Mono.empty();
+					String args=parse.length==2?parse[1]:"";
 					
 					return Mono.just(e).flatMap(new Function<MessageCreateEvent, Mono<Void>>() {
 
@@ -114,7 +114,7 @@ public final class DiscordBot {
 									@Override
 									public void accept(MessageChannel channel) {
 										if(channel==null) return;
-										command.execute(args.length==2?args[1]:"",channel).subscribe();
+										command.execute(args,channel).subscribe();
 										updateStatus(content);
 									}
 									
