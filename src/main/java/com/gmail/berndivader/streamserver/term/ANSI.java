@@ -1,6 +1,12 @@
 package com.gmail.berndivader.streamserver.term;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.time.Instant;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -106,13 +112,17 @@ public enum ANSI {
 			console.print(parse(string));
 		}
 		console.print(ANSI.PROMPT.str());
+		
+		if(Config.DEBUG) log(string,null);
 	}
 	
 	public static void printErr(String string, Throwable error) {
 		console.printf("%s%s%s%n%s",ANSI.ERROR.str(),parse(string),ANSI.BOLDOFF.str(),error.getMessage());
-		if(Config.DEBUG) error.printStackTrace();
+		if(Config.DEBUG) {
+			error.printStackTrace();
+			log(string,error);
+		}
 		console.print(ANSI.PROMPT.str());
-		
 	}
 		
 	public static void println(String string) {
@@ -125,7 +135,29 @@ public enum ANSI {
 	
 	public static void prompt() {
 		console.print(ANSI.PROMPT.str());
-	}	
+	}
+	
+	private static void log(String string,Throwable throwable) {
+		File file=new File(Config.config_dir+"/"+"debug.log");
+		if(!file.exists()) {
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if(file.exists()) {
+			try(FileWriter writer=new FileWriter(file,true)) {
+				writer.append(Date.from(Instant.now())+": "+string+"\n");
+				if(throwable!=null) {
+					writer.append(throwable.getMessage()+"\n");
+					throwable.printStackTrace(new PrintWriter(writer));
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 	
 }
 
