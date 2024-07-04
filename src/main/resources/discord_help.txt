@@ -1,6 +1,2 @@
 StreamServer discord help
 =========================
-.mtv -> prefix to interact with StreamServer
-
-Commands
-========

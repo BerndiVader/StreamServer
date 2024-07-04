@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffmpeg.FFmpeg;
 import com.github.kokorin.jaffree.ffmpeg.FFmpegProgress;
+import com.github.kokorin.jaffree.ffmpeg.FFmpegResult;
 import com.github.kokorin.jaffree.ffmpeg.FFmpegResultFuture;
 import com.github.kokorin.jaffree.ffmpeg.OutputListener;
 import com.github.kokorin.jaffree.ffmpeg.ProgressListener;
@@ -38,7 +39,7 @@ public class BroadcastRunner extends TimerTask {
 	public static BroadcastRunner instance;
 	
 	public BroadcastRunner() {
-		ANSI.print("Starting BroadcastRunner...");
+		ANSI.print("[YELLOW]Starting BroadcastRunner...");
 		
 		instance=this;
 		stop=false;
@@ -50,39 +51,38 @@ public class BroadcastRunner extends TimerTask {
 		runStream();
 		
 		Helper.SCHEDULED_EXECUTOR.scheduleAtFixedRate(this, 0l, 1l, TimeUnit.SECONDS);
-		ANSI.println("DONE!");		
+		ANSI.println("[GREEN]DONE![RESET]");
 	}
 	
 	public void stop() throws InterruptedException {
-		ANSI.print("Stopping BroadcastRunner...");
+		ANSI.print("[YELLOW]Stopping BroadcastRunner...");
 		
 		stop=true;
     	if(future!=null&&(!future.isCancelled()||!future.isDone())) {
-    		ANSI.print("[Stop broadcasting...");
-    		future.graceStop();
-    		try {
-				future.get(30,TimeUnit.SECONDS);
-				ANSI.print("DONE!]...");
-			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				ANSI.printWarn(e.getMessage());
-			}
+    		ANSI.print("[YELLOW][Stop broadcasting...");
+    		
+    		FFmpegResult result=stopFuture();
+    		if(result!=null) {
+				ANSI.print("[GREEN]DONE!]...[RESET]");
+    		} else {
+				ANSI.printWarn("Problem occured while stopping the BroadcastRunner.");
+    		}
+    		
     	}
 		
-    	ANSI.println("DONE!");
+    	ANSI.println("[GREEN]DONE![RESET]");
 	}
 	
 	@Override
 	public void run() {
 		
     	if(!stop) {
-    		if(future.isCancelled()||future.isDone()) {
-    			runStream();
-    		}
+    		if(future.isCancelled()||future.isDone()) runStream();
 		}
 		
 	}
 	
-	void runStream() {
+	private void runStream() {
 		
 		GetNextScheduled scheduled=new GetNextScheduled();
 		String filename=null;
@@ -137,11 +137,12 @@ public class BroadcastRunner extends TimerTask {
 		
 		if(DiscordBot.instance!=null) DiscordBot.instance.updateStatus(title);
 		
-		ANSI.println("Now playing: "
+		ANSI.println("[BLUE]Now playing: "
 			+currentFormat.getTag("title")
 			+":"+currentFormat.getTag("artist")
 			+":"+currentFormat.getTag("date")
-			+":"+currentFormat.getTag("comment"));
+			+":"+currentFormat.getTag("comment")+"[RESET]");
+		ANSI.prompt();
 				
 		return FFmpeg.atPath()
 				.addInput(UrlInput.fromUrl(path)
@@ -176,48 +177,41 @@ public class BroadcastRunner extends TimerTask {
 	}
 	
 	public static void broadcastFilename(File file) {
-		if(future!=null) {
-			future.graceStop();
-			try {
-				future.get(20,TimeUnit.SECONDS);
-			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				ANSI.printErr("Failed to stop broadcast task.",e);
-			}
+		if(isStreaming()) {
+			stopFuture();
+			future=createStream(file);
 		}
-		future=createStream(file);
-		ANSI.println(file.getName());
 	}
 	
 	public static void broadcastPlaylistPosition(int idx) {
 		index=idx;
-		if(future!=null) {
-			future.graceStop();
-		}
+		if(isStreaming()) stopFuture();
 	}
 	
 	public static void restartStream() {
-		if(future!=null) {
-			future.forceStop();
-		}
+		if(isStreaming()) stopFuture();
 		future=createStream(currentPlaying);
 	}
 	
 	public static void playNext() {
-		if(future!=null) {
-			future.graceStop();
-		}
+		if(isStreaming()) stopFuture();
 	}
 	
 	public static void playPrevious() {
-		if(future!=null) {
-			int idx=index;
-			idx-=2;
-			if(idx<0) {
-				idx=Helper.files.length-1;
-			}
-			index=idx;
-			future.graceStop();
+		if(isStreaming()) {
+			index=index-2<0?Helper.files.length-1:index-2;
+			stopFuture();
 		}
+	}
+	
+	private static FFmpegResult stopFuture() {
+		future.graceStop();
+		try {
+			return future.get(20,TimeUnit.SECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			ANSI.printErr("Failed to stop broadcast task.",e);
+		}
+		return null;
 	}
 	
 }
