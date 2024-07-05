@@ -7,6 +7,7 @@ public class ConfigData {
 	
 	String YOUTUBE_LINK;
 	String YOUTUBE_KEY;
+	String YOUTUBE_CHANNEL_ID;
 	
 	Boolean YOUTUBE_USE_COOKIES;
 	

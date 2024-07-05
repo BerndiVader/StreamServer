@@ -20,6 +20,7 @@ public class Config {
 	
 	public static String YOUTUBE_LINK="https://youtu.be/xxxxxxx";
 	public static String YOUTUBE_KEY="yt-api-key";
+	public static String YOUTUBE_CHANNEL_ID="yt-channel-id";
 	
 	public static Boolean YOUTUBE_USE_COOKIES=false;
 	public static File YOUTUBE_COOKIES;
@@ -109,6 +110,7 @@ public class Config {
 			data.YOUTUBE_LINK=YOUTUBE_LINK;
 			data.YOUTUBE_KEY=YOUTUBE_KEY;
 			data.YOUTUBE_USE_COOKIES=YOUTUBE_USE_COOKIES;
+			data.YOUTUBE_CHANNEL_ID=YOUTUBE_CHANNEL_ID;
 			data.STREAM_BOT_START=STREAM_BOT_START;
 			data.DATABASE_CONNECTION=DATABASE_CONNECTION;
 			data.DATABASE_USER=DATABASE_USER;
@@ -142,6 +144,7 @@ public class Config {
 			if(data.YOUTUBE_LINK!=null) YOUTUBE_LINK=data.YOUTUBE_LINK;
 			if(data.YOUTUBE_KEY!=null) YOUTUBE_KEY=data.YOUTUBE_KEY;
 			if(data.YOUTUBE_USE_COOKIES!=null) YOUTUBE_USE_COOKIES=data.YOUTUBE_USE_COOKIES;
+			if(data.YOUTUBE_CHANNEL_ID!=null) YOUTUBE_CHANNEL_ID=data.YOUTUBE_CHANNEL_ID;
 			if(data.STREAM_BOT_START!=null) STREAM_BOT_START=data.STREAM_BOT_START;
 			if(data.DATABASE_CONNECTION!=null) DATABASE_CONNECTION=data.DATABASE_CONNECTION;
 			if(data.DATABASE_USER!=null) DATABASE_USER=data.DATABASE_USER;
