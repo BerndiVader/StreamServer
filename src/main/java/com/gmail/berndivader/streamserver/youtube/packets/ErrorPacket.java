@@ -2,6 +2,9 @@ package com.gmail.berndivader.streamserver.youtube.packets;
 
 import java.util.List;
 
+import com.gmail.berndivader.streamserver.Helper;
+import com.gmail.berndivader.streamserver.term.ANSI;
+
 public class ErrorPacket extends Packet {
 	
 	public class Error {
@@ -14,18 +17,19 @@ public class ErrorPacket extends Packet {
 	public String message;
 	public List<Error>errors;
 	public String status;
-
-	@Override
-	public void printSimple() {
-		System.err.println("ERROR: "+code+" - "+message);
-	}
 	
 	@Override
+	public String toString() {
+		return Helper.GSON.toJson(this);
+	}
+	
+	public void printSimple() {
+		ANSI.printWarn("YT Request Error:"+code+" - "+message);
+	}
+	
 	public void printDetails() {
 		printSimple();
-		errors.forEach(e->{
-			System.err.println(e.reason+" - "+e.domain+" - "+e.message);
-		});
-	}
-	
+		errors.forEach(e->ANSI.printWarn(e.reason+" - "+e.domain+" - "+e.message));
+	}	
+		
 }
