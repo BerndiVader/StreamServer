@@ -12,10 +12,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -191,22 +195,22 @@ public final class Helper {
 		}
 	}
 	
-	public static FFProbePacket createDownloadLink(File file) {		
-		ProcessBuilder builder=new ProcessBuilder();
-		builder.directory(new File("./"));
-		builder.command("ffprobe","-v","quiet","-print_format","json","-show_format",file.getAbsolutePath());
-		
+	public static FFProbePacket getProbePacket(File file) {
 		FFProbePacket packet=new FFProbePacket();
-		try {
-			Process process=builder.start();
-			BufferedReader reader=process.inputReader();
-			while(process.isAlive()) {
-				if(reader.ready()) {
-					packet=GSON.fromJson(process.inputReader().readLine(),FFProbePacket.class);
-				}
+		if(file.exists()) {
+			ProcessBuilder builder=new ProcessBuilder();
+			builder.directory(new File("./"));
+			builder.command("ffprobe","-v","quiet","-print_format","json","-show_format",file.getAbsolutePath());
+			try {
+				Process process=builder.start();
+				CompletableFuture<Process>future=process.onExit();
+				future.get(1l,TimeUnit.MINUTES);
+				StringBuilder input=new StringBuilder();
+				process.inputReader().lines().forEach(line->input.append(line));
+				packet=GSON.fromJson(input.toString(),FFProbePacket.class);
+			} catch (Exception e) {
+				ANSI.printErr("getProbePacket method failed.", e);
 			}
-		} catch (Exception e) {
-			ANSI.printErr("createDownloadlink method failed.", e);
 		}
 		return packet;
 	}
@@ -221,13 +225,17 @@ public final class Helper {
 		InfoPacket info=new InfoPacket();
 		try {
 			Process infoProc=infoBuilder.start();
+			CompletableFuture<Process>future=infoProc.onExit();
 			BufferedReader reader=infoProc.inputReader();
-			while(infoProc.isAlive()) {
-				if(reader.ready()) {
-					info=GSON.fromJson(infoProc.inputReader().readLine(),InfoPacket.class);
-				}
+			future.get(1l,TimeUnit.MINUTES);
+			
+			if(reader.ready()) {
+				StringBuilder out=new StringBuilder();
+				reader.lines().forEach(line->out.append(line));
+				info=GSON.fromJson(out.toString(),InfoPacket.class);
 			}
-		} catch (IOException e) {
+			
+		} catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
 			ANSI.printErr("getDLPinfoPacket method failed.",e);
 		}
 		return info;
