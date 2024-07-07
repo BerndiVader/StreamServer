@@ -2,6 +2,7 @@ package com.gmail.berndivader.streamserver.console.command.commands;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -68,12 +69,13 @@ public class DownloadMedia extends Command {
 		try {
 			Process process=builder.start();
 			Future<Boolean>future=Helper.EXECUTOR.submit(new InterruptHandler(process));
-			BufferedReader input=process.inputReader();
+			InputStream input=process.getInputStream();
 			long time=System.currentTimeMillis();
 			
 			while(process.isAlive()&&!future.isDone()) {
-				if(input.ready()) {
-					String line=input.readLine();
+				int avail=input.available();
+				if(avail>0) {
+					String line=new String(input.readNBytes(avail));
 					if(line.contains("[Metadata]")) {
 						infoPacket.ifPresent(info->{
 							String[]temp=line.split("\"");

@@ -2,6 +2,7 @@ package com.gmail.berndivader.streamserver.discord.command.commands;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
@@ -121,7 +122,7 @@ public class DownloadMedia extends Command<Void> {
 					
 					Process process=builder.start();
 
-					BufferedReader input=process.inputReader();
+					InputStream input=process.getInputStream();
 					long time=System.currentTimeMillis();
 					status=Status.RUNNING;
 					
@@ -130,9 +131,10 @@ public class DownloadMedia extends Command<Void> {
 							status=Status.FINISHED;
 							break;
 						}
-						if(input.ready()) {
+						int avail=input.available();
+						if(avail>0) {
 							time=System.currentTimeMillis();
-							String line=input.readLine();
+							String line=new String(input.readNBytes(avail));
 							if(line.contains("[Metadata]")) {
 								infoPacket.ifPresent(info->{
 									String[]temp=line.split("\"");
@@ -140,7 +142,9 @@ public class DownloadMedia extends Command<Void> {
 								});
 							}
 							message.edit(msg->msg.setContent(line)).subscribe();
-						} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l) status=Status.TIMEOUT;
+						} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l) {
+							status=Status.TIMEOUT;
+						}
 					}
 					
 					BufferedReader error=process.errorReader();

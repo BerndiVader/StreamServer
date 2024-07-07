@@ -1,25 +1,19 @@
 package com.gmail.berndivader.streamserver;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -28,8 +22,11 @@ import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.google.gson.FieldNamingStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public final class Helper {
 	
@@ -48,7 +45,14 @@ public final class Helper {
 		EXECUTOR=Executors.newFixedThreadPool(10);
 		SCHEDULED_EXECUTOR=Executors.newScheduledThreadPool(5);
 		HTTP_CLIENT=HttpClients.createMinimal();
-		GSON=new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+		GSON=new GsonBuilder().setPrettyPrinting().setFieldNamingStrategy(new FieldNamingStrategy() {
+			
+			@Override
+			public String translateName(Field f) {
+				return f.getName().toLowerCase();
+			}
+			
+		}).disableHtmlEscaping().create();
 	}
 	
 	public static int getFilePosition(String name) {
@@ -196,49 +200,71 @@ public final class Helper {
 	}
 	
 	public static FFProbePacket getProbePacket(File file) {
-		FFProbePacket packet=new FFProbePacket();
+		FFProbePacket packet=null;
 		if(file.exists()) {
 			ProcessBuilder builder=new ProcessBuilder();
 			builder.directory(new File("./"));
 			builder.command("ffprobe","-v","quiet","-print_format","json","-show_format",file.getAbsolutePath());
 			try {
 				Process process=builder.start();
-				CompletableFuture<Process>future=process.onExit();
-				future.get(1l,TimeUnit.MINUTES);
-				StringBuilder input=new StringBuilder();
-				process.inputReader().lines().forEach(line->input.append(line));
-				packet=GSON.fromJson(input.toString(),FFProbePacket.class);
+				InputStream input=process.getInputStream();
+				StringBuilder out=new StringBuilder();
+				long time=System.currentTimeMillis();
+				while(process.isAlive()) {
+					int avail=input.available();
+					if(avail>0) out.append(new String(input.readNBytes(avail)));
+					if(System.currentTimeMillis()-time>10000l) {
+						ANSI.printWarn("FFProbePacket timeout.");
+						process.destroyForcibly();
+					}
+				}
+				process.inputReader().lines().forEach(line->out.append(line));
+				if(!out.isEmpty()) {
+					JsonObject o=JsonParser.parseString(out.toString()).getAsJsonObject();
+					if(o.has("format")) packet=GSON.fromJson(o.get("format"),FFProbePacket.class);
+				}
 			} catch (Exception e) {
 				ANSI.printErr("getProbePacket method failed.", e);
 			}
 		}
-		return packet;
+		return packet==null?new FFProbePacket():packet;
 	}
 	
-	public static InfoPacket getDLPinfoPacket(List<String>commands,File directory,String url) {
+	public static InfoPacket getInfoPacket(String url) {
 		//yt-dlp --quiet --no-warnings --dump-single-json
-		ProcessBuilder infoBuilder=new ProcessBuilder();
-		infoBuilder.directory(directory);
-		infoBuilder.command(commands);
-		infoBuilder.command().addAll(Arrays.asList("--quiet","--no-warnings","--dump-json",url));
-		
-		InfoPacket info=new InfoPacket();
-		try {
-			Process infoProc=infoBuilder.start();
-			CompletableFuture<Process>future=infoProc.onExit();
-			BufferedReader reader=infoProc.inputReader();
-			future.get(1l,TimeUnit.MINUTES);
-			
-			if(reader.ready()) {
-				StringBuilder out=new StringBuilder();
-				reader.lines().forEach(line->out.append(line));
-				info=GSON.fromJson(out.toString(),InfoPacket.class);
-			}
-			
-		} catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr("getDLPinfoPacket method failed.",e);
+		ProcessBuilder builder=new ProcessBuilder();
+		builder.directory(new File("./"));
+		builder.command("yt-dlp"
+			,"--quiet"
+			,"--no-warnings"
+			,"--dump-json"
+		);
+		if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
+			builder.command().add("--cookies");
+			builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
 		}
-		return info;
+		builder.command().add(url);
+		
+		InfoPacket info=null;
+		try {
+			Process process=builder.start();
+			InputStream reader=process.getInputStream();
+			StringBuilder out=new StringBuilder();
+			long start=System.currentTimeMillis();
+			while(process.isAlive()) {
+				int avail=reader.available();
+				if(avail>0) out.append(new String(reader.readNBytes(avail)));
+				if(System.currentTimeMillis()-start>30000l) {
+					ANSI.printWarn("InfoPacket timeout.");
+					process.destroyForcibly();
+				}
+			}
+			if(!out.isEmpty()) info=GSON.fromJson(out.toString(),InfoPacket.class);
+			
+		} catch (Exception e) {
+			ANSI.printErr("getinfoPacket method failed.",e);
+		}
+		return info==null?new InfoPacket():info;
 	}
 	
 	public static Entry<ProcessBuilder, Optional<InfoPacket>> prepareDownloadBuilder(File directory,String args) {
@@ -331,7 +357,7 @@ public final class Helper {
 			}			
 		}
 		
-		InfoPacket infoPacket=Helper.getDLPinfoPacket(new ArrayList<String>(builder.command()),builder.directory(),url);
+		InfoPacket infoPacket=Helper.getInfoPacket(url);
 		if(!url.isEmpty()) builder.command().add(url);
 		infoPacket.downloadable=downloadable;
 		
