@@ -8,7 +8,6 @@ import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
-import com.gmail.berndivader.streamserver.term.ANSI;
 
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -32,10 +31,10 @@ public class Current extends Command<Void> {
 			public void accept(EmbedCreateSpec embed) {
 				embed.setColor(Color.CINNABAR);
 				if(BroadcastRunner.currentPlaying!=null) {
-					embed.setTitle(packet.isSet(packet.format.tags.title)?packet.format.tags.title:"");
-					embed.setAuthor(packet.isSet(packet.format.tags.title)?packet.format.tags.title:"","","");
-					embed.setDescription(packet.isSet(packet.format.tags.description)?packet.format.tags.description:"");
-					embed.addField("Duration",packet.isSet(packet.format.duration)?packet.format.duration:"",false);
+					embed.setTitle(packet.isSet(packet.tags.title)?packet.tags.title:"");
+					embed.setAuthor(packet.isSet(packet.tags.title)?packet.tags.title:"","","");
+					embed.setDescription(packet.isSet(packet.tags.description)?packet.tags.description:"");
+					embed.addField("Duration",packet.isSet(packet.duration)?packet.duration:"",false);
 				} else {
 					embed.setDescription("No media streaming.");
 				}
