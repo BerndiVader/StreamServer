@@ -31,15 +31,15 @@ public class CleanUpDownloadables implements Callable<Boolean>{
 				if(result.first()) {
 					do {
 						File file=new File(result.getString("path"));
-						if(file.exists()) file.delete();
+						if(file.exists()) if(!file.delete()&&Config.DEBUG) ANSI.printWarn("Failed to delete temp download file: "+file.getName());
 						count++;
 					} while(result.next());
 				}
-				if(Config.DEBUG) ANSI.println(count+" files are deleted from disc.");
+				if(Config.DEBUG) ANSI.println(count+" files deleted from disc.");
 			}
-			try(PreparedStatement statement=connection.prepareStatement(DELETE_SQL,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
+			try(PreparedStatement statement=connection.prepareStatement(DELETE_SQL,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				int dels=statement.executeUpdate();
-				if(Config.DEBUG) ANSI.println(dels+" files are deleted from database.");
+				if(Config.DEBUG) ANSI.println(dels+" files deleted from database.");
 			}
 		} catch (SQLException e) {
 			ANSI.printErr("Failed to cleanup downloadable database and files",e);

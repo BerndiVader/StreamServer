@@ -76,7 +76,7 @@ public class DatabaseConnection {
 		if(!INIT) return false;
 		
 		try(Connection connection=getNewConnection()) {
-			try(Statement statement=connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
+			try(Statement statement=connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				statement.addBatch("START TRANSACTION;");
 				statement.addBatch("CREATE TABLE IF NOT EXISTS `current` (`uuid` VARCHAR(512), `info` VARCHAR(512));");
 				statement.addBatch("CREATE TABLE IF NOT EXISTS `info` (`infotext` VARCHAR(50));");

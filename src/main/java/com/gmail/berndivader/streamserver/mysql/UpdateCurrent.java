@@ -30,7 +30,7 @@ public class UpdateCurrent implements Callable<Boolean>{
 	public Boolean call() {
 		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
-			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
+			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				
 				if(Config.DEBUG) ANSI.println("[BEGIN MYSQL CURRENT UPDATE]");
 				

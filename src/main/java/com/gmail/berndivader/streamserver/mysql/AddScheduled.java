@@ -13,9 +13,9 @@ import com.gmail.berndivader.streamserver.term.ANSI;
 
 public class AddScheduled implements Callable<Boolean> {
 	
-	String sql_insert="INSERT INTO `scheduled` (`title`, `filename`) VALUES(?, ?);";
-	String sql_testfor="SELECT `filename` from `scheduled` where `filename` = ?";
-	String title,filename;
+	private static final String SQL_INSERT="INSERT INTO `scheduled` (`title`, `filename`) VALUES(?, ?);";
+	private static final String SQL_TESTFOR="SELECT `filename` from `scheduled` where `filename` = ?";
+	private String title,filename;
 	public Future<Boolean>future;
 	
 	public AddScheduled(String filename) {
@@ -31,14 +31,14 @@ public class AddScheduled implements Callable<Boolean> {
 		
 		boolean exists=false;
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
-			try(PreparedStatement testfor=connection.prepareStatement(sql_testfor,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
+			try(PreparedStatement testfor=connection.prepareStatement(SQL_TESTFOR,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				testfor.setString(1, filename);
 				ResultSet result=testfor.executeQuery();
 				result.last();
 				exists=result.getRow()>0;
 			}
 			if(!exists) {
-				try(PreparedStatement insert=connection.prepareStatement(sql_insert,ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
+				try(PreparedStatement insert=connection.prepareStatement(SQL_INSERT,ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 					insert.setString(1,title);
 					insert.setString(2,filename);
 					insert.execute();

@@ -49,7 +49,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			connection.setAutoCommit(false);
-			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
+			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				
 				ANSI.println("[BEGIN MYSQL PLAYLIST UPDATE]");
 				if(isCommand) {

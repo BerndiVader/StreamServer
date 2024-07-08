@@ -30,7 +30,7 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 	public Optional<String> call() {
 		UUID uuid=UUID.randomUUID();
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
-			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
+			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				statement.addBatch("START TRANSACTION;");
 				statement.setString(1,uuid.toString());
 				statement.setString(2,file.getAbsolutePath());
