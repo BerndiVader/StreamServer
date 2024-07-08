@@ -33,6 +33,7 @@ public class Config {
 	public static String PLAYLIST_PATH_CUSTOM="./custom";
 	
 	public static String DL_MUSIC_PATH="./music";
+	public static String DL_TEMP_NAME="./music/temp";
 	public static Long DL_TIMEOUT_SECONDS=1800l;
 	public static String DL_URL="https://path.to.php";
 	public static String DL_INTERVAL_FORMAT="DAY";
@@ -103,6 +104,7 @@ public class Config {
 			data.PLAYLIST_PATH=PLAYLIST_PATH;
 			data.PLAYLIST_PATH_CUSTOM=PLAYLIST_PATH_CUSTOM;
 			data.DL_MUSIC_PATH=DL_MUSIC_PATH;
+			data.DL_TEMP_NAME=DL_TEMP_NAME;
 			data.DL_TIMEOUT_SECONDS=DL_TIMEOUT_SECONDS;
 			data.DL_URL=DL_URL;
 			data.DL_INTERVAL_FORMAT=DL_INTERVAL_FORMAT;
@@ -137,6 +139,7 @@ public class Config {
 			if(data.PLAYLIST_PATH!=null) PLAYLIST_PATH=data.PLAYLIST_PATH;
 			if(data.PLAYLIST_PATH_CUSTOM!=null) PLAYLIST_PATH_CUSTOM=data.PLAYLIST_PATH_CUSTOM;
 			if(data.DL_MUSIC_PATH!=null) DL_MUSIC_PATH=data.DL_MUSIC_PATH;
+			if(data.DL_TEMP_NAME!=null) DL_TEMP_NAME=data.DL_TEMP_NAME;
 			if(data.DL_TIMEOUT_SECONDS!=null) DL_TIMEOUT_SECONDS=data.DL_TIMEOUT_SECONDS;
 			if(data.DL_URL!=null) DL_URL=data.DL_URL;
 			if(data.DL_INTERVAL_FORMAT!=null) DL_INTERVAL_FORMAT=data.DL_INTERVAL_FORMAT;

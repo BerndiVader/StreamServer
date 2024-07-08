@@ -18,6 +18,7 @@ public class ConfigData {
 	String PLAYLIST_PATH_CUSTOM;
 	
 	String DL_MUSIC_PATH;
+	String DL_TEMP_NAME;
 	Long DL_TIMEOUT_SECONDS;
 	String DL_URL;
 	String DL_INTERVAL_FORMAT;

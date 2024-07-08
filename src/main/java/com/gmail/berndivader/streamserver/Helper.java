@@ -299,7 +299,7 @@ public final class Helper {
 				builder.command().add("--cookies");
 				builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
 			}
-			File dir=getOrCreateMediaDir("temp");
+			File dir=getOrCreateMediaDir(Config.DL_TEMP_NAME);
 			if(dir!=null) builder.directory(dir);
 			downloadable=true;
 		} else {
@@ -365,9 +365,10 @@ public final class Helper {
 	}
 	
 	public static File getOrCreateMediaDir(String name) {
-		File dir=new File(Config.DL_MUSIC_PATH.concat("/").concat(name));
+		File dir=new File(name);
 		if(!dir.exists()) dir.mkdir();
 		if(dir.isDirectory()) return dir;
+		if(Config.DEBUG) ANSI.printWarn("Failed to create directory: "+name);
 		return null;
 	}
 	
