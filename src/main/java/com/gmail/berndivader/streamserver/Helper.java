@@ -269,42 +269,14 @@ public final class Helper {
 		return info==null?new InfoPacket():info;
 	}
 	
-	public static Entry<ProcessBuilder, Optional<InfoPacket>> prepareDownloadBuilder(File directory,String args) {
+	public static Entry<ProcessBuilder, Optional<InfoPacket>> prepareDownloadBuilder(File defaultDirectory,String args) {
 		ProcessBuilder builder=new ProcessBuilder();
-		builder.directory(directory);
-		boolean downloadable=false;
+		builder.directory(defaultDirectory);
+		boolean downloadable=args.contains("--link ");
+		if(downloadable) args=args.replace("--link","");
 		
-		if(args.contains("--downloadable")) {
-			args=args.replace("--downloadable","");
-			downloadable=true;
-		}
-		
-		if(args.contains("--no-default")) {
-			args=args.replace("--no-default","");
-			builder.command("yt-dlp"
-					,"--progress-delta","2"
-					,"--restrict-filenames"
-					,"--embed-metadata"
-					,"--embed-thumbnail"
-					,"--output","%(title).64s.%(ext)s"
-			);
-		} else if(args.contains("--auto ")) {
-			args=args.replace("--auto","");
-			builder.command("yt-dlp"
-					,"--progress-delta","2"
-					,"--restrict-filenames"
-					,"--embed-metadata"
-					,"--embed-thumbnail"
-					,"--output","%(title).64s.%(ext)s"
-			);
-			if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
-				builder.command().add("--cookies");
-				builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
-			}
-			File dir=getOrCreateMediaDir(Config.DL_TEMP_NAME);
-			if(dir!=null) builder.directory(dir);
-			downloadable=true;
-		} else {
+		if(args.contains("--music ")) {
+			args=args.replace("--music","");
 			builder.command("yt-dlp"
 					,"--progress-delta","2"
 					,"--embed-metadata"
@@ -318,6 +290,36 @@ public final class Helper {
 					,"--restrict-filenames"
 					,"--no-playlist"
 			);
+			File dir=getOrCreateMediaDir(Config.DL_MUSIC_PATH);
+			if(dir!=null) builder.directory(dir);
+			
+		} else if(args.contains("--temp ")) {
+			args=args.replace("--temp","");
+			builder.command("yt-dlp"
+					,"--progress-delta","2"
+					,"--restrict-filenames"
+					,"--embed-metadata"
+					,"--embed-thumbnail"
+					,"--output","%(title).64s.%(ext)s"
+			);
+			File dir=getOrCreateMediaDir(Config.DL_TEMP_PATH);
+			if(dir!=null) builder.directory(dir);
+			downloadable=true;
+		} else {
+			builder.command("yt-dlp"
+					,"--progress-delta","2"
+					,"--restrict-filenames"
+					,"--embed-metadata"
+					,"--embed-thumbnail"
+					,"--output","%(title).64s.%(ext)s"
+			);
+			File dir=getOrCreateMediaDir(Config.DL_MEDIA_PATH);
+			if(dir!=null) builder.directory(dir);
+		}
+		
+		if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
+			builder.command().add("--cookies");
+			builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
 		}
 		
 		String[]temp=args.split("--");
@@ -335,19 +337,8 @@ public final class Helper {
 							parse[1]="";
 						}
 						break;
-					case("dir"):
-						if(parse.length==2) {
-							File dir=getOrCreateMediaDir(parse[1]);
-							parse[1]="";
-							if(dir!=null) {
-								builder.directory(dir);
-							} else {
-								ANSI.printWarn("Warning! Download directory is a file, using default.");
-							}
-						}
-						break;
 					case("cookies"):
-						if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
+						if(!Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
 							builder.command().add("--cookies");
 							builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
 						}
