@@ -46,7 +46,7 @@ public class FFProbePacket {
 	
 	@Override
 	public String toString() {
-        return Helper.GSON.toJson(this);
+        return Helper.LGSON.toJson(this);
 	}
 	
 	public boolean isSet(String field) {

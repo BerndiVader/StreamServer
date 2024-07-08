@@ -33,6 +33,7 @@ public final class Helper {
 	public final static ExecutorService EXECUTOR;
 	public final static ScheduledExecutorService SCHEDULED_EXECUTOR;
 	public final static CloseableHttpClient HTTP_CLIENT;
+	public final static Gson LGSON;
 	public final static Gson GSON;
 	public static File[] files;
 	public static File[] customs;
@@ -45,7 +46,8 @@ public final class Helper {
 		EXECUTOR=Executors.newFixedThreadPool(10);
 		SCHEDULED_EXECUTOR=Executors.newScheduledThreadPool(5);
 		HTTP_CLIENT=HttpClients.createMinimal();
-		GSON=new GsonBuilder().setPrettyPrinting().setFieldNamingStrategy(new FieldNamingStrategy() {
+		GSON=new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+		LGSON=new GsonBuilder().setPrettyPrinting().setFieldNamingStrategy(new FieldNamingStrategy() {
 			
 			@Override
 			public String translateName(Field f) {
@@ -221,7 +223,7 @@ public final class Helper {
 				process.inputReader().lines().forEach(line->out.append(line));
 				if(!out.isEmpty()) {
 					JsonObject o=JsonParser.parseString(out.toString()).getAsJsonObject();
-					if(o.has("format")) packet=GSON.fromJson(o.get("format"),FFProbePacket.class);
+					if(o.has("format")) packet=LGSON.fromJson(o.get("format"),FFProbePacket.class);
 				}
 			} catch (Exception e) {
 				ANSI.printErr("getProbePacket method failed.", e);
@@ -259,7 +261,7 @@ public final class Helper {
 					process.destroyForcibly();
 				}
 			}
-			if(!out.isEmpty()) info=GSON.fromJson(out.toString(),InfoPacket.class);
+			if(!out.isEmpty()) info=LGSON.fromJson(out.toString(),InfoPacket.class);
 			
 		} catch (Exception e) {
 			ANSI.printErr("getinfoPacket method failed.",e);

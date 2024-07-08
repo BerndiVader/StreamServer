@@ -9,10 +9,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Scanner;
 
+import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.StreamServer;
 import com.gmail.berndivader.streamserver.term.ANSI;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 public class Config {
 	
@@ -58,7 +57,6 @@ public class Config {
 	public static ConfigData data;
 	
 	public static Config instance;
-	private static Gson GSON=new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 	
 	static {
         try {
@@ -125,7 +123,7 @@ public class Config {
 			data.DISCORD_COMMAND_PREFIX=DISCORD_COMMAND_PREFIX;
 			data.DISCORD_RESPONSE_TO_PRIVATE=DISCORD_RESPONSE_TO_PRIVATE;
 			data.DISCORD_BOT_START=DISCORD_BOT_START;
-	        GSON.toJson(data,writer);
+	        Helper.GSON.toJson(data,writer);
 		} catch (IOException e) {
 			ok=false;
 			ANSI.printErr("Error while saving config file.",e);
@@ -135,7 +133,7 @@ public class Config {
 	
 	public static boolean loadConfig() {
 		try (FileReader reader=new FileReader(config_file.getAbsoluteFile())) {
-			data=GSON.fromJson(reader,ConfigData.class);
+			data=Helper.GSON.fromJson(reader,ConfigData.class);
 			if(data.PLAYLIST_PATH!=null) PLAYLIST_PATH=data.PLAYLIST_PATH;
 			if(data.PLAYLIST_PATH_CUSTOM!=null) PLAYLIST_PATH_CUSTOM=data.PLAYLIST_PATH_CUSTOM;
 			if(data.DL_MUSIC_PATH!=null) DL_MUSIC_PATH=data.DL_MUSIC_PATH;
