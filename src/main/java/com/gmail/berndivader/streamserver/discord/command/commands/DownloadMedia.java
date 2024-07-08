@@ -58,11 +58,8 @@ public class DownloadMedia extends Command<Void> {
 
 		@Override
 		public void run() {
-			File directory=new File(Config.DL_MUSIC_PATH);
-			if(!directory.exists()) {
-				directory.mkdir();
-			}
-			if(!directory.exists()||directory.isFile()) {
+			File directory=Helper.getOrCreateMediaDir(Config.DL_MUSIC_PATH);
+			if(directory==null) {
 								
 				channel.createMessage(msg->{
 					msg.addEmbed(embed->{

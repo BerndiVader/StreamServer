@@ -56,9 +56,8 @@ public class DownloadMedia extends Command {
 			ANSI.printErr("Failed to run cleanup process.",e);
 		}
 		
-		File directory=new File(Config.DL_MUSIC_PATH);
-		if(!directory.exists()) directory.mkdir();
-		if(directory.isFile()) return false;
+		File directory=Helper.getOrCreateMediaDir(Config.DL_MEDIA_PATH);
+		if(directory==null) return false;
 				
 		Entry<ProcessBuilder,Optional<InfoPacket>>entry=Helper.prepareDownloadBuilder(directory,args[0]);
 		ProcessBuilder builder=entry.getKey();
