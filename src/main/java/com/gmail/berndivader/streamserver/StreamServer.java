@@ -10,6 +10,7 @@ import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
+import com.gmail.berndivader.streamserver.mysql.DatabaseConnection.STATUS;
 import com.gmail.berndivader.streamserver.mysql.WipeDatabase;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
@@ -26,7 +27,7 @@ public final class StreamServer {
 			Arrays.stream(args).forEach(arg->{
 				switch(args[0]) {
 				case"--db-wipe":
-					if(DatabaseConnection.INIT) {
+					if(DatabaseConnection.status==STATUS.OK) {
 						try {
 							WipeDatabase wipe=new WipeDatabase();
 							wipe.future.get(20l,TimeUnit.SECONDS);

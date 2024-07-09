@@ -15,6 +15,7 @@ import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
+import com.gmail.berndivader.streamserver.mysql.DatabaseConnection.STATUS;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 public class Commands {
@@ -73,7 +74,7 @@ public class Commands {
 										add&=DiscordBot.instance!=null;
 										break;
 									case DATABASE:
-										add&=DatabaseConnection.INIT;
+										add&=DatabaseConnection.status==STATUS.OK;
 										break;
 									default:
 										add=true;
