@@ -32,7 +32,7 @@ public class Current extends Command<Void> {
 				embed.setColor(Color.CINNABAR);
 				if(BroadcastRunner.currentPlaying!=null) {
 					embed.setTitle(packet.isSet(packet.tags.title)?packet.tags.title:"");
-					embed.setAuthor(packet.isSet(packet.tags.title)?packet.tags.title:"","","");
+					embed.setAuthor(packet.isSet(packet.tags.artist)?packet.tags.artist:"","","");
 					embed.setDescription(packet.isSet(packet.tags.description)?packet.tags.description:"");
 					embed.addField("Duration",packet.isSet(packet.duration)?packet.duration:"",false);
 				} else {
@@ -40,8 +40,13 @@ public class Current extends Command<Void> {
 				}
 			}
 			
+		}).doOnError(error->{
+			channel.createEmbed(embed->{
+				embed.setTitle("Error");
+				embed.setColor(Color.RED);
+				embed.setDescription("Something went wrong while gathering media info.");
+			}).subscribe();
 		}).then();
-						
 	}
 
 }

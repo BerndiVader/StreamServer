@@ -67,13 +67,14 @@ public class DownloadMedia extends Command {
 
 		try {
 			Process process=builder.start();
-			Future<Boolean>future=Helper.EXECUTOR.submit(new InterruptHandler(process));
+			Future<Boolean>interruptHandler=Helper.EXECUTOR.submit(new InterruptHandler(process));
 			InputStream input=process.getInputStream();
 			long time=System.currentTimeMillis();
 			
-			while(process.isAlive()&&!future.isDone()) {
+			while(process.isAlive()&&!interruptHandler.isDone()) {
 				int avail=input.available();
 				if(avail>0) {
+					time=System.currentTimeMillis();
 					String line=new String(input.readNBytes(avail));
 					if(line.contains("[Metadata]")) {
 						infoPacket.ifPresent(info->{
@@ -81,9 +82,9 @@ public class DownloadMedia extends Command {
 							if(temp.length>0) info.local_filename=temp[1];
 						});
 					}
-					time=System.currentTimeMillis();
 					ANSI.printRaw("[CR][DL]"+line);
-				} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
+				}
+				if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
 					ANSI.printRaw("[BR]");
 					ANSI.printWarn("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
 					process.destroy();
@@ -96,7 +97,6 @@ public class DownloadMedia extends Command {
 				error.lines().forEach(line->ANSI.printWarn(line));
 			}
 			if(process.isAlive()) process.destroy();
-			
 			ANSI.printRaw("[BR]");
 			
 			if(infoPacket.isPresent()) {

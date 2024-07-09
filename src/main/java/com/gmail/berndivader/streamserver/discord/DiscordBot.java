@@ -114,7 +114,11 @@ public final class DiscordBot {
 									@Override
 									public void accept(MessageChannel channel) {
 										if(channel==null) return;
-										command.exec(args,channel).subscribe();
+										command.exec(args,channel).doOnError(error->{
+											ANSI.printErr(error.getMessage(),error);
+										}).doOnError(error->{
+											if(error!=null) ANSI.printErr(error.getMessage(),error);
+										}).subscribe();
 										updateStatus(content);
 									}
 									
