@@ -28,7 +28,7 @@ public class InfoPacket {
 		}
 		
 		public boolean isSet(String field) {
-			return !field.equals(UNKNOWN);
+			return field!=null&&!field.equals(UNKNOWN);
 		}
 
 	}
