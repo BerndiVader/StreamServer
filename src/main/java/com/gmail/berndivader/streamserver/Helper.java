@@ -43,8 +43,8 @@ public final class Helper {
 	static {
 		files=new File[0];
 		customs=new File[0];
-		EXECUTOR=Executors.newFixedThreadPool(10);
-		SCHEDULED_EXECUTOR=Executors.newScheduledThreadPool(5);
+		EXECUTOR=Executors.newCachedThreadPool();
+		SCHEDULED_EXECUTOR=Executors.newSingleThreadScheduledExecutor();
 		HTTP_CLIENT=HttpClients.createMinimal();
 		GSON=new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 		LGSON=new GsonBuilder().setPrettyPrinting().setFieldNamingStrategy(new FieldNamingStrategy() {
