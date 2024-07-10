@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
+import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.youtube.Youtube;
@@ -14,7 +15,7 @@ import com.gmail.berndivader.streamserver.youtube.packets.ErrorPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.LiveStreamPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
 
-@ConsoleCommand(name="streamby",usage="Get livestream by id.")
+@ConsoleCommand(name="ytlive",usage="Get livestream by channel id. Use --json for complete json response.")
 public class LivestreamsById extends Command{
 
 	@Override
@@ -29,6 +30,7 @@ public class LivestreamsById extends Command{
 		}
 		arg=arg.strip();
 		Packet packet=new EmptyPacket();
+		if(arg.isEmpty()) arg=Config.YOUTUBE_CHANNEL_ID;
 		Future<Packet>future=Youtube.livestreamsByChannelId(arg);
 		try {
 			packet=future.get(15l,TimeUnit.SECONDS);
