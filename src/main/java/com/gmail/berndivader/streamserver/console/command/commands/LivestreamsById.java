@@ -20,9 +20,7 @@ public class LivestreamsById extends Command{
 
 	@Override
 	public boolean execute(String[] args) {
-		if(args.length==0) return false;
 		String arg=args[0];
-		if(arg.length()==0) return false;
 		boolean printJson=false;
 		if(arg.contains("--json")) {
 			printJson=true;
@@ -30,7 +28,7 @@ public class LivestreamsById extends Command{
 		}
 		arg=arg.strip();
 		Packet packet=new EmptyPacket();
-		if(arg.isEmpty()) arg=Config.YOUTUBE_CHANNEL_ID;
+		if(arg.length()==0) arg=Config.YOUTUBE_CHANNEL_ID;
 		Future<Packet>future=Youtube.livestreamsByChannelId(arg);
 		try {
 			packet=future.get(15l,TimeUnit.SECONDS);
