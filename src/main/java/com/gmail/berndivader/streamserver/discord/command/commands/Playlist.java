@@ -1,6 +1,7 @@
 package com.gmail.berndivader.streamserver.discord.command.commands;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.gmail.berndivader.streamserver.Helper;
@@ -24,10 +25,10 @@ public class Playlist extends Command<Void> {
 			regex=regex.replaceFirst("custom ","");
 		}
 		
-		ArrayList<String>list=Helper.getFilelistAsList(regex);
+		List<String>list=Helper.getFilelistAsList(regex);
 		int size=list.size();
 		
-		ArrayList<String>messages=new ArrayList<String>();
+		List<String>messages=new ArrayList<String>();
 		StringBuilder builder=new StringBuilder();
 		
 		for(int i1=0;i1<size;i1++) {

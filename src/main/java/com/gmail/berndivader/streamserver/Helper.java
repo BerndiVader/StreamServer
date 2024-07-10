@@ -4,8 +4,9 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -14,6 +15,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -22,7 +25,6 @@ import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
 import com.gmail.berndivader.streamserver.term.ANSI;
-import com.google.gson.FieldNamingStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -47,25 +49,15 @@ public final class Helper {
 		SCHEDULED_EXECUTOR=Executors.newSingleThreadScheduledExecutor();
 		HTTP_CLIENT=HttpClients.createMinimal();
 		GSON=new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-		LGSON=new GsonBuilder().setPrettyPrinting().setFieldNamingStrategy(new FieldNamingStrategy() {
-			
-			@Override
-			public String translateName(Field f) {
-				return f.getName().toLowerCase();
-			}
-			
-		}).disableHtmlEscaping().create();
+		LGSON=new GsonBuilder().setPrettyPrinting().setFieldNamingStrategy(s->s.getName().toLowerCase()).disableHtmlEscaping().create();
 	}
 	
 	public static int getFilePosition(String name) {
 		if(!name.isEmpty()) {
 			File[]files=Helper.files.clone();
-			for(int i1=0;i1<files.length;i1++) {
-				String file=files[i1].getName().toLowerCase();
-				if(file.equals(name)) {
-					return i1;
-				}
-			}
+		    for(int i=0;i<Helper.files.length;i++) {
+		        if(files[i].getName().equalsIgnoreCase(name)) return i;
+		    }
 		}
 		return -1;
 	}
@@ -73,74 +65,55 @@ public final class Helper {
 	public static int getCustomFilePosition(String name) {
 		if(!name.isEmpty()) {
 			File[]files=Helper.customs.clone();
-			for(int i1=0;i1<files.length;i1++) {
-				String file=files[i1].getName().toLowerCase();
-				if(file.equals(name)) {
-					return i1;
-				}
+			for(int i=0;i<files.length;i++) {
+		        if(files[i].getName().equalsIgnoreCase(name)) return i;
+
 			}
 		}
 		return -1;
 	}
 	
-	public static ArrayList<String> getFilelistAsList(String regex) {
-		if(regex.contains("*")) {
-			regex=regex.replaceAll("*","(.*)");
-		} else {
-			regex="(.*)"+regex+("(.*)");
-		}
-		ArrayList<String>list=new ArrayList<>();
-		File[]files=Helper.files.clone();
-		for(int i1=0;i1<files.length;i1++) {
-			String name=files[i1].getName().toLowerCase();
-			try {
-				if(name.matches(regex)) {
-					list.add(name);
-				}
-			} catch (Exception e) {
-				ANSI.printErr("getFilelistAsList method failed.",e);
-			}
-		}
-		files=Helper.customs.clone();
-		for(int i1=0;i1<files.length;i1++) {
-			String name=files[i1].getName().toLowerCase();
-			try {
-				if(name.matches(regex)) {
-					list.add(name);
-				}
-			} catch (Exception e) {
-				ANSI.println(e.getMessage());
-			}
-		}
-		return list;
+	public static List<String> getFilelistAsList(String r) {
+	    String regex=r.contains("*")?r.replaceAll("\\*","(.*)"):"(.*)"+r+"(.*)";
+	    List<String>list=new ArrayList<String>();
+	    Stream.of(Helper.files,Helper.customs)
+	        .flatMap(Arrays::stream)
+	        .map(File::getName)
+	        .filter(name->{
+	        	try {
+		            return name.toLowerCase().matches(regex);	
+	        	} catch (Exception e) {
+					if(Config.DEBUG) ANSI.printErr("getFilelistAsString method failed.",e);
+	        	}
+	        	return false;
+	        })
+	        .forEach(list::add);
+	    return list;
 	}
+
+	public static String getFilelistAsString(String r) {
+	    AtomicInteger count=new AtomicInteger(0);
+	    StringBuilder playlist = new StringBuilder();
+	    String regex=r.contains("*")?r.replaceAll("\\*","(.*)"):"(.*)"+r+"(.*)";
 	
-	public static String getFilelistAsString(String regex) {
-		int count=0;
-		StringBuilder playlist=new StringBuilder();
-		if(regex.contains("*")) {
-			regex=regex.replaceAll("*","(.*)");
-		} else {
-			regex="(.*)"+regex+("(.*)");
-		}
-		File[]files=Helper.files.clone();
-		for(int i1=0;i1<files.length;i1++) {
-			String name=files[i1].getName().toLowerCase();
-			if(name!=null&&!name.isEmpty()&&name.matches(regex)) {
-				playlist.append(name+"\n");
-				count++;
-			}
-		}
-		files=Helper.customs.clone();
-		for(int i1=0;i1<files.length;i1++) {
-			String name=files[i1].getName().toLowerCase();
-			if(name!=null&&!name.isEmpty()&&name.matches(regex)) {
-				playlist.append(name+"\n");
-				count++;
-			}
-		}
-		playlist.append("\nThere are "+count+" matches for "+regex);
-		return playlist.toString();
+	    Stream.of(Helper.files, Helper.customs)
+	        .flatMap(Arrays::stream)
+	        .map(File::getName)
+	        .filter(name->{
+				try {
+					return !name.isEmpty()&&name.matches(regex);
+				} catch (Exception e) {
+					if(Config.DEBUG) ANSI.printErr("getFilelistAsString method failed.",e);
+				}
+				return false;
+	        })
+	        .forEach(name->{
+	            playlist.append(name).append("\n");
+	            count.incrementAndGet();
+	        });
+	
+	    playlist.append("\nThere are ").append(count).append(" matches for ").append(regex);
+	    return playlist.toString();
 	}
 	
 	public static void shuffleFilelist(File[] files) {
