@@ -1,6 +1,7 @@
 package com.gmail.berndivader.streamserver.youtube.packets;
 
 import com.gmail.berndivader.streamserver.Helper;
+import com.google.gson.annotations.SerializedName;
 
 public class LiveStreamPacket extends Packet {
 	
@@ -26,6 +27,8 @@ public class LiveStreamPacket extends Packet {
 				public int width;
 				public int height;
 			}
+			@SerializedName(value="default")
+			public Resolution low;
 			public Resolution medium;
 			public Resolution high;
 		}
