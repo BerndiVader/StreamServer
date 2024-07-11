@@ -8,18 +8,19 @@ import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 @DiscordCommand(name="play",usage="[filename|next|last|repeat]",requireds={Requireds.BROADCASTRUNNER})
-public class Play extends Command<Void> {
+public class Play extends Command<Message> {
 	
 	int index=-1;
 	
 	@Override
-	public Mono<Void> execute(String s,MessageChannel channel) {
+	public Mono<Message> execute(String s,MessageChannel channel) {
 		
 		if(s.toLowerCase().equals("next")) {
 			BroadcastRunner.playNext();
@@ -49,7 +50,7 @@ public class Play extends Command<Void> {
 					embed.setDescription(s);
 				}
 				
-			}).then();
+			});
 			
 		}
 		return channel.createEmbed(new Consumer<EmbedCreateSpec>() {
@@ -61,7 +62,7 @@ public class Play extends Command<Void> {
 				embed.setDescription(s);
 			}
 			
-		}).then();
+		});
 		
 	}
 

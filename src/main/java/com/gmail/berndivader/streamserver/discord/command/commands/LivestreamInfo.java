@@ -15,18 +15,19 @@ import com.gmail.berndivader.streamserver.youtube.packets.EmptyPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.LiveStreamPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 @DiscordCommand(name="info",usage="Show stream status.")
-public class LivestreamInfo extends Command<Void> {
+public class LivestreamInfo extends Command<Message> {
 	
 	private Packet packet;
 
 	@Override
-	public Mono<Void> execute(String string, MessageChannel channel) {
+	public Mono<Message> execute(String string, MessageChannel channel) {
 		
 		packet=new EmptyPacket();
 		Future<Packet>future=Youtube.livestreamsByChannelId(Config.YOUTUBE_CHANNEL_ID);
@@ -59,7 +60,7 @@ public class LivestreamInfo extends Command<Void> {
 				
 			}
 			
-		}).then();
+		});
 		
 	}
 

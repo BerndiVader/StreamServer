@@ -8,16 +8,17 @@ import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.mysql.AddScheduled;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 @DiscordCommand(name="schedule",usage="[filename] -> Add file to schedule table.",requireds={Requireds.BROADCASTRUNNER})
-public class Schedule extends Command<Void> {
+public class Schedule extends Command<Message> {
 
 	@Override
-	public Mono<Void> execute(String p, MessageChannel channel) {
+	public Mono<Message> execute(String p, MessageChannel channel) {
 		
 		int index=Helper.getFilePosition(p);
 		if(index==-1) {
@@ -38,7 +39,7 @@ public class Schedule extends Command<Void> {
 					embed.setDescription(p);
 				}
 
-			}).then();
+			});
 		}
 		return channel.createEmbed(new Consumer<EmbedCreateSpec>() {
 
@@ -49,7 +50,7 @@ public class Schedule extends Command<Void> {
 				embed.setDescription(p);
 			}
 
-		}).then();
+		});
 				
 	}
 }

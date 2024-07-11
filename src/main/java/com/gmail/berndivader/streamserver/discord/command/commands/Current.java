@@ -9,13 +9,14 @@ import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 @DiscordCommand(name="current",usage="Display current playing file.",requireds={Requireds.BROADCASTRUNNER})
-public class Current extends Command<Void> {
+public class Current extends Command<Message> {
 	private FFProbePacket packet;
 	
 	public Current() {
@@ -23,7 +24,7 @@ public class Current extends Command<Void> {
 	}
 
 	@Override
-	public Mono<Void> execute(String string, MessageChannel channel) {
+	public Mono<Message> execute(String string, MessageChannel channel) {
 		if(BroadcastRunner.currentPlaying!=null) packet=Helper.getProbePacket(BroadcastRunner.currentPlaying);
 		return channel.createEmbed(new Consumer<EmbedCreateSpec>() {
 
@@ -46,7 +47,7 @@ public class Current extends Command<Void> {
 				embed.setColor(Color.RED);
 				embed.setDescription("Something went wrong while gathering media info.");
 			}).subscribe();
-		}).then();
+		});
 	}
 
 }

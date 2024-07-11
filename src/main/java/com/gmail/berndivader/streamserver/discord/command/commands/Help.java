@@ -5,15 +5,16 @@ import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.command.Commands;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 @DiscordCommand(name="help",usage="Show Help.")
-public class Help extends Command<Void> {
+public class Help extends Command<Message> {
 	
 	@Override
-	public Mono<Void> execute(String string,MessageChannel channel) {
+	public Mono<Message> execute(String string,MessageChannel channel) {
 		
 		return channel.createMessage(msg->{
 			msg.addEmbed(embed->{
@@ -29,7 +30,7 @@ public class Help extends Command<Void> {
 				embed.setDescription(builder.toString());
 				
 			});
-		}).then();
+		});
 		
 	}
 
