@@ -126,52 +126,60 @@ public final class Helper {
 		}
 	}
 	
+	private static File[] getFiles(File file,FileFilter filter) {
+		if(file.exists()) {
+	    	if(file.isDirectory()) {
+	    		return file.listFiles(filter);
+	    	} else if(file.isFile()) {
+	    		return new File[] {file};
+	    	}
+		}
+		return new File[0];
+	}
+	
 	public static void refreshFilelist() {
     	File file=new File(Config.PLAYLIST_PATH);
     	File custom=new File(Config.PLAYLIST_PATH_CUSTOM);
     	
-		FileFilter filter=new FileFilter() {
-			@Override
-			public boolean accept(File pathname) {
-				return pathname.getAbsolutePath().toLowerCase().endsWith(".mp4");
-			}
-		};
-    	
-		if(file.exists()) {
-	    	if(file.isDirectory()) {
-	    		Helper.files=file.listFiles(filter);
-	    	} else if(file.isFile()) {
-	    		Helper.files=new File[] {file};
-	    	} else {
-	    		Helper.files=new File[0];
-	    	}
-		} else {
-			Helper.files=new File[0];
-		}
-    	
-    	if(custom.exists()) {
-        	if(custom.isDirectory()) {
-        		Helper.customs=custom.listFiles(filter);
-        	} else if(custom.isFile()) {
-        		Helper.customs=new File[] {custom};
-        	} else {
-        		Helper.customs=new File[0];
-        	}
-    	} else {
-    		Helper.customs=new File[0];
-    	}
-    	
+    	FileFilter filter=pathName->pathName.getAbsolutePath().toLowerCase().endsWith(".mp4");
+    	Helper.files=getFiles(file,filter);
+    	Helper.customs=getFiles(custom,filter);
 	}
 	
 	public static String getStringFromStream(InputStream stream,int length) {
 		byte[]bytes=new byte[length];
 		try {
 			int size=stream.read(bytes,0,length);
-			return new String(bytes).substring(0,size-1);
+			return new String(bytes,0,size-1);
 		} catch (IOException e) {
 			ANSI.printErr("getStringFromStream method failed.",e);
 			return "";
 		}
+	}
+	
+	private static String startProcessAndWait(ProcessBuilder builder,long timeout) throws Exception {
+		long start=System.currentTimeMillis();
+		timeout*=1000l;
+		Process process=builder.start();
+		InputStream input=process.getInputStream();
+		InputStream error=process.getErrorStream();
+		StringBuilder out=new StringBuilder();
+		
+		while(process.isAlive()) {
+			int avail=input.available();
+			if(avail>0) {
+				out.append(new String(input.readAllBytes()));
+				start=System.currentTimeMillis();
+			}
+			
+			if(System.currentTimeMillis()-start>timeout) {
+				process.destroy();
+				throw new Exception("Process timed out.");
+			}
+		}
+		
+		if(error.available()>0) ANSI.printErr(new String(error.readAllBytes()),null);
+		return out.toString();
 	}
 	
 	public static FFProbePacket getProbePacket(File file) {
@@ -181,19 +189,7 @@ public final class Helper {
 			builder.directory(new File("./"));
 			builder.command("ffprobe","-v","quiet","-print_format","json","-show_format",file.getAbsolutePath());
 			try {
-				Process process=builder.start();
-				InputStream input=process.getInputStream();
-				StringBuilder out=new StringBuilder();
-				long time=System.currentTimeMillis();
-				while(process.isAlive()) {
-					int avail=input.available();
-					if(avail>0) out.append(new String(input.readNBytes(avail)));
-					if(System.currentTimeMillis()-time>10000l) {
-						ANSI.printWarn("FFProbePacket timeout.");
-						process.destroyForcibly();
-					}
-				}
-				process.inputReader().lines().forEach(line->out.append(line));
+				String out=startProcessAndWait(builder,10l);
 				if(!out.isEmpty()) {
 					JsonObject o=JsonParser.parseString(out.toString()).getAsJsonObject();
 					if(o.has("format")) packet=LGSON.fromJson(o.get("format"),FFProbePacket.class);
@@ -222,20 +218,8 @@ public final class Helper {
 		
 		InfoPacket info=null;
 		try {
-			Process process=builder.start();
-			InputStream reader=process.getInputStream();
-			StringBuilder out=new StringBuilder();
-			long start=System.currentTimeMillis();
-			while(process.isAlive()) {
-				int avail=reader.available();
-				if(avail>0) out.append(new String(reader.readNBytes(avail)));
-				if(System.currentTimeMillis()-start>30000l) {
-					ANSI.printWarn("InfoPacket timeout.");
-					process.destroyForcibly();
-				}
-			}
+			String out=startProcessAndWait(builder,10l);
 			if(!out.isEmpty()) info=LGSON.fromJson(out.toString(),InfoPacket.class);
-			
 		} catch (Exception e) {
 			ANSI.printErr("getinfoPacket method failed.",e);
 		}

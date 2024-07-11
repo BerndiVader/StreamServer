@@ -3,7 +3,6 @@ package com.gmail.berndivader.streamserver.discord.command;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -46,7 +45,7 @@ public class Commands {
 		commands=new HashMap<>();
 		try {
 			loadCommandClasses();
-		} catch (ClassNotFoundException | IOException e) {
+		} catch (Exception e) {
 			ANSI.printErr("Failed to instantiate console commands.",e);
 		}
 	}
@@ -92,14 +91,14 @@ public class Commands {
 	public Command<?> newCommandInstance(String name) {
 		if(name.isEmpty()) name="help";
 		Class<Command<?>>command=commands.get(name);
-		if(command==null) return null;
-		try {
-			return command.getDeclaredConstructor().newInstance();
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
-			ANSI.printErr("Error while collect discord commands.",e);
-			return null;
+		if(command!=null) {
+			try {
+				return command.getDeclaredConstructor().newInstance();
+			} catch (Exception e) {
+				ANSI.printErr("Error while collect discord commands.",e);
+			}
 		}
+		return null;
 	}
 		
 }

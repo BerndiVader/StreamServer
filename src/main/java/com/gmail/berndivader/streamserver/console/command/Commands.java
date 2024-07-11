@@ -3,7 +3,6 @@ package com.gmail.berndivader.streamserver.console.command;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -94,16 +93,14 @@ public class Commands {
 	
 	public Command getCommand(String name) {
 		Class<Command>clazz=commands.get(name);
-		if(clazz==null) return null;
-		
-		try {
-			return clazz.getDeclaredConstructor().newInstance();
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
-			ANSI.printErr("Error getting console command class.",e);
-			return null;
+		if(clazz!=null) {
+			try {
+				return clazz.getDeclaredConstructor().newInstance();
+			} catch (Exception e) {
+				ANSI.printErr("Error getting console command class.",e);
+			}
 		}
-		
+		return null;
 	}
 	
 }
