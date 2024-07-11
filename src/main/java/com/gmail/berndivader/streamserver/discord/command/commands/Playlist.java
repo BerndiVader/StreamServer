@@ -29,17 +29,20 @@ public class Playlist extends Command<Void> {
 		int size=list.size();
 		
 		List<String>messages=new ArrayList<String>();
-		StringBuilder builder=new StringBuilder();
+		StringBuilder builder=new StringBuilder("```");
 		
 		for(int i1=0;i1<size;i1++) {
 			String next=list.get(i1);
 			if(builder.length()+next.length()<1975) {
 				builder.append(next+"\n");
 			} else {
+				builder.append("```");
 				messages.add(builder.toString());
 				builder.delete(0,builder.length());
+				builder.append("```");
 			}
 		}
+		builder.append("```");
 		messages.add(builder.toString());
 		size=messages.size();
 		for(int i1=0;i1<size;i1++) {
