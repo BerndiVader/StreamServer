@@ -53,7 +53,7 @@ public final class DiscordBot {
 		
 		if(status!=Status.CONNECTED) return;
 		
-		dispatcher=client.getEventDispatcher();
+		dispatcher=client.getEventDispatcher();		
 		dispatcher.on(MessageCreateEvent.class)
 		    .flatMap(e->{
 		        if(!e.getMember().isPresent()) return Mono.empty();
@@ -73,11 +73,10 @@ public final class DiscordBot {
 		                .filter(role->role.getName().equals(Config.DISCORD_ROLE))
 		                .collectList()
 		                .flatMap(roles->{
-		                    if(!roles.isEmpty()) {
-		                        Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE
+	                        Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE
 		                            ?message.getAuthor().get().getPrivateChannel()
 		                            :message.getChannel();
-		
+	                        if(!roles.isEmpty()) {
 		                        return mono.flatMap(channel->{
 		                            if (channel==null) return Mono.empty();
 		                            return command.exec(args,channel)
@@ -85,7 +84,9 @@ public final class DiscordBot {
 		                                .then(Mono.fromRunnable(()->updateStatus(content)));
 		                        });
 		                    }
-		                    return Mono.empty();
+		                    return message.getChannel().flatMap(channel->{
+		                    	return channel.createMessage("You have no permission to use this command!");
+		                    });
 		                });
 		        });
 		    }).subscribe();
