@@ -82,6 +82,7 @@ public class DownloadMedia extends Command<Void> {
 				Entry<ProcessBuilder, Optional<InfoPacket>>entry=Helper.prepareDownloadBuilder(directory,line);
 				ProcessBuilder builder=entry.getKey();
 				Optional<InfoPacket>infoPacket=entry.getValue();
+				status=Status.RUNNING;
 				
 				try {
 					message.edit(msg->{
@@ -121,7 +122,6 @@ public class DownloadMedia extends Command<Void> {
 
 					InputStream input=process.getInputStream();
 					long time=System.currentTimeMillis();
-					status=Status.RUNNING;
 					
 					while(status==Status.RUNNING) {
 						if(!process.isAlive()) {
