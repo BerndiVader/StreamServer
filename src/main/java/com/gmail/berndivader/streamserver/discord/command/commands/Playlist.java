@@ -2,70 +2,51 @@ package com.gmail.berndivader.streamserver.discord.command.commands;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @DiscordCommand(name="playlist",usage="[filter] -> Search for files.")
-public class Playlist extends Command<Void> {
+public class Playlist extends Command<List<Message>> {
 	
 	@Override
-	public Mono<Void> execute(String command,MessageChannel channel) {
-		
+	public Mono<List<Message>> execute(String command,MessageChannel channel) {
 		String regex=command.toLowerCase();
-		boolean custom=regex.startsWith("custom ");
-		if(custom) {
-			regex=regex.replaceFirst("custom ","");
-		}
 		
 		List<String>list=Helper.getFilelistAsList(regex);
-		int size=list.size();
+		int filesSize=list.size();
 		
 		List<String>messages=new ArrayList<String>();
-		StringBuilder builder=new StringBuilder("```");
-		
-		for(int i1=0;i1<size;i1++) {
-			String next=list.get(i1);
-			if(builder.length()+next.length()<1975) {
-				builder.append(next+"\n");
+		StringBuilder builder=new StringBuilder();
+		list.forEach(name->{
+			if(builder.length()+name.length()<1975) {
+				builder.append(name+"\n");
 			} else {
-				builder.append("```");
 				messages.add(builder.toString());
-				builder.delete(0,builder.length());
-				builder.append("```");
+				builder.setLength(0);
 			}
-		}
-		builder.append("```");
+		});
 		messages.add(builder.toString());
-		size=messages.size();
-		for(int i1=0;i1<size;i1++) {
-			int i=i1;
-			int s=size;
-			int ls=list.size();
-			String msg=messages.get(i1);
-			
-			channel.createEmbed(new Consumer<EmbedCreateSpec>() {
-
-				@Override
-				public void accept(EmbedCreateSpec embed) {
-					embed.setColor(Color.CINNABAR);
-					embed.setTitle(i==0?"Playlist result":"Playlist continue");
-					embed.setDescription(msg);
-					if(i==s-1) {
-						embed.setFooter("Found ".concat(Integer.toString(ls)).concat(" matches"),null);
-					}
-				}
-				
-			}).subscribe();
-		}
-		return Mono.empty();
+		
+		List<Mono<Message>>monos=new ArrayList<Mono<Message>>();
+		IntStream.range(0,messages.size()).mapToObj(i->{
+			return channel.createEmbed(embed->{
+				embed.setColor(Color.CINNABAR);
+				embed.setTitle(i==0?"Playlist result":"Playlist continue");
+				embed.setDescription("```"+messages.get(i)+"```");
+				if(i==messages.size()-1) embed.setFooter("Found ".concat(Integer.toString(filesSize)).concat(" matches"),null);
+			});
+		}).forEach(monos::add);
+		
+		return Flux.fromIterable(monos).flatMap(mono->mono).collectList();		
 	}
 
 }
