@@ -101,14 +101,14 @@ public final class Helper {
 	        .map(File::getName)
 	        .filter(name->{
 				try {
-					return !name.isEmpty()&&name.matches(regex);
+					return name.toLowerCase().matches(regex);
 				} catch (Exception e) {
 					if(Config.DEBUG) ANSI.printErr("getFilelistAsString method failed.",e);
 				}
 				return false;
 	        })
 	        .forEach(name->{
-	            playlist.append(name).append("\n");
+	            playlist.append(name+"\n");
 	            count.incrementAndGet();
 	        });
 	

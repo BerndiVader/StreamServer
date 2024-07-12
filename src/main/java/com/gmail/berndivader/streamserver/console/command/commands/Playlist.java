@@ -10,8 +10,7 @@ public class Playlist extends Command {
 
 	@Override
 	public boolean execute(String[] args) {
-		String regex=args[0];
-		if(regex.startsWith("custom ")) regex=regex.replaceFirst("custom ", "");
+		String regex=args[0].toLowerCase();
 		ANSI.println(Helper.getFilelistAsString(regex));
 		return true;
 	}
