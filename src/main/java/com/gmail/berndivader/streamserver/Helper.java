@@ -228,50 +228,39 @@ public final class Helper {
 	
 	public static Entry<ProcessBuilder, Optional<InfoPacket>> prepareDownloadBuilder(File defaultDirectory,String args) {
 		ProcessBuilder builder=new ProcessBuilder();
-		builder.directory(defaultDirectory);
+		File dir=getOrCreateMediaDir(Config.DL_MEDIA_PATH);
+		if(dir!=null) builder.directory(dir);
+		
 		boolean downloadable=args.contains("--link ");
 		if(downloadable) args=args.replace("--link","");
 		
+		builder.command("yt-dlp"
+				,"--progress-delta","2"
+				,"--restrict-filenames"
+				,"--embed-metadata"
+				,"--embed-thumbnail"
+				,"--output","%(title).64s.%(ext)s"
+		);
+		
 		if(args.contains("--music ")) {
 			args=args.replace("--music","");
-			builder.command("yt-dlp"
-					,"--progress-delta","2"
-					,"--embed-metadata"
-					,"--embed-thumbnail"
-					,"--ignore-errors"
+			builder.command().addAll(Arrays.asList("--ignore-errors"
 					,"--extract-audio"
 					,"--format","bestaudio"
 					,"--audio-format","mp3"
 					,"--audio-quality","160K"
 					,"--output","%(title).64s.%(ext)s"
-					,"--restrict-filenames"
 					,"--no-playlist"
-			);
-			File dir=getOrCreateMediaDir(Config.DL_MUSIC_PATH);
+			));
+			dir=getOrCreateMediaDir(Config.DL_MUSIC_PATH);
 			if(dir!=null) builder.directory(dir);
-			
-		} else if(args.contains("--temp ")) {
+		}
+		
+		if(args.contains("--temp ")) {
 			args=args.replace("--temp","");
-			builder.command("yt-dlp"
-					,"--progress-delta","2"
-					,"--restrict-filenames"
-					,"--embed-metadata"
-					,"--embed-thumbnail"
-					,"--output","%(title).64s.%(ext)s"
-			);
-			File dir=getOrCreateMediaDir(Config.DL_TEMP_PATH);
+			dir=getOrCreateMediaDir(Config.DL_TEMP_PATH);
 			if(dir!=null) builder.directory(dir);
 			downloadable=true;
-		} else {
-			builder.command("yt-dlp"
-					,"--progress-delta","2"
-					,"--restrict-filenames"
-					,"--embed-metadata"
-					,"--embed-thumbnail"
-					,"--output","%(title).64s.%(ext)s"
-			);
-			File dir=getOrCreateMediaDir(Config.DL_MEDIA_PATH);
-			if(dir!=null) builder.directory(dir);
 		}
 		
 		if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {

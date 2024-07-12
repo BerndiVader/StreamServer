@@ -117,6 +117,7 @@ public enum ANSI {
 	}
 	
 	public static void printErr(String string, Throwable error) {
+		if(error==null) error=new Throwable("Unknown");
 		console.printf("%s%s%s%n%s",ANSI.ERROR.str(),parse(string),ANSI.BOLDOFF.str(),error.getMessage());
 		if(Config.DEBUG) {
 			error.printStackTrace();
