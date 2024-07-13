@@ -56,6 +56,9 @@ public final class DiscordBot {
 		
 		dispatcher=client.getEventDispatcher();
 		dispatcher.on(MessageCreateEvent.class)
+			.filter(e->e.getMessage().getContent().startsWith(".")
+					&&e.getMember().isPresent()
+					&&e.getMember().get().getRoleIds().contains(Snowflake.of(Config.DISCORD_ROLE_ID)))
 		    .flatMap(e->{
 		        if(!e.getMember().isPresent()||!e.getMember().get().getRoleIds().contains(Snowflake.of(Config.DISCORD_ROLE_ID))) return Mono.empty();
 		        
