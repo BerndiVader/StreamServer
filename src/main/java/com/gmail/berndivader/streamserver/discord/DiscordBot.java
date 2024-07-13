@@ -7,6 +7,7 @@ import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.command.Commands;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.EventDispatcher;
@@ -56,8 +57,8 @@ public final class DiscordBot {
 		dispatcher=client.getEventDispatcher();
 		dispatcher.on(MessageCreateEvent.class)
 		    .flatMap(e->{
-		        if(!e.getMember().isPresent()) return Mono.empty();
-		
+		        if(!e.getMember().isPresent()||!e.getMember().get().getRoleIds().contains(Snowflake.of(Config.DISCORD_ROLE_ID))) return Mono.empty();
+		        
 		        Message message=e.getMessage();
 		        String content=message.getContent();
 		        String[]parse=content.split(" ",2);
@@ -68,24 +69,17 @@ public final class DiscordBot {
 		        if(command==null) return Mono.empty();
 		        String args=parse.length==2?parse[1]:"";
 		        
-	            return e.getMember().get().getRoles()
-	                .filter(role->role.getName().equals(Config.DISCORD_ROLE))
-	                .hasElements()
-	                .flatMap(permission->{
-                        Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE
-	                            ?message.getAuthor().get().getPrivateChannel()
-	                            :message.getChannel();
-                        if(permission) {
-	                        return mono.flatMap(channel->{
-	                            if (channel==null) return Mono.empty();
-	                            return command.exec(args,channel)
-	                                .doOnError(error->ANSI.printErr(error.getMessage(),error))
-	                                .then(Mono.fromRunnable(()->updateStatus(content)));
-	                        });
-	                    }
-	                    return mono.flatMap(channel->channel.createMessage("You cant use this bot with your role."));
-	                });
-		            
+                Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE
+                		?message.getAuthor().get().getPrivateChannel()
+                		:message.getChannel();
+                
+                return mono.flatMap(channel->{
+                    if (channel==null) return Mono.empty();
+                    return command.exec(args,channel)
+                        .doOnError(error->ANSI.printErr(error.getMessage(),error))
+                        .then(Mono.fromRunnable(()->updateStatus(content)));
+                });
+                
 		    }).subscribe();
 		
 		client.onDisconnect().doOnSuccess(t->{

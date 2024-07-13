@@ -33,6 +33,7 @@ public class ConfigData {
 	String DISCORD_TOKEN;
 	String DISCORD_CHANNEL;
 	String DISCORD_ROLE;
+	Long DISCORD_ROLE_ID;
 	String DISCORD_COMMAND_PREFIX;
 	Boolean DISCORD_RESPONSE_TO_PRIVATE;
 	
