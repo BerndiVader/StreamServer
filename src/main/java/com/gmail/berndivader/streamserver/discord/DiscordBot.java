@@ -53,7 +53,7 @@ public final class DiscordBot {
 		
 		if(status!=Status.CONNECTED) return;
 		
-		dispatcher=client.getEventDispatcher();		
+		dispatcher=client.getEventDispatcher();
 		dispatcher.on(MessageCreateEvent.class)
 		    .flatMap(e->{
 		        if(!e.getMember().isPresent()) return Mono.empty();
@@ -67,28 +67,25 @@ public final class DiscordBot {
 		        Command<?>command=Commands.instance.newCommandInstance(cmd);
 		        if(command==null) return Mono.empty();
 		        String args=parse.length==2?parse[1]:"";
-		
-		        return Mono.just(e).flatMap(event->{
-		            return event.getMember().get().getRoles()
-		                .filter(role->role.getName().equals(Config.DISCORD_ROLE))
-		                .collectList()
-		                .flatMap(roles->{
-	                        Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE
-		                            ?message.getAuthor().get().getPrivateChannel()
-		                            :message.getChannel();
-	                        if(!roles.isEmpty()) {
-		                        return mono.flatMap(channel->{
-		                            if (channel==null) return Mono.empty();
-		                            return command.exec(args,channel)
-		                                .doOnError(error->ANSI.printErr(error.getMessage(),error))
-		                                .then(Mono.fromRunnable(()->updateStatus(content)));
-		                        });
-		                    }
-		                    return message.getChannel().flatMap(channel->{
-		                    	return channel.createMessage("You have no permission to use this command!");
-		                    });
-		                });
-		        });
+		        
+	            return e.getMember().get().getRoles()
+	                .filter(role->role.getName().equals(Config.DISCORD_ROLE))
+	                .hasElements()
+	                .flatMap(permission->{
+                        Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE
+	                            ?message.getAuthor().get().getPrivateChannel()
+	                            :message.getChannel();
+                        if(permission) {
+	                        return mono.flatMap(channel->{
+	                            if (channel==null) return Mono.empty();
+	                            return command.exec(args,channel)
+	                                .doOnError(error->ANSI.printErr(error.getMessage(),error))
+	                                .then(Mono.fromRunnable(()->updateStatus(content)));
+	                        });
+	                    }
+	                    return mono.flatMap(channel->channel.createMessage("You cant use this bot with your role."));
+	                });
+		            
 		    }).subscribe();
 		
 		client.onDisconnect().doOnSuccess(t->{
@@ -99,12 +96,13 @@ public final class DiscordBot {
 	}
 	
 	public void updateStatus(String comment) {
+		if(Config.DEBUG) ANSI.println("Set status to: "+comment);
 	    StatusUpdate statusUpdate=StatusUpdate.builder()
 	        .afk(false)
-	        .since(0L)
-	        .status("!".concat(comment))
+	        .since(1l)
+	        .status(comment)
 	        .build();
-	    client.updatePresence(statusUpdate).subscribe();
+	    client.updatePresence(statusUpdate).doOnError(error->ANSI.printErr("Failed to update status",error)).subscribe();
 	}
 	
 	public void close() {
