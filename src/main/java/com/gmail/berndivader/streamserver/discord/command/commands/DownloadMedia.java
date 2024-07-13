@@ -31,7 +31,7 @@ import reactor.core.publisher.Mono;
 @DiscordCommand(name="dl",usage="Download media. [--no-default] [--dir] [--yes-playlist] --url <valid_url>")
 public class DownloadMedia extends Command<Void> {
 
-	private class ProcessCallback implements Runnable {
+	private class ProcessRunnable implements Runnable {
 		
 		private enum Status {
 			NONE,
@@ -50,7 +50,7 @@ public class DownloadMedia extends Command<Void> {
 		
 		private Status status=Status.NONE;
 		
-		public ProcessCallback(String line,MessageChannel channel) {
+		public ProcessRunnable(String line,MessageChannel channel) {
 			this.line=line;
 			this.channel=channel;
 			uuid=UUID.randomUUID().toString();
@@ -221,8 +221,8 @@ public class DownloadMedia extends Command<Void> {
 	@Override
 	public Mono<Void> execute(String string, MessageChannel channel) {
 		
-		Helper.EXECUTOR.submit(new ProcessCallback(string,channel));
-		return Mono.empty();
+		return Mono.fromRunnable(new ProcessRunnable(string, channel));
+		
 	}
 	
 }
