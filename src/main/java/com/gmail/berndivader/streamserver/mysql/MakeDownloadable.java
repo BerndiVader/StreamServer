@@ -39,6 +39,9 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 				statement.addBatch();
 				statement.addBatch("COMMIT;");
 				statement.executeBatch();
+			} catch(SQLException e) {
+				connection.rollback();
+				throw e;
 			}
 		} catch (SQLException e) {
 			ANSI.printErr("Failed to create downloadable media file.",e);

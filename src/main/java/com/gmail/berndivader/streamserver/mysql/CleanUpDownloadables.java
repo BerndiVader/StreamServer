@@ -40,6 +40,9 @@ public class CleanUpDownloadables implements Callable<Boolean>{
 			try(PreparedStatement statement=connection.prepareStatement(DELETE_SQL,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				int dels=statement.executeUpdate();
 				if(Config.DEBUG) ANSI.println(dels+" files deleted from database.");
+			} catch(SQLException e) {
+				connection.rollback();
+				throw e;
 			}
 		} catch (SQLException e) {
 			ANSI.printErr("Failed to cleanup downloadable database and files",e);

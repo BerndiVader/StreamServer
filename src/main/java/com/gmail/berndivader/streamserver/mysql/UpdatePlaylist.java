@@ -19,14 +19,14 @@ import com.gmail.berndivader.streamserver.Helper;
 
 public class UpdatePlaylist implements Callable<Boolean> {
 	
-	String sql="INSERT INTO `playlist` (`title`, `filepath`, `info`) VALUES(?, ?, ?);";
-    String[]spinner=new String[] {"\u0008/", "\u0008-", "\u0008\\", "\u0008|"};
-    boolean isCommand;
+	static final String SQL="INSERT INTO `playlist` (`title`, `filepath`, `info`) VALUES(?, ?, ?);";
+    static final String[]SPINNER=new String[] {"\u0008/", "\u0008-", "\u0008\\", "\u0008|"};
+    final boolean IS_COMMAND;
 	
 	public UpdatePlaylist(boolean fromConsole) throws InterruptedException, ExecutionException, TimeoutException {
 		Future<Boolean>future=Helper.EXECUTOR.submit(this);
 		
-		if(isCommand=fromConsole) {
+		if(IS_COMMAND=fromConsole) {
 			if(future.get(20,TimeUnit.MINUTES)) {
 				ANSI.println("[BR][SUCSESSFUL MYSQL PLAYLIST UPDATE]");
 			} else {
@@ -49,10 +49,10 @@ public class UpdatePlaylist implements Callable<Boolean> {
 		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			connection.setAutoCommit(false);
-			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
+			try(PreparedStatement statement=connection.prepareStatement(SQL,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				
 				ANSI.println("[BEGIN MYSQL PLAYLIST UPDATE]");
-				if(isCommand) {
+				if(IS_COMMAND) {
 					ANSI.print("[GREEN]|");
 				}
 				
@@ -61,8 +61,8 @@ public class UpdatePlaylist implements Callable<Boolean> {
 				
 				for(int i1=0;i1<files.length;i1++) {
 					
-					if(isCommand) {
-						ANSI.print(spinner[i1%spinner.length]);
+					if(IS_COMMAND) {
+						ANSI.print(SPINNER[i1%SPINNER.length]);
 					}
 					
 					String path=files[i1].getAbsolutePath().replace("\\","/");
@@ -88,8 +88,11 @@ public class UpdatePlaylist implements Callable<Boolean> {
 				statement.addBatch("COMMIT;");
 				statement.executeBatch();
 				
+			} catch(SQLException e) {
+				connection.rollback();
+				throw e;
 			}
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			ANSI.printErr("Update playlist failed.",e);
 			return false;
 		}

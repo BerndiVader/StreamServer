@@ -42,6 +42,9 @@ public class AddScheduled implements Callable<Boolean> {
 					insert.setString(1,title);
 					insert.setString(2,filename);
 					insert.execute();
+				} catch(SQLException e) {
+					connection.rollback();
+					throw e;
 				}
 			}
 			

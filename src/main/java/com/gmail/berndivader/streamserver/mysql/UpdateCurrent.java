@@ -44,9 +44,10 @@ public class UpdateCurrent implements Callable<Boolean>{
 				statement.addBatch("COMMIT;");
 				statement.executeBatch();
 
+			} catch(SQLException e) {
+				connection.rollback();
+				throw e;
 			}
-			
-			
 		} catch (SQLException e) {
 			ANSI.printErr("Update now playing entry failed.",e);
 			return false;
