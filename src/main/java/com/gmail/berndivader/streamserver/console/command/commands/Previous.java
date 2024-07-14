@@ -10,7 +10,7 @@ public class Previous extends Command {
 
 	@Override
 	public boolean execute(String[] args) {
-		BroadcastRunner.playPrevious();
+		BroadcastRunner.previous();;
 		return true;
 	}
 

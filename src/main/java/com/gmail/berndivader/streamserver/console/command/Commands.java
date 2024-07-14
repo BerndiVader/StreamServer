@@ -42,7 +42,6 @@ public class Commands {
 	}
 	
 	public Commands() {
-		instance=this;
 		commands=new HashMap<>();
 		try {
 			loadCommandClasses();

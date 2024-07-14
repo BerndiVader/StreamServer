@@ -84,7 +84,6 @@ public class Config {
 	}
 	
 	public Config() {
-		instance=this;
 		ANSI.println("[WHITE]Load or create config...");
 		if(loadConfig()) {
 			ANSI.println("[GREEN]DONE![/GREEN]");

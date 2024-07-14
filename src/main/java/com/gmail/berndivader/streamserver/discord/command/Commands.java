@@ -17,7 +17,7 @@ import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
 import com.gmail.berndivader.streamserver.mysql.DatabaseConnection.STATUS;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
-public class Commands {
+public final class Commands {
 	
 	public static Commands instance;
 	private final static String PACKAGE_NAME="com/gmail/berndivader/streamserver/discord/command/commands";
@@ -41,7 +41,6 @@ public class Commands {
 	}
 	
 	public Commands() {
-		instance=this;
 		commands=new HashMap<>();
 		try {
 			loadCommandClasses();

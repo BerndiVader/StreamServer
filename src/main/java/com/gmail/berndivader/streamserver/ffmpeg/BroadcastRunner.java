@@ -25,30 +25,29 @@ import com.gmail.berndivader.streamserver.mysql.GetNextScheduled;
 import com.gmail.berndivader.streamserver.mysql.UpdateCurrent;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
-public class BroadcastRunner extends TimerTask {
+public final class BroadcastRunner extends TimerTask {
 	
 	boolean stop;
 	
-	public static FFmpegProgress currentProgress;
-	public static Format currentFormat;
-	public static String currentMessage;
-	public static File currentPlaying;
-	public static FFmpegResultFuture future;
+	public static FFmpegProgress progress;
+	public static Format format;
+	public static String message;
+	public static File playling;
+	private static FFmpegResultFuture ffmpeg;
 	public static int index;
 	
 	public static BroadcastRunner instance;
 	
 	public BroadcastRunner() {
 		ANSI.print("[YELLOW]Starting BroadcastRunner...");
-		
-		instance=this;
+
 		stop=false;
 		
 		Helper.refreshFilelist();
 		Helper.shuffleFilelist(Helper.files);
 
 		index=0;
-		runStream();
+		startStream();
 		
 		Helper.SCHEDULED_EXECUTOR.scheduleAtFixedRate(this, 0l, 1l, TimeUnit.SECONDS);
 		ANSI.println("[GREEN]DONE![RESET]");
@@ -58,10 +57,10 @@ public class BroadcastRunner extends TimerTask {
 		ANSI.print("[YELLOW]Stopping BroadcastRunner...");
 		
 		stop=true;
-    	if(future!=null&&(!future.isCancelled()||!future.isDone())) {
+    	if(ffmpeg!=null&&(!ffmpeg.isCancelled()||!ffmpeg.isDone())) {
     		ANSI.print("[YELLOW][Stop broadcasting...");
     		
-    		FFmpegResult result=stopFuture();
+    		FFmpegResult result=stopStream();
     		if(result!=null) {
 				ANSI.print("[GREEN]DONE!]...[RESET]");
     		} else {
@@ -77,48 +76,32 @@ public class BroadcastRunner extends TimerTask {
 	public void run() {
 		
     	if(!stop) {
-    		if(future.isCancelled()||future.isDone()) runStream();
+    		if(ffmpeg==null||ffmpeg.isCancelled()||ffmpeg.isDone()) startStream();
 		}
 		
 	}
 	
-	private void runStream() {
+	private void startStream() {
 		
 		GetNextScheduled scheduled=new GetNextScheduled();
-		String filename=null;
 		try {
-			filename=scheduled.future.get(20,TimeUnit.SECONDS);
+			String name=scheduled.future.get(20,TimeUnit.SECONDS);
+			if(name!=null) {
+				File file=Helper.getFileByName(name.toLowerCase());
+				if(file!=null) {
+					createStream(file);
+					return;
+				}
+			}
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			ANSI.printErr("Get next scheduled file failed.",e);
 		}
-		if(filename!=null) {
-			int filepos=-1;
-			filepos=Helper.getFilePosition(filename.toLowerCase());
-			
-			if(filepos>-1) {
-				future=createStream(Helper.files[filepos]);
-				currentPlaying=Helper.files[filepos];
-			} else {
-				filepos=Helper.getCustomFilePosition(filename.toLowerCase());
-				if(filepos>-1) {
-    				future=createStream(Helper.customs[filepos]);
-    				currentPlaying=Helper.customs[filepos];
-				}
-			}
-		} else {
-			future=createStream(Helper.files[index]);
-			currentPlaying=Helper.files[index];
-			index++;
-			if(index>Helper.files.length-1) {
-				Helper.refreshFilelist();
-				Helper.shuffleFilelist(Helper.files);				
-				index=0;
-			}
-		}
 		
+		createStream(Helper.files[index]);
+		index=(index+1)%Helper.files.length;
 	}
 	
-	private static FFmpegResultFuture createStream(File file) {
+	private static void createStream(File file) {
 		String path=file.getAbsolutePath();
 		FFprobeResult probeResult=FFprobe.atPath()
 			.setShowFormat(true)
@@ -126,25 +109,25 @@ public class BroadcastRunner extends TimerTask {
 			.setShowStreams(true)
 			.execute();
 		
-		currentFormat=probeResult.getFormat();
-		
+		format=probeResult.getFormat();
 		String title=file.getName();
 		if(title.toLowerCase().endsWith(".mp4")) {
 			title=title.substring(0,title.length()-4);
 		}
-		String info=currentFormat.getTag("artist")+":"+currentFormat.getTag("date")+":"+currentFormat.getTag("comment");
+		
+		String info=format.getTag("artist")+":"+format.getTag("date")+":"+format.getTag("comment");
 		new UpdateCurrent(title, info);
 		
-		if(DiscordBot.instance!=null) DiscordBot.instance.updateStatus(title);
+		if(Config.DISCORD_BOT_START&&DiscordBot.instance!=null) DiscordBot.instance.updateStatus(title);
 		
 		ANSI.println("[BLUE]Now playing: "
-			+currentFormat.getTag("title")
-			+":"+currentFormat.getTag("artist")
-			+":"+currentFormat.getTag("date")
-			+":"+currentFormat.getTag("comment")+"[RESET]");
+			+format.getTag("title")
+			+":"+format.getTag("artist")
+			+":"+format.getTag("date")
+			+":"+format.getTag("comment")+"[RESET]");
 		ANSI.prompt();
 				
-		return FFmpeg.atPath()
+		ffmpeg=FFmpeg.atPath()
 				.addInput(UrlInput.fromUrl(path)
 						.addArgument("-re")
 						)
@@ -161,53 +144,54 @@ public class BroadcastRunner extends TimerTask {
 				.setOutputListener(new OutputListener() {
 					@Override
 					public void onOutput(String message) {
-						currentMessage=message;
+						BroadcastRunner.message=message;
 					}
 				})
 				.setProgressListener(new ProgressListener() {
 					@Override
 					public void onProgress(FFmpegProgress progress) {
-						currentProgress=progress;
+						BroadcastRunner.progress=progress;
 					}
 				}).setOverwriteOutput(true).executeAsync();
+		if(ffmpeg!=null&&!ffmpeg.isDone()&&!ffmpeg.isCancelled()) playling=file;
 	}
 	
 	public static boolean isStreaming() {
-		return future!=null&&!future.isCancelled()&&!future.isDone();
+		return ffmpeg!=null&&!ffmpeg.isCancelled()&&!ffmpeg.isDone();
 	}
 	
-	public static void broadcastFilename(File file) {
+	public static void playFile(File file) {
 		if(isStreaming()) {
-			stopFuture();
-			future=createStream(file);
+			stopStream();
+			createStream(file);
 		}
 	}
 	
-	public static void broadcastPlaylistPosition(int idx) {
+	public static void playPosition(int idx) {
 		index=idx;
-		if(isStreaming()) stopFuture();
+		if(isStreaming()) stopStream();
 	}
 	
-	public static void restartStream() {
-		if(isStreaming()) stopFuture();
-		future=createStream(currentPlaying);
+	public static void restart() {
+		if(isStreaming()) stopStream();
+		createStream(playling);
 	}
 	
-	public static void playNext() {
-		if(isStreaming()) stopFuture();
+	public static void next() {
+		if(isStreaming()) stopStream();		
 	}
 	
-	public static void playPrevious() {
+	public static void previous() {
 		if(isStreaming()) {
 			index=index-2<0?Helper.files.length-1:index-2;
-			stopFuture();
+			stopStream();
 		}
 	}
 	
-	private static FFmpegResult stopFuture() {
-		future.graceStop();
+	private static FFmpegResult stopStream() {
+		ffmpeg.graceStop();
 		try {
-			return future.get(20,TimeUnit.SECONDS);
+			return ffmpeg.get(20,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			ANSI.printErr("Failed to stop broadcast task.",e);
 		}

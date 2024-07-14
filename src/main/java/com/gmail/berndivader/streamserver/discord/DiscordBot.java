@@ -32,10 +32,9 @@ public final class DiscordBot {
 	}
 	
 	public DiscordBot() {
-		instance=this;
 		DiscordBot.status=Status.DISCONNECTED;
 		
-		new Commands();
+		Commands.instance=new Commands();
 
 		client=DiscordClientBuilder.create(Config.DISCORD_TOKEN).build().login()
 		    .doOnSubscribe(t->{

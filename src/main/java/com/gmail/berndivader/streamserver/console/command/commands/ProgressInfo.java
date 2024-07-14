@@ -2,7 +2,6 @@ package com.gmail.berndivader.streamserver.console.command.commands;
 
 import java.util.concurrent.TimeUnit;
 
-import com.github.kokorin.jaffree.ffmpeg.FFmpegProgress;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.console.command.Command;
@@ -15,10 +14,9 @@ public class ProgressInfo extends Command {
 	@Override
 	public boolean execute(String[] args) {
 		if(BroadcastRunner.isStreaming()) {
-			FFmpegProgress progress=BroadcastRunner.currentProgress;
-			if(progress!=null) {
+			if(BroadcastRunner.progress!=null) {
 				ANSI.println("===Progress information===");
-				long duration=progress.getTime(TimeUnit.SECONDS);
+				long duration=BroadcastRunner.progress.getTime(TimeUnit.SECONDS);
 				for(int i1=0;i1<args.length;i1++) {
 					String option=args[i1];
 					switch(option) {
@@ -27,37 +25,37 @@ public class ProgressInfo extends Command {
 							break;
 						case "frames":
 						case "frame":
-							ANSI.println("Frames: "+progress.getFrame());
+							ANSI.println("Frames: "+BroadcastRunner.progress.getFrame());
 							break;
 						case "bitrate":
 						case "bits":
-							ANSI.println("Bitrate: "+progress.getBitrate());
+							ANSI.println("Bitrate: "+BroadcastRunner.progress.getBitrate());
 							break;
 						case "quality":
 						case "q":
-							ANSI.println("Quality: "+progress.getQ());
+							ANSI.println("Quality: "+BroadcastRunner.progress.getQ());
 							break;
 						case "fps":
-							ANSI.println("FPS: "+progress.getFps());
+							ANSI.println("FPS: "+BroadcastRunner.progress.getFps());
 							break;
 						case "drops":
-							ANSI.println("Drops: "+progress.getDrop());
+							ANSI.println("Drops: "+BroadcastRunner.progress.getDrop());
 							break;
 						case "size":
-							ANSI.println("Size: "+progress.getSize());
+							ANSI.println("Size: "+BroadcastRunner.progress.getSize());
 							break;
 						case "speed":
-							ANSI.println("Speed: "+progress.getSpeed());
+							ANSI.println("Speed: "+BroadcastRunner.progress.getSpeed());
 							break;
 						default:
 							ANSI.println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
-							ANSI.println("Frames: "+progress.getFrame());
-							ANSI.println("Bitrate: "+progress.getBitrate());
-							ANSI.println("Quality: "+progress.getQ());
-							ANSI.println("FPS: "+progress.getFps());
-							ANSI.println("Drops: "+progress.getDrop());
-							ANSI.println("Size: "+progress.getSize());
-							ANSI.println("Speed: "+progress.getSpeed());
+							ANSI.println("Frames: "+BroadcastRunner.progress.getFrame());
+							ANSI.println("Bitrate: "+BroadcastRunner.progress.getBitrate());
+							ANSI.println("Quality: "+BroadcastRunner.progress.getQ());
+							ANSI.println("FPS: "+BroadcastRunner.progress.getFps());
+							ANSI.println("Drops: "+BroadcastRunner.progress.getDrop());
+							ANSI.println("Size: "+BroadcastRunner.progress.getSize());
+							ANSI.println("Speed: "+BroadcastRunner.progress.getSpeed());
 							break;
 					}
 				}

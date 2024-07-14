@@ -23,20 +23,20 @@ public class Play extends Command<Message> {
 	public Mono<Message> execute(String s,MessageChannel channel) {
 		
 		if(s.toLowerCase().equals("next")) {
-			BroadcastRunner.playNext();
-		} else if(s.toLowerCase().equals("last")) {
-			BroadcastRunner.playPrevious();
+			BroadcastRunner.next();
+		} else if(s.toLowerCase().equals("prev")) {
+			BroadcastRunner.previous();
 		} else if(s.toLowerCase().equals("repeat")) {
-			BroadcastRunner.restartStream();
+			BroadcastRunner.restart();
 		} else {
 			index=Helper.getFilePosition(s);
 			if(index==-1) {
 				index=Helper.getCustomFilePosition(s);
 				if(index>-1) {
-					BroadcastRunner.broadcastFilename(Helper.customs[index]);
+					BroadcastRunner.playFile(Helper.customs[index]);
 				}
 			} else {
-				BroadcastRunner.broadcastFilename(Helper.files[index]);
+				BroadcastRunner.playFile(Helper.files[index]);
 			}
 		}
 		if(index!=-1) {

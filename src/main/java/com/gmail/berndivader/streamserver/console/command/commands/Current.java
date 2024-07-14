@@ -16,8 +16,8 @@ public class Current extends Command {
 	public boolean execute(String[] args) {
 		
 		if(args[0].isEmpty()) {
-			if(BroadcastRunner.isStreaming()&&BroadcastRunner.currentPlaying!=null) {
-				FFProbePacket packet=Helper.getProbePacket(BroadcastRunner.currentPlaying);
+			if(BroadcastRunner.isStreaming()&&BroadcastRunner.playling!=null) {
+				FFProbePacket packet=Helper.getProbePacket(BroadcastRunner.playling);
 				ANSI.println("[GREEN]"+packet.toString()+"[RESET]");
 			} else {
 				ANSI.println("[YELLOW]There is currently no media streaming.[RESET]");

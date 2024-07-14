@@ -25,7 +25,6 @@ public class DatabaseConnection {
 	public static DatabaseConnection instance;
 	
 	public DatabaseConnection() {
-		DatabaseConnection.instance=this;
 		ANSI.print("[BLUE]Test connection to mysql server...");
 		
 		try {

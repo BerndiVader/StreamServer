@@ -10,7 +10,7 @@ public class Restart extends Command {
 
 	@Override
 	public boolean execute(String[] args) {
-		BroadcastRunner.restartStream();
+		BroadcastRunner.restart();
 		return true;
 	}
 

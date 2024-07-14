@@ -22,7 +22,6 @@ public class ListScheduled extends Command {
 		try {
 			files = scheduled.future.get(20, TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			// TODO Auto-generated catch block
 			ANSI.printErr("Error while waiting for get all scheduled future.",e);
 		}
 		if(files!=null&&!files.isEmpty()) {

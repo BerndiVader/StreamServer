@@ -4,6 +4,7 @@ import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.console.command.Commands;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
+
 public class ConsoleRunner {
 	
     public static boolean forceExit,exit;
@@ -11,10 +12,8 @@ public class ConsoleRunner {
     	
 	public ConsoleRunner() {
 		
-		instance=this;
+		Commands.instance=new Commands();
 		exit=false;
-		
-		new Commands();
 		
 		while (!exit) {
 	        ANSI.prompt();
@@ -34,7 +33,6 @@ public class ConsoleRunner {
             	if(cmd!=null) cmd.execute(args);
             }
         }
-        ANSI.keyboard.close();
+        ANSI.keyboard.close();		
 	}
-
 }

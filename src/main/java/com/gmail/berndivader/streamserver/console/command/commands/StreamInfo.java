@@ -1,6 +1,5 @@
 package com.gmail.berndivader.streamserver.console.command.commands;
 
-import com.github.kokorin.jaffree.ffprobe.Format;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.console.command.Command;
@@ -13,47 +12,46 @@ public class StreamInfo extends Command {
 	@Override
 	public boolean execute(String[] args) {
 		if(BroadcastRunner.isStreaming()) {
-			Format format=BroadcastRunner.currentFormat;
-			if(format!=null) {
-				float duration=format.getDuration();
+			if(BroadcastRunner.format!=null) {
+				float duration=BroadcastRunner.format.getDuration();
 				ANSI.println("===Current playing===");
 				for(int i1=0;i1<args.length;i1++) {
 					switch(args[i1]) {
 					case "title":
-						ANSI.println("Title: "+format.getTag("title"));
+						ANSI.println("Title: "+BroadcastRunner.format.getTag("title"));
 						break;
 					case "artist":
-						ANSI.println("Artist:"+format.getTag("artist"));
+						ANSI.println("Artist:"+BroadcastRunner.format.getTag("artist"));
 						break;
 					case "date":
-						ANSI.println("Date:"+format.getTag("date"));
+						ANSI.println("Date:"+BroadcastRunner.format.getTag("date"));
 						break;
 					case "comment":
-						ANSI.println("Comment:"+format.getTag("comment"));
+						ANSI.println("Comment:"+BroadcastRunner.format.getTag("comment"));
 						break;
 					case "playtime":
 					case "time":
 						ANSI.println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
 						break;
 					case "file":
-						ANSI.println("File:"+format.getFilename());
+						ANSI.println("File:"+BroadcastRunner.format.getFilename());
 						break;
 					case "bitrate":
 					case "bits":
-						ANSI.println("Bitrate:"+format.getBitRate());
+						ANSI.println("Bitrate:"+BroadcastRunner.format.getBitRate());
 						break;
 					case "format":
-						ANSI.println("Format:"+format.getFormatName());
+						ANSI.println("Format:"+BroadcastRunner.format.getFormatName());
 						break;
 					default:
-						ANSI.println("Title: "+format.getTag("title"));
-						ANSI.println("Artist:"+format.getTag("artist"));
-						ANSI.println("Date:"+format.getTag("date"));
-						ANSI.println("Comment:"+format.getTag("comment"));
+						ANSI.println("Title: "+BroadcastRunner.format.getTag("title"));
+						ANSI.println("Artist:"+BroadcastRunner.format.getTag("artist"));
+						ANSI.println("Date:"+BroadcastRunner.format.getTag("date"));
+						ANSI.println("Comment:"+BroadcastRunner.format.getTag("comment"));
 						ANSI.println("Playtime:"+(long)(duration/60)+":"+(long)(duration%60));
-						ANSI.println("File:"+format.getFilename());
-						ANSI.println("Bitrate:"+format.getBitRate());
-						ANSI.println("Format:"+format.getFormatName());
+						ANSI.println("File:"+BroadcastRunner.format.getFilename());
+						ANSI.println("Bitrate:"+BroadcastRunner.format.getBitRate());
+						ANSI.println("Format:"+BroadcastRunner.format.getFormatName());
 						break;
 					}
 				}

@@ -20,9 +20,9 @@ public final class StreamServer {
 	
 	public static void main(String[] args) {
 		
-		new Config();
-		new DatabaseConnection();
-		
+		Config.instance=new Config();
+		DatabaseConnection.instance=new DatabaseConnection();
+				
 		if(args.length>0) {
 			Arrays.stream(args).forEach(arg->{
 				switch(args[0]) {
@@ -40,10 +40,10 @@ public final class StreamServer {
 			});
 		}
 		
-		if(Config.STREAM_BOT_START) new BroadcastRunner();
-		if(Config.DISCORD_BOT_START) new DiscordBot();
+		if(Config.STREAM_BOT_START) BroadcastRunner.instance=new BroadcastRunner();
+		if(Config.DISCORD_BOT_START) DiscordBot.instance=new DiscordBot();
 		
-		new ConsoleRunner();
+		ConsoleRunner.instance=new ConsoleRunner();
 
 		try {
 			if(BroadcastRunner.instance!=null) BroadcastRunner.instance.stop();
