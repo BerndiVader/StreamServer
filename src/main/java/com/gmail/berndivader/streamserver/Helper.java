@@ -16,6 +16,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -40,6 +42,8 @@ public final class Helper {
 	public static File[] files;
 	public static File[] customs;
 	
+	static final Pattern EXTRACT_URL=Pattern.compile("\\b(https?)://[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|]",Pattern.CASE_INSENSITIVE);
+
 	private Helper() {}
 	
 	static {
@@ -55,7 +59,7 @@ public final class Helper {
 	public static int getFilePosition(String name) {
 		if(!name.isEmpty()) {
 			File[]files=Helper.files.clone();
-		    for(int i=0;i<Helper.files.length;i++) {
+		    for(int i=0;i<files.length;i++) {
 		        if(files[i].getName().equalsIgnoreCase(name)) return i;
 		    }
 		}
@@ -67,7 +71,6 @@ public final class Helper {
 			File[]files=Helper.customs.clone();
 			for(int i=0;i<files.length;i++) {
 		        if(files[i].getName().equalsIgnoreCase(name)) return i;
-
 			}
 		}
 		return -1;
@@ -230,9 +233,7 @@ public final class Helper {
 		ProcessBuilder builder=new ProcessBuilder();
 		File dir=getOrCreateMediaDir(Config.DL_MEDIA_PATH);
 		if(dir!=null) builder.directory(dir);
-		
-		boolean downloadable=args.contains("--link ");
-		if(downloadable) args=args.replace("--link","");
+		boolean downloadable=false;
 		
 		builder.command("yt-dlp"
 				,"--progress-delta","2"
@@ -242,45 +243,49 @@ public final class Helper {
 				,"--output","%(title).64s.%(ext)s"
 		);
 		
-		if(args.contains("--music ")) {
-			args=args.replace("--music","");
-			builder.command().addAll(Arrays.asList("--ignore-errors"
-					,"--extract-audio"
-					,"--format","bestaudio"
-					,"--audio-format","mp3"
-					,"--audio-quality","160K"
-					,"--output","%(title).64s.%(ext)s"
-					,"--no-playlist"
-			));
-			dir=getOrCreateMediaDir(Config.DL_MUSIC_PATH);
-			if(dir!=null) builder.directory(dir);
-		}
-		
-		if(args.contains("--temp ")) {
-			args=args.replace("--temp","");
-			dir=getOrCreateMediaDir(Config.DL_TEMP_PATH);
-			if(dir!=null) builder.directory(dir);
-			downloadable=true;
-		}
-		
 		if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
 			builder.command().add("--cookies");
 			builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
 		}
 		
-		String[]temp=args.split("--");
 		String url="";
+		Matcher matcher=EXTRACT_URL.matcher(args);
+		if(matcher.find()) {
+			url=matcher.group();
+			args=matcher.replaceAll("");
+		}
 		
-		for(int i=0;i<temp.length;i++) {
-			if(temp[i].isEmpty()) continue;
+		String[]commands=args.split("--");
+		
+		for(String command:commands) {
+			if(command.isEmpty()) continue;
 						
-			String[]parse=temp[i].trim().split(" ",2);
+			String[]parse=command.trim().split(" ",2);
 			if(parse.length>0) {
 				switch(parse[0]) {
+					case("temp"):
+						dir=getOrCreateMediaDir(Config.DL_TEMP_PATH);
+						if(dir!=null) builder.directory(dir);
+						downloadable=true;
+						break;
+					case("music"):
+						builder.command().addAll(Arrays.asList("--ignore-errors"
+								,"--extract-audio"
+								,"--format","bestaudio"
+								,"--audio-format","mp3"
+								,"--audio-quality","160K"
+								,"--output","%(title).64s.%(ext)s"
+								,"--no-playlist"
+						));
+						dir=getOrCreateMediaDir(Config.DL_MUSIC_PATH);
+						if(dir!=null) builder.directory(dir);
+						break;
+					case("link"):
+						downloadable=true;
+						break;
 					case("url"):
-						if(parse.length==2) {
+						if(parse.length==2&&!parse[1].isBlank()) {
 							url=parse[1];
-							parse[1]="";
 						}
 						break;
 					case("cookies"):
@@ -290,10 +295,11 @@ public final class Helper {
 						}
 						break;
 					default:
-						if(!parse[0].isEmpty()) builder.command().add(parse[0]);
+						if(!parse[0].isEmpty()) builder.command().add("--"+parse[0]);
+						if(parse.length==2&&!parse[1].isEmpty()) builder.command().add(parse[1]);
 						break;
 				}
-			}			
+			}
 		}
 		
 		InfoPacket infoPacket=Helper.getInfoPacket(url);
@@ -308,6 +314,15 @@ public final class Helper {
 		if(!dir.exists()) dir.mkdir();
 		if(dir.isDirectory()) return dir;
 		if(Config.DEBUG) ANSI.printWarn("Failed to create directory: "+name);
+		return null;
+	}
+	
+	public static File getFileByName(String name) {
+		int pos=Helper.getFilePosition(name);
+		if(pos!=-1) return Helper.files[pos];
+		pos=Helper.getCustomFilePosition(name);
+		if(pos!=-1) return Helper.customs[pos];
+		
 		return null;
 	}
 	
