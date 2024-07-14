@@ -6,11 +6,11 @@ import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
 @ConsoleCommand(name="next",usage="Play next file.",requireds={Requireds.BROADCASTRUNNER,Requireds.DATABASE})
-public class Stop extends Command {
+public class Next extends Command {
 
 	@Override
 	public boolean execute(String[] args) {
-		BroadcastRunner.playNext();
+		BroadcastRunner.next();
 		return true;
 	}
 
