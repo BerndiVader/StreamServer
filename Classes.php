@@ -46,9 +46,9 @@ class FileDownload
         }
 
         $pointer=fopen($filePath,"rb");
-        if(!is_resource($pointer))
+        if(!$pointer||(!is_resource($pointer)&&!is_object($pointer)))
         {
-            throw new \InvalidArgumentException("No file pointer in ctor.");
+            throw new \InvalidArgumentException("No valid file pointer.");
         }
 
         $this->path=$filePath;
