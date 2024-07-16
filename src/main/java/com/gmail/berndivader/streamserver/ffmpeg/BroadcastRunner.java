@@ -24,9 +24,6 @@ import com.github.kokorin.jaffree.ffmpeg.OutputListener;
 import com.github.kokorin.jaffree.ffmpeg.ProgressListener;
 import com.github.kokorin.jaffree.ffmpeg.UrlInput;
 import com.github.kokorin.jaffree.ffmpeg.UrlOutput;
-import com.github.kokorin.jaffree.ffprobe.FFprobe;
-import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
-import com.github.kokorin.jaffree.ffprobe.Format;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
@@ -39,7 +36,7 @@ public final class BroadcastRunner extends TimerTask {
 	boolean stop;
 	
 	public static FFmpegProgress progress;
-	public static Format format;
+	public static FFProbePacket probePacket;
 	public static String message;
 	public static File playing;
 	private static FFmpegResultFuture ffmpeg;
@@ -117,28 +114,20 @@ public final class BroadcastRunner extends TimerTask {
 	
 	private static void createStream(File file) {
 		String path=file.getAbsolutePath();
-		FFprobeResult probeResult=FFprobe.atPath()
-			.setShowFormat(true)
-			.setInput(path)
-			.setShowStreams(true)
-			.execute();
+		probePacket=Helper.createProbePacket(file);
 		
-		format=probeResult.getFormat();
-		String title=file.getName();
-		if(title.toLowerCase().endsWith(".mp4")) {
-			title=title.substring(0,title.length()-4);
-		}
-		
-		String info=format.getTag("artist")+":"+format.getTag("date")+":"+format.getTag("comment");
+		String title=probePacket.isSet(probePacket.tags.title)?probePacket.tags.title:probePacket.filename;
+				
+		String info=probePacket.tags.artist+":"+Helper.stringFloatToTime(probePacket.duration)+":"+probePacket.tags.description;
 		new UpdateCurrent(title, info);
 		
 		if(Config.DISCORD_BOT_START&&DiscordBot.instance!=null) DiscordBot.instance.updateStatus(title);
 		
 		ANSI.println("[BLUE]Now playing: "
-			+format.getTag("title")
-			+":"+format.getTag("artist")
-			+":"+format.getTag("date")
-			+":"+format.getTag("comment")+"[RESET]");
+			+probePacket.tags.title
+			+":"+probePacket.tags.artist
+			+":"+probePacket.tags.date
+			+":"+probePacket.tags.comment+"[RESET]");
 		ANSI.prompt();
 				
 		ffmpeg=FFmpeg.atPath()

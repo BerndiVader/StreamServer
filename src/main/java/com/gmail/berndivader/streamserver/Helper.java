@@ -96,7 +96,6 @@ public final class Helper {
 	}
 	
 	public static InfoPacket createInfoPacket(String url) {
-		//yt-dlp --quiet --no-warnings --dump-single-json
 		ProcessBuilder builder=new ProcessBuilder();
 		builder.directory(new File("./"));
 		builder.command("yt-dlp"

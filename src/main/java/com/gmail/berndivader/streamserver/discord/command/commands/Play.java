@@ -46,6 +46,7 @@ public class Play extends Command<Message> {
 			final Optional<File>file=BroadcastRunner.getFileByName(s);
 			if(file.isPresent()) {
 				mono=createMessage(file.get(),channel);
+				BroadcastRunner.playFile(file.get());
 			} else {
 				mono=channel.createMessage(EmbedCreateSpec.builder()
 					.color(Color.RED)
