@@ -116,7 +116,17 @@ public final class BroadcastRunner extends TimerTask {
 		String path=file.getAbsolutePath();
 		probePacket=Helper.createProbePacket(file);
 		
-		String title=probePacket.isSet(probePacket.tags.title)?probePacket.tags.title:probePacket.filename;
+		String title="";
+		if(probePacket.isSet(probePacket.tags.title)) {
+			title=probePacket.tags.title;
+		} else {
+			int pos=probePacket.filename.lastIndexOf(".");
+			if(pos>0) {
+				title=probePacket.filename.substring(0,pos);
+			} else {
+				title=probePacket.filename;
+			}
+		}
 				
 		String info=probePacket.tags.artist+":"+Helper.stringFloatToTime(probePacket.duration)+":"+probePacket.tags.description;
 		new UpdateCurrent(title, info);
