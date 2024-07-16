@@ -2,6 +2,9 @@ package com.gmail.berndivader.streamserver.youtube;
 
 import java.util.concurrent.Future;
 
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.term.ANSI;
@@ -16,7 +19,12 @@ public final class Youtube {
 	
 	private Youtube() {};
 	
+	public final static CloseableHttpClient HTTP_CLIENT;	
 	private static final String URL="https://youtube.googleapis.com/youtube/v3/";
+	
+	static {
+		HTTP_CLIENT=HttpClients.createMinimal();
+	}
 	
 	public static Future<Packet> livestreamsByChannelId(String id) {
 		

@@ -1,10 +1,11 @@
 package com.gmail.berndivader.streamserver.console.command.commands;
 
-import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.console.command.Command;
+import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.mysql.AddScheduled;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 @ConsoleCommand(name="schedule",usage="[filename] -> Add file to scheduled playlist.",requireds= {Requireds.DATABASE})
 public class Schedule extends Command {
@@ -12,21 +13,10 @@ public class Schedule extends Command {
 	@Override
 	public boolean execute(String[] args) {
 		if(args.length>0) {
-			String filename=args[0];
-			if(!filename.endsWith(".mp4")) {
-				filename=filename+".mp4";
-			}
-			int index=Helper.getFilePosition(filename);
-			if(index>-1) {
-				filename=Helper.files[index].getName();
-				new AddScheduled(filename);
-			} else {
-				index=Helper.getCustomFilePosition(filename);
-				if(index>-1) {
-					filename=Helper.customs[index].getName();
-					new AddScheduled(filename);
-				}
-			}
+			final String filename=args[0].endsWith(".mp4")?args[0]+".mp4":args[0];
+			BroadcastRunner.getFileByName(filename)
+				.ifPresentOrElse(file->new AddScheduled(file.getName()),
+				()->ANSI.printErr("No file found for "+filename,null));
 		}
 		return true;
 	}

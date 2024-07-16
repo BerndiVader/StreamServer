@@ -16,8 +16,8 @@ public class Current extends Command {
 	public boolean execute(String[] args) {
 		
 		if(args[0].isEmpty()) {
-			if(BroadcastRunner.isStreaming()&&BroadcastRunner.playling!=null) {
-				FFProbePacket packet=Helper.getProbePacket(BroadcastRunner.playling);
+			if(BroadcastRunner.isStreaming()&&BroadcastRunner.playing!=null) {
+				FFProbePacket packet=Helper.createProbePacket(BroadcastRunner.playing);
 				ANSI.println("[GREEN]"+packet.toString()+"[RESET]");
 			} else {
 				ANSI.println("[YELLOW]There is currently no media streaming.[RESET]");
@@ -25,7 +25,7 @@ public class Current extends Command {
 		} else {
 			File file=new File(args[0]);
 			if(file.exists()&&file.isFile()) {
-				FFProbePacket packet=Helper.getProbePacket(file);
+				FFProbePacket packet=Helper.createProbePacket(file);
 				ANSI.println("[GREEN]"+packet.toString()+"[RESET]");
 			} else {
 				ANSI.println("[YELLOW]No file found.[RESET]");

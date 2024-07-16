@@ -1,10 +1,19 @@
 package com.gmail.berndivader.streamserver.ffmpeg;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffmpeg.FFmpeg;
@@ -32,19 +41,27 @@ public final class BroadcastRunner extends TimerTask {
 	public static FFmpegProgress progress;
 	public static Format format;
 	public static String message;
-	public static File playling;
+	public static File playing;
 	private static FFmpegResultFuture ffmpeg;
 	public static int index;
 	
+	private static File[] files;
+	private static File[] customs;	
+	
 	public static BroadcastRunner instance;
+	
+	static {
+		files=new File[0];
+		customs=new File[0];		
+	}
 	
 	public BroadcastRunner() {
 		ANSI.print("[YELLOW]Starting BroadcastRunner...");
 
 		stop=false;
 		
-		Helper.refreshFilelist();
-		Helper.shuffleFilelist(Helper.files);
+		refreshFilelist();
+		shuffleFilelist();
 
 		index=0;
 		startStream();
@@ -87,18 +104,15 @@ public final class BroadcastRunner extends TimerTask {
 		try {
 			String name=scheduled.future.get(20,TimeUnit.SECONDS);
 			if(name!=null) {
-				File file=Helper.getFileByName(name.toLowerCase());
-				if(file!=null) {
-					createStream(file);
-					return;
-				}
+				getFileByName(name.toLowerCase()).ifPresent(file->createStream(file));
+				return;
 			}
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			ANSI.printErr("Get next scheduled file failed.",e);
 		}
 		
-		createStream(Helper.files[index]);
-		index=(index+1)%Helper.files.length;
+		createStream(getFiles()[index]);
+		index=(index+1)%getFiles().length;
 	}
 	
 	private static void createStream(File file) {
@@ -153,7 +167,7 @@ public final class BroadcastRunner extends TimerTask {
 						BroadcastRunner.progress=progress;
 					}
 				}).setOverwriteOutput(true).executeAsync();
-		if(ffmpeg!=null&&!ffmpeg.isDone()&&!ffmpeg.isCancelled()) playling=file;
+		if(ffmpeg!=null&&!ffmpeg.isDone()&&!ffmpeg.isCancelled()) playing=file;
 	}
 	
 	public static boolean isStreaming() {
@@ -174,7 +188,7 @@ public final class BroadcastRunner extends TimerTask {
 	
 	public static void restart() {
 		if(isStreaming()) stopStream();
-		createStream(playling);
+		createStream(playing);
 	}
 	
 	public static void next() {
@@ -183,7 +197,7 @@ public final class BroadcastRunner extends TimerTask {
 	
 	public static void previous() {
 		if(isStreaming()) {
-			index=index-2<0?Helper.files.length-1:index-2;
+			index=(index-2+getFiles().length)%getFiles().length;
 			stopStream();
 		}
 	}
@@ -197,5 +211,114 @@ public final class BroadcastRunner extends TimerTask {
 		}
 		return null;
 	}
+	
+	public static File[] getFiles() {
+		return files;
+	}
+	
+	public static Optional<File> getFileByName(String name) {
+		File file=null;
+		int pos=getFilePosition(name);
+		if(pos!=-1) {
+			file=files[pos];
+		} else {
+			pos=getCustomFilePosition(name);
+			if(pos!=-1) file=customs[pos];
+		}
+		if(file!=null&&file.exists()&&file.isFile()&&file.canRead()) return Optional.of(file);
+		return Optional.empty();
+	}	
+	
+	public static int getFilePosition(String name) {
+		if(!name.isEmpty()) {
+		    for(int i=0;i<files.length;i++) {
+		        if(files[i].getName().equalsIgnoreCase(name)) return i;
+		    }
+		}
+		return -1;
+	}
+	
+	public static int getCustomFilePosition(String name) {
+		if(!name.isEmpty()) {
+			for(int i=0;i<customs.length;i++) {
+		        if(customs[i].getName().equalsIgnoreCase(name)) return i;
+			}
+		}
+		return -1;
+	}
+	
+	public static List<String> getFilesAsList(String r) {
+	    String regex=r.contains("*")?r.replaceAll("\\*","(.*)"):"(.*)"+r+"(.*)";
+	    List<String>list=new ArrayList<String>();
+	    Stream.of(files,customs)
+	        .flatMap(Arrays::stream)
+	        .map(File::getName)
+	        .filter(name->{
+	        	try {
+		            return name.toLowerCase().matches(regex);	
+	        	} catch (Exception e) {
+					if(Config.DEBUG) ANSI.printErr("getFilelistAsString method failed.",e);
+	        	}
+	        	return false;
+	        })
+	        .forEach(list::add);
+	    return list;
+	}
+
+	public static String getFilesAsString(String r) {
+	    AtomicInteger count=new AtomicInteger(0);
+	    StringBuilder playlist = new StringBuilder();
+	    String regex=r.contains("*")?r.replaceAll("\\*","(.*)"):"(.*)"+r+"(.*)";
+	
+	    Stream.of(files,customs)
+	        .flatMap(Arrays::stream)
+	        .map(File::getName)
+	        .filter(name->{
+				try {
+					return name.toLowerCase().matches(regex);
+				} catch (Exception e) {
+					if(Config.DEBUG) ANSI.printErr("getFilelistAsString method failed.",e);
+				}
+				return false;
+	        })
+	        .forEach(name->{
+	            playlist.append(name+"\n");
+	            count.incrementAndGet();
+	        });
+	
+	    playlist.append("\nThere are ").append(count).append(" matches for ").append(regex);
+	    return playlist.toString();
+	}
+	
+	public static void shuffleFilelist() {
+		Random random=ThreadLocalRandom.current();
+		for (int i1=files.length-1;i1>0;i1--) {
+			int index=random.nextInt(i1+1);
+			File a=files[index];
+			files[index]=files[i1];
+			files[i1]=a;
+		}
+	}
+	
+	private static File[] getFiles(File file,FileFilter filter) {
+		if(file.exists()) {
+	    	if(file.isDirectory()) {
+	    		return file.listFiles(filter);
+	    	} else if(file.isFile()) {
+	    		return new File[] {file};
+	    	}
+		}
+		return new File[0];
+	}
+	
+	public static void refreshFilelist() {
+    	File file=new File(Config.PLAYLIST_PATH);
+    	File custom=new File(Config.PLAYLIST_PATH_CUSTOM);
+    	
+    	FileFilter filter=pathName->pathName.getAbsolutePath().toLowerCase().endsWith(".mp4");
+    	files=getFiles(file,filter);
+    	customs=getFiles(custom,filter);
+	}
+	
 	
 }

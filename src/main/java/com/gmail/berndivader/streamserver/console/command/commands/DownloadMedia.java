@@ -55,15 +55,17 @@ public class DownloadMedia extends Command {
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			ANSI.printErr("Failed to run cleanup process.",e);
 		}
+
+		Optional<File>opt=Helper.getOrCreateMediaDir(Config.DL_MEDIA_PATH);
+		if(opt.isEmpty()) return false;
 		
-		File directory=Helper.getOrCreateMediaDir(Config.DL_MEDIA_PATH);
-		if(directory==null) return false;
+		File directory=opt.get();
 				
-		Entry<ProcessBuilder,Optional<InfoPacket>>entry=Helper.prepareDownloadBuilder(directory,args[0]);
+		Entry<ProcessBuilder,InfoPacket>entry=Helper.createDownloadBuilder(directory,args[0]);
 		ProcessBuilder builder=entry.getKey();
 		
-		Optional<InfoPacket>infoPacket=entry.getValue();
-		infoPacket.ifPresent(info->ANSI.println(info.toString()));
+		InfoPacket infoPacket=entry.getValue();
+		ANSI.println(infoPacket.toString());
 
 		try {
 			Process process=builder.start();
@@ -77,10 +79,8 @@ public class DownloadMedia extends Command {
 					time=System.currentTimeMillis();
 					String line=new String(input.readNBytes(avail));
 					if(line.contains("[Metadata]")) {
-						infoPacket.ifPresent(info->{
-							String[]temp=line.split("\"");
-							if(temp.length>0) info.local_filename=temp[1];
-						});
+						String[]temp=line.split("\"");
+						if(temp.length>0) infoPacket.local_filename=temp[1];						
 					}
 					ANSI.printRaw("[CR][DL]"+line);
 				}
@@ -99,19 +99,16 @@ public class DownloadMedia extends Command {
 			if(process.isAlive()) process.destroy();
 			ANSI.printRaw("[BR]");
 			
-			if(infoPacket.isPresent()) {
-				InfoPacket info=infoPacket.get();
-				if(info.downloadable) {
-					File file=new File(builder.directory().getAbsolutePath()+"/"+info.local_filename);
-					if(file.exists()&&file.isFile()&&file.canRead()) {
-						MakeDownloadable downloadable= new MakeDownloadable(file);
-						Optional<String>optLink=downloadable.future.get(2,TimeUnit.MINUTES);
-						optLink.ifPresentOrElse(link->{
-							ANSI.println("[BR][BOLD][GREEN]"+link+"[RESET]");
-						},()->{
-							ANSI.printWarn("[BR]Failed to create download link.");
-						});
-					}
+			if(infoPacket.downloadable) {
+				File file=new File(builder.directory().getAbsolutePath()+"/"+infoPacket.local_filename);
+				if(file.exists()&&file.isFile()&&file.canRead()) {
+					MakeDownloadable downloadable= new MakeDownloadable(file);
+					Optional<String>optLink=downloadable.future.get(2,TimeUnit.MINUTES);
+					optLink.ifPresentOrElse(link->{
+						ANSI.println("[BR][BOLD][GREEN]"+link+"[RESET]");
+					},()->{
+						ANSI.printWarn("[BR]Failed to create download link.");
+					});
 				}
 			}
 		} catch (Exception e) {

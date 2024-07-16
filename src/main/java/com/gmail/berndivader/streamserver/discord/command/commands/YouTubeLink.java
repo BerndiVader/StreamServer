@@ -1,7 +1,5 @@
 package com.gmail.berndivader.streamserver.discord.command.commands;
 
-import java.util.function.Consumer;
-
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.command.Command;
@@ -17,17 +15,13 @@ public class YouTubeLink extends Command<Message> {
 
 	@Override
 	public Mono<Message> execute(String string, MessageChannel channel) {
-		return channel.createEmbed(new Consumer<EmbedCreateSpec>() {
-
-			@Override
-			public void accept(EmbedCreateSpec embed) {
-				embed.setTitle("Youtube link:");
-				embed.setColor(Color.CINNABAR);
-				embed.setDescription(Config.YOUTUBE_LINK);
-			}
-			
-		});
 		
+		return channel.createMessage(EmbedCreateSpec.builder()
+				.title("Youtube link:")
+				.color(Color.CINNABAR)
+				.description(Config.YOUTUBE_LINK)
+				.build());
+				
 	}
 
 }

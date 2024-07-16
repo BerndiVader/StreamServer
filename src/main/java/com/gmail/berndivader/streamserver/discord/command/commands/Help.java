@@ -7,6 +7,8 @@ import com.gmail.berndivader.streamserver.discord.command.Commands;
 
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
@@ -15,22 +17,20 @@ public class Help extends Command<Message> {
 	
 	@Override
 	public Mono<Message> execute(String string,MessageChannel channel) {
-		
-		return channel.createMessage(msg->{
-			msg.addEmbed(embed->{
-				embed.setTitle("StreamServer discord help");
-				embed.setColor(Color.GREEN);
-				
-				StringBuilder builder=new StringBuilder().append(Config.DISCORD_HELP_TEXT);
-				
-				Commands.instance.commands.forEach((name,clazz)->{
-					DiscordCommand a=clazz.getDeclaredAnnotation(DiscordCommand.class);
-					if(a!=null) builder.append(a.name().concat(" - ").concat(a.usage()).concat("\n"));
-				});
-				embed.setDescription(builder.toString());
-				
-			});
+
+		StringBuilder builder=new StringBuilder().append(Config.DISCORD_HELP_TEXT);
+		Commands.instance.commands.forEach((name,clazz)->{
+			DiscordCommand a=clazz.getDeclaredAnnotation(DiscordCommand.class);
+			if(a!=null) builder.append(a.name().concat(" - ").concat(a.usage()).concat("\n"));
 		});
+		
+		return channel.createMessage(MessageCreateSpec.builder()
+				.addEmbed(EmbedCreateSpec.builder()
+					.title("StreamServer discord help")
+					.color(Color.GREEN)
+					.description(builder.toString())
+					.build())				
+				.build());
 		
 	}
 

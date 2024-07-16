@@ -19,11 +19,13 @@ import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
 import com.gmail.berndivader.streamserver.mysql.MakeDownloadable;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
-import discord4j.core.event.domain.interaction.ButtonInteractEvent;
-import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.Button;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.spec.EmbedCreateFields.Field;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
+import discord4j.core.spec.MessageEditSpec;
 import discord4j.rest.util.Color;
 import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
@@ -58,62 +60,61 @@ public class DownloadMedia extends Command<Void> {
 
 		@Override
 		public void run() {
-			File directory=Helper.getOrCreateMediaDir(Config.DL_MUSIC_PATH);
-			if(directory==null) {
-								
-				channel.createMessage(msg->{
-					msg.addEmbed(embed->{
-						embed.setTitle("ERROR DLP!")
-						.setColor(Color.RED)
-						.setDescription("There was an issue with the download directory configured in Config.DL_MUSIC_PATH. It is either a file or the directory couldnt be created by the bot.");
-					});
-				}).subscribe();
+			Optional<File>opt=Helper.getOrCreateMediaDir(Config.DL_MUSIC_PATH);
+			if(opt.isEmpty()) {
 				
+				channel.createMessage(EmbedCreateSpec.builder()
+						.title("ERROR")
+						.color(Color.RED)
+						.description("There was an issue with the download directory configured in Config.DL_MUSIC_PATH. It is either a file or the directory couldnt be created by the bot.")
+						.build()
+				).subscribe();
 				return;
+				
 			}
 			
-			channel.createMessage(msg->{
-				msg.addEmbed(embed->{
-					embed.setTitle("Prepare download media file.");
-					embed.setColor(Color.GREEN);
-				});
-			}).doOnSuccess(message->{
+			File directory=opt.get();
+
+			channel.createMessage(EmbedCreateSpec.builder()
+					.title("Prepare download media file.")
+					.color(Color.GREEN)
+					.build()
+			).doOnSuccess(message->{
 				
-				Entry<ProcessBuilder, Optional<InfoPacket>>entry=Helper.prepareDownloadBuilder(directory,line);
+				Entry<ProcessBuilder,InfoPacket>entry=Helper.createDownloadBuilder(directory,line);
 				ProcessBuilder builder=entry.getKey();
-				Optional<InfoPacket>infoPacket=entry.getValue();
+				InfoPacket infoPacket=entry.getValue();
 				status=Status.RUNNING;
 				
-				try {
-					message.edit(msg->{
-						msg.setComponents(ActionRow.of(Button.danger(uuid,"Cancel")))
-						.setContent("Starting download...").addEmbed(embed->{
-							embed.setTitle("Downloading....");
-							infoPacket.ifPresent(info->{
-								embed.setUrl(info.webpage_url);
-								embed.setDescription(info.title);
-								embed.setImage(info.thumbnail);
-								embed.setColor(Color.BLUE);
-								embed.setFooter(info.format,null);
-							});
-						});
-					}).doOnCancel(()->{
+				try {					
+					message.edit(MessageEditSpec.create()
+							.withContentOrNull("Starting download...")
+								.withEmbeds(EmbedCreateSpec.builder()
+									.title(infoPacket.title)
+									.url(infoPacket.webpage_url)
+									.description(infoPacket.description)
+									.image(infoPacket.thumbnail)
+									.color(Color.BLUE)
+									.footer(infoPacket.format,null)
+								.build())
+							).doOnCancel(()->{
 						ANSI.printRaw("[BR]CANCELLED[BR]");
-					})
-					.doOnError(e->{
+					}).doOnError(e->{
 						ANSI.printErr(e.getMessage(),e.getCause());
 					}).subscribe();
 					
-					Disposable listener=message.getClient().on(ButtonInteractEvent.class,event->{
+					Disposable listener=message.getClient().on(ButtonInteractionEvent.class,event->{
 						if(event.getCustomId().equals(uuid)) {
 							status=Status.ABORTED;
-							return event.edit(msg->{
-								msg.setContent("").addEmbed(embed->{
-									embed.setTitle("Aborted")
-									.setDescription("Media download aborted by user.")
-									.setColor(Color.RED);
-								}).setComponents(new ArrayList<LayoutComponent>());
-							});
+							return event.edit(InteractionApplicationCommandCallbackSpec.create()
+									.withContent("")
+									.withEmbeds(EmbedCreateSpec.create()
+											.withTitle("Aborted")
+											.withDescription("Media download aborted by user.")
+											.withColor(Color.RED)
+											)
+									.withComponents(new ArrayList<LayoutComponent>())
+							);
 						}
 						return Mono.empty();
 					}).subscribe();
@@ -133,12 +134,10 @@ public class DownloadMedia extends Command<Void> {
 							time=System.currentTimeMillis();
 							String line=new String(input.readNBytes(avail));
 							if(line.contains("[Metadata]")) {
-								infoPacket.ifPresent(info->{
-									String[]temp=line.split("\"");
-									if(temp.length>0) info.local_filename=temp[1];
-								});
+								String[]temp=line.split("\"");
+								if(temp.length>0) infoPacket.local_filename=temp[1];
 							}
-							message.edit(msg->msg.setContent(line)).subscribe();
+							message.edit(MessageEditSpec.create().withContentOrNull(line)).subscribe();
 						} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l) {
 							status=Status.TIMEOUT;
 						}
@@ -150,61 +149,64 @@ public class DownloadMedia extends Command<Void> {
 					
 					if(errorBuilder.length()>0) status=Status.ERROR;
 					
-					message.edit(msg->{
-						msg.setComponents(new ArrayList<LayoutComponent>());
-						msg.addEmbed(embed->{
-							switch(status) {
-							case TIMEOUT:
-								msg.setContent("");
-								embed.setTitle("TIMEOUT")
-								.setDescription("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.")
-								.setColor(Color.RED);
-								break;
-							case FINISHED:
-								msg.setContent("FINISHED");
-								embed.setTitle("Download finished....");
-								infoPacket.ifPresent(info->{
-									embed.setUrl(info.webpage_url);
-									embed.setDescription(info.title);
-									embed.setImage(info.thumbnail);
-									embed.setColor(Color.GREEN);
-									embed.setFooter(info.format,null);
-
-									if(info.downloadable) {
-										File file=new File(builder.directory().getAbsolutePath()+"/"+info.local_filename);
-										if(file.exists()&&file.isFile()&&file.canRead()) {
-											MakeDownloadable downloadable= new MakeDownloadable(file);
-											Optional<String>optLink=Optional.ofNullable(null);
-											try {
-												optLink=downloadable.future.get(2,TimeUnit.MINUTES);
-											} catch (InterruptedException | ExecutionException | TimeoutException e) {
-												ANSI.printErr(e.getMessage(),e);
-											}
-											optLink.ifPresentOrElse(link->{
-												embed.addField("Downloadlink",link,false);
-											},()->{
-												embed.addField("Downloadlink","Failed to create download link.",false);
-											});
-										}
-									}
-									
+					MessageEditSpec.Builder edit=MessageEditSpec.builder().componentsOrNull(null);
+					
+					switch(status) {
+					case TIMEOUT:
+						edit.contentOrNull("")
+							.addEmbed(EmbedCreateSpec.builder()
+								.title("TIMOUT")
+								.description("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.")
+								.color(Color.RED)
+								.build());
+						break;
+					case FINISHED:
+						edit.contentOrNull("FINISHED");
+						EmbedCreateSpec.Builder embed=EmbedCreateSpec.builder()
+							.title("Download finished....")
+							.url(infoPacket.webpage_url)
+							.description(infoPacket.title)
+							.image(infoPacket.thumbnail)
+							.color(Color.GREEN)
+							.footer(infoPacket.format,null);
+						if(infoPacket.downloadable) {
+							File file=new File(builder.directory().getAbsolutePath()+"/"+infoPacket.local_filename);
+							if(file.exists()&&file.isFile()&&file.canRead()) {
+								MakeDownloadable downloadable= new MakeDownloadable(file);
+								Optional<String>optLink=Optional.ofNullable(null);
+								try {
+									optLink=downloadable.future.get(2,TimeUnit.MINUTES);
+								} catch (InterruptedException | ExecutionException | TimeoutException e) {
+									ANSI.printErr(e.getMessage(),e);
+								}
+								optLink.ifPresentOrElse(link->{
+									embed.addField(Field.of("Downloadlink",link,false));
+								},()->{
+									embed.addField(Field.of("Downloadlink","Failed to create download link.",false));
 								});
-								break;
-							case ERROR:
-								msg.setContent("");
-								embed.setTitle("ERROR")
-								.setColor(Color.ORANGE)
-								.setDescription("Something went wront.\n\n".concat(errorBuilder.toString()));
-								break;
-							default:
-								msg.setContent("");
-								embed.setTitle("WARNING")
-								.setDescription("Mediafile already downloaded and exists.")
-								.setColor(Color.ORANGE);
-								break;
 							}
-						});
-					}).subscribe();
+						}
+						edit.addEmbed(embed.build());
+						break;
+					case ERROR:
+						edit.contentOrNull("");
+						edit.addEmbed(EmbedCreateSpec.builder()
+								.title("ERROR")
+								.color(Color.RED)
+								.description("Something went wront.\n\n".concat(errorBuilder.toString()))
+								.build());
+						break;
+					default:
+						edit.contentOrNull("");
+						edit.addEmbed(EmbedCreateSpec.builder()
+								.title("WARNING")
+								.description("Mediafile already downloaded and exists.")
+								.color(Color.ORANGE)
+								.build());
+						break;
+					}
+					
+					message.edit(edit.build()).subscribe();
 					
 					if(listener!=null&&!listener.isDisposed()) listener.dispose();
 					if(process.isAlive()) process.destroyForcibly();

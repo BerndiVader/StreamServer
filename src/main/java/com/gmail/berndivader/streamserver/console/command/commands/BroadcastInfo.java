@@ -1,6 +1,5 @@
 package com.gmail.berndivader.streamserver.console.command.commands;
 
-import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.console.command.Command;
@@ -20,10 +19,10 @@ public class BroadcastInfo extends Command {
 					ANSI.println("Is broadcasting: "+BroadcastRunner.isStreaming());
 					break;
 				case "file":
-					ANSI.println("Current File: "+Helper.files[BroadcastRunner.index-1].getName());
+					ANSI.println("Current File: "+BroadcastRunner.getFiles()[BroadcastRunner.index-1].getName());
 					break;
 				case "next":
-					ANSI.println("Next File: "+Helper.files[BroadcastRunner.index].getName());
+					ANSI.println("Next File: "+BroadcastRunner.getFiles()[BroadcastRunner.index].getName());
 					break;
 				default:
 					break;

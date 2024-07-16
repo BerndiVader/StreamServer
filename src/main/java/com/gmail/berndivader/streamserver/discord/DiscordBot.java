@@ -16,7 +16,8 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.discordjson.json.gateway.StatusUpdate;
+import discord4j.core.object.presence.ClientActivity;
+import discord4j.core.object.presence.ClientPresence;
 import reactor.core.publisher.Mono;
 
 public final class DiscordBot {
@@ -78,8 +79,7 @@ public final class DiscordBot {
                 return mono.flatMap(channel->{
                     if (channel==null) return Mono.empty();
                     return command.exec(args,channel)
-                        .doOnError(error->ANSI.printErr(error.getMessage(),error))
-                        .then(Mono.fromRunnable(()->updateStatus(content)));
+                        .doOnError(error->ANSI.printErr(error.getMessage(),error));
                 });
                 
 		    }).subscribe();
@@ -93,12 +93,7 @@ public final class DiscordBot {
 	
 	public void updateStatus(String comment) {
 		if(Config.DEBUG) ANSI.println("Set status to: "+comment);
-	    StatusUpdate statusUpdate=StatusUpdate.builder()
-	        .afk(false)
-	        .since(1l)
-	        .status(comment)
-	        .build();
-	    client.updatePresence(statusUpdate).doOnError(error->ANSI.printErr("Failed to update status",error)).subscribe();
+	    client.updatePresence(ClientPresence.of(discord4j.core.object.presence.Status.ONLINE,ClientActivity.custom(comment))).doOnError(error->ANSI.printErr("Failed to update discord status",error)).subscribe();
 	}
 	
 	public void close() {

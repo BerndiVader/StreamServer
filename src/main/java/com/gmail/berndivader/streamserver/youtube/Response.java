@@ -11,7 +11,6 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 
-import com.gmail.berndivader.streamserver.Helper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -26,7 +25,7 @@ public abstract class Response<T> implements Callable<T> {
 	@Override
 	public T call() throws Exception {
 		HttpUriRequest request=new HttpGet(query);
-		JsonObject json=Helper.HTTP_CLIENT.execute(request,new ResponseHandler<JsonObject>() {
+		JsonObject json=Youtube.HTTP_CLIENT.execute(request,new ResponseHandler<JsonObject>() {
 			@Override
 			public JsonObject handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
 				String text="";

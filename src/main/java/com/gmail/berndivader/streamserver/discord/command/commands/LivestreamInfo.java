@@ -4,7 +4,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
 
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.config.Config;
@@ -37,31 +36,26 @@ public class LivestreamInfo extends Command<Message> {
 			ANSI.printErr(e.getMessage(),e);
 		}
 		
-		return channel.createEmbed(new Consumer<EmbedCreateSpec>() {
-
-			@Override
-			public void accept(EmbedCreateSpec embed) {
-				
-				if(packet instanceof LiveStreamPacket) {
-					LiveStreamPacket p=(LiveStreamPacket)packet;
-					embed.setColor(Color.CINNABAR);
-					embed.setAuthor(p.snippet.channelTitle,"https://www.youtube.com/channel/"+p.snippet.channelId,p.snippet.thumbnails.low.url);
-					embed.setImage(p.snippet.thumbnails.medium.url);
-					embed.setUrl("https://www.youtube.com/watch?v="+p.id.videoId);
-					embed.setDescription(p.snippet.description);
-					embed.setFooter("Broadcastcontent: "+p.snippet.liveBroadcastContent,p.snippet.thumbnails.low.url);
-					embed.setThumbnail(p.snippet.thumbnails.low.url);
-					embed.setTitle(p.snippet.title);					
-				} else {
-					embed.setTitle("Error");
-					embed.setColor(Color.RED);
-					embed.setDescription("Unable to get livestream status from YT.");
-				}
-				
-			}
-			
-		});
+		EmbedCreateSpec.Builder builder=EmbedCreateSpec.builder();
 		
+		if(packet instanceof LiveStreamPacket) {
+			LiveStreamPacket p=(LiveStreamPacket)packet;
+			builder.color(Color.CINNABAR)
+				.author(p.snippet.channelTitle,"https://www.youtube.com/channel/"+p.snippet.channelId,p.snippet.thumbnails.low.url)
+				.image(p.snippet.thumbnails.medium.url)
+				.url("https://www.youtube.com/watch?v="+p.id.videoId)
+				.description(p.snippet.description)
+				.footer("Broadcastcontent: "+p.snippet.liveBroadcastContent,p.snippet.thumbnails.low.url)
+				.thumbnail(p.snippet.thumbnails.low.url)
+				.title(p.snippet.title);
+		} else {
+			builder.title("ERROR")
+				.color(Color.RED)
+				.description("Unable to get livestream status from YT.");
+		}
+		
+		return channel.createMessage(builder.build());
+				
 	}
 
 }
