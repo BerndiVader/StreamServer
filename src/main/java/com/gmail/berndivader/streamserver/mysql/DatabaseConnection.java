@@ -66,7 +66,10 @@ public class DatabaseConnection {
 	}
 	
 	public static boolean setup() {
-		if(status==STATUS.SERVER_CONNECTION_FAILED) return false;
+		if(status==STATUS.SERVER_CONNECTION_FAILED) {
+			ANSI.printWarn("Failed to connect to MYSQL Server. Not able to install.");
+			return false;
+		}
 		
 		try(Connection connection=getNewConnection()) {
 			try(Statement statement=connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
