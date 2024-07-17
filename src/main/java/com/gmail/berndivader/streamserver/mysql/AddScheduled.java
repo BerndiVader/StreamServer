@@ -31,6 +31,7 @@ public class AddScheduled implements Callable<Boolean> {
 		
 		boolean exists=false;
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
+			connection.setAutoCommit(false);
 			try(PreparedStatement testfor=connection.prepareStatement(SQL_TESTFOR,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				testfor.setString(1, filename);
 				ResultSet result=testfor.executeQuery();

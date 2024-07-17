@@ -14,8 +14,8 @@ import com.gmail.berndivader.streamserver.config.Config;
 
 public class CleanUpDownloadables implements Callable<Boolean>{
 	
-	private static final String SELECT_SQL="SELECT path FROM downloadables WHERE timestamp < UNIX_TIMESTAMP(NOW()-INTERVAL "+Config.DL_INTERVAL_VALUE+" "+Config.DL_INTERVAL_FORMAT+");";
-	private static final String DELETE_SQL="DELETE FROM downloadables WHERE timestamp < UNIX_TIMESTAMP(NOW()-INTERVAL "+Config.DL_INTERVAL_VALUE+" "+Config.DL_INTERVAL_FORMAT+");";
+	private static final String SELECT_SQL="SELECT path FROM downloadables WHERE temp=true AND timestamp < UNIX_TIMESTAMP(NOW()-INTERVAL "+Config.DL_INTERVAL_VALUE+" "+Config.DL_INTERVAL_FORMAT+");";
+	private static final String DELETE_SQL="DELETE FROM downloadables WHERE temp=true AND timestamp < UNIX_TIMESTAMP(NOW()-INTERVAL "+Config.DL_INTERVAL_VALUE+" "+Config.DL_INTERVAL_FORMAT+");";
 	public Future<Boolean>future;
 	
 	public CleanUpDownloadables() {
@@ -25,6 +25,7 @@ public class CleanUpDownloadables implements Callable<Boolean>{
 	@Override
 	public Boolean call() {
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
+			connection.setAutoCommit(false);
 			try(PreparedStatement statement=connection.prepareStatement(SELECT_SQL,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				ResultSet result=statement.executeQuery();
 				int count=0;

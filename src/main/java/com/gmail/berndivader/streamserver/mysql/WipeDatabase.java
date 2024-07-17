@@ -23,6 +23,7 @@ public class WipeDatabase implements Callable<Boolean> {
 	@Override
 	public Boolean call() {
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
+			connection.setAutoCommit(false);
 			try(Statement wipe=connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				wipe.addBatch("START TRANSACTION;");
 				wipe.addBatch("TRUNCATE TABLE `current`;");
@@ -31,6 +32,9 @@ public class WipeDatabase implements Callable<Boolean> {
 				wipe.addBatch("TRUNCATE TABLE `downloadables`;");
 				wipe.addBatch("COMMIT;");
 				wipe.executeBatch();
+			} catch(SQLException e) {
+				connection.rollback();
+				throw e;
 			}
 		} catch (SQLException e) {
 			ANSI.printErr("Reset database failed.",e);
