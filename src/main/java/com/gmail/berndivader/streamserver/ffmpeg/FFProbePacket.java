@@ -1,12 +1,14 @@
 package com.gmail.berndivader.streamserver.ffmpeg;
 
+import java.nio.file.Paths;
+
 import com.gmail.berndivader.streamserver.Helper;
 import com.google.gson.annotations.SerializedName;
 
 public class FFProbePacket {
 	private static final String UNKNOWN="<UNKNOWN>";
 	
-	public String filename=UNKNOWN;
+	private String filename=UNKNOWN;
 	public Integer nb_streams=-1;
 	public Integer nb_programs=-1;
 	public Integer nb_stream_groups=-1;
@@ -42,6 +44,14 @@ public class FFProbePacket {
 		public String synopsis=UNKNOWN;
 		@SerializedName(value="purl", alternate={"PURL"})
 		public String purl=UNKNOWN;
+	}
+	
+	public String getFileName() {
+		return Paths.get(filename).getFileName().toString();
+	}
+	
+	public String getPath() {
+		return filename;
 	}
 	
 	@Override
