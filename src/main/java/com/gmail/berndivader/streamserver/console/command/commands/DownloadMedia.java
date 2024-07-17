@@ -70,32 +70,34 @@ public class DownloadMedia extends Command {
 		try {
 			Process process=builder.start();
 			Future<Boolean>interruptHandler=Helper.EXECUTOR.submit(new InterruptHandler(process));
-			InputStream input=process.getInputStream();
-			long time=System.currentTimeMillis();
-			
-			while(process.isAlive()&&!interruptHandler.isDone()) {
-				int avail=input.available();
-				if(avail>0) {
-					time=System.currentTimeMillis();
-					String line=new String(input.readNBytes(avail));
-					if(line.contains("[Metadata]")) {
-						String[]temp=line.split("\"");
-						if(temp.length>0) infoPacket.local_filename=temp[1];						
+			try(InputStream input=process.getInputStream();
+				BufferedReader error=process.errorReader()) {
+				long time=System.currentTimeMillis();
+				
+				while(process.isAlive()&&!interruptHandler.isDone()) {
+					int avail=input.available();
+					if(avail>0) {
+						time=System.currentTimeMillis();
+						String line=new String(input.readNBytes(avail));
+						if(line.contains("[Metadata]")) {
+							String[]temp=line.split("\"");
+							if(temp.length>0) infoPacket.local_filename=temp[1];						
+						}
+						ANSI.printRaw("[CR][DL]"+line);
 					}
-					ANSI.printRaw("[CR][DL]"+line);
+					if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
+						ANSI.printRaw("[BR]");
+						ANSI.printWarn("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
+						process.destroy();
+					}
 				}
-				if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
+				
+				if(error!=null&&error.ready()) {
 					ANSI.printRaw("[BR]");
-					ANSI.printWarn("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
-					process.destroy();
+					error.lines().forEach(line->ANSI.printWarn(line));
 				}
 			}
 						
-			BufferedReader error=process.errorReader();
-			if(error!=null&&error.ready()) {
-				ANSI.printRaw("[BR]");
-				error.lines().forEach(line->ANSI.printWarn(line));
-			}
 			if(process.isAlive()) process.destroy();
 			ANSI.printRaw("[BR]");
 			

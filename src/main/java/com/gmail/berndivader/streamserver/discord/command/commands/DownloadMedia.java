@@ -120,35 +120,37 @@ public class DownloadMedia extends Command<Void> {
 					}).subscribe();
 					
 					Process process=builder.start();
-
-					InputStream input=process.getInputStream();
 					long time=System.currentTimeMillis();
-					
-					while(status==Status.RUNNING) {
-						if(!process.isAlive()) {
-							status=Status.FINISHED;
-							break;
-						}
-						int avail=input.available();
-						if(avail>0) {
-							time=System.currentTimeMillis();
-							String line=new String(input.readNBytes(avail));
-							if(line.contains("[Metadata]")) {
-								String[]temp=line.split("\"");
-								if(temp.length>0) infoPacket.local_filename=temp[1];
-							}
-							message.edit(MessageEditSpec.create().withContentOrNull(line)).subscribe();
-						} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l) {
-							status=Status.TIMEOUT;
-						}
-					}
-					
-					BufferedReader error=process.errorReader();
 					StringBuilder errorBuilder=new StringBuilder();
-					error.lines().filter(line->!line.startsWith("WARNING")).forEach(line->errorBuilder.append(line));
 					
-					if(errorBuilder.length()>0) status=Status.ERROR;
-					
+					try(InputStream input=process.getInputStream();
+						BufferedReader error=process.errorReader()) {
+						
+						while(status==Status.RUNNING) {
+							if(!process.isAlive()) {
+								status=Status.FINISHED;
+								break;
+							}
+							int avail=input.available();
+							if(avail>0) {
+								time=System.currentTimeMillis();
+								String line=new String(input.readNBytes(avail));
+								if(line.contains("[Metadata]")) {
+									String[]temp=line.split("\"");
+									if(temp.length>0) infoPacket.local_filename=temp[1];
+								}
+								message.edit(MessageEditSpec.create().withContentOrNull(line)).subscribe();
+							} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l) {
+								status=Status.TIMEOUT;
+								break;
+							}
+						}
+						
+						error.lines().filter(line->!line.startsWith("WARNING")).forEach(line->errorBuilder.append(line));
+						if(errorBuilder.length()>0) status=Status.ERROR;
+						
+					}
+										
 					MessageEditSpec.Builder edit=MessageEditSpec.builder().componentsOrNull(null);
 					
 					switch(status) {
