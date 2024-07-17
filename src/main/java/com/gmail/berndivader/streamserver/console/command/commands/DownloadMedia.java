@@ -104,7 +104,7 @@ public class DownloadMedia extends Command {
 			if(infoPacket.downloadable) {
 				File file=new File(builder.directory().getAbsolutePath()+"/"+infoPacket.local_filename);
 				if(file.exists()&&file.isFile()&&file.canRead()) {
-					MakeDownloadable downloadable= new MakeDownloadable(file);
+					MakeDownloadable downloadable= new MakeDownloadable(file,infoPacket.temp);
 					Optional<String>optLink=downloadable.future.get(2,TimeUnit.MINUTES);
 					optLink.ifPresentOrElse(link->{
 						ANSI.println("[BR][BOLD][GREEN]"+link+"[RESET]");

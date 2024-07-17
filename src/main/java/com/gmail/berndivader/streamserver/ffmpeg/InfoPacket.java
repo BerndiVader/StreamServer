@@ -21,6 +21,7 @@ public class InfoPacket {
 		public String local_filename=UNKNOWN;
 		public Integer filesize_approx=-1;
 		public Boolean downloadable=false;
+		public Boolean temp=false;
 		
 		@Override
 		public String toString() {

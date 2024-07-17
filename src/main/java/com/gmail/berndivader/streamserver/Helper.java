@@ -1,5 +1,7 @@
 package com.gmail.berndivader.streamserver;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +14,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.imageio.ImageIO;
 
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
@@ -55,25 +59,28 @@ public final class Helper {
 		long start=System.currentTimeMillis();
 		timeout*=1000l;
 		Process process=builder.start();
-		InputStream input=process.getInputStream();
-		InputStream error=process.getErrorStream();
-		StringBuilder out=new StringBuilder();
 		
-		while(process.isAlive()) {
-			int avail=input.available();
-			if(avail>0) {
-				out.append(new String(input.readAllBytes()));
-				start=System.currentTimeMillis();
+		try(InputStream input=process.getInputStream();
+			InputStream error=process.getErrorStream()) {
+			
+			StringBuilder out=new StringBuilder();
+			int avail;
+			
+			while(process.isAlive()) {
+				avail=input.available();
+				if(avail>0) {
+					out.append(new String(input.readAllBytes()));
+					start=System.currentTimeMillis();
+				}
+				if(System.currentTimeMillis()-start>timeout) {
+					process.destroy();
+					throw new Exception("Process timed out.");
+				}
 			}
 			
-			if(System.currentTimeMillis()-start>timeout) {
-				process.destroy();
-				throw new Exception("Process timed out.");
-			}
+			if(error.available()>0) ANSI.printErr(new String(error.readAllBytes()),null);
+			return out.toString();
 		}
-		
-		if(error.available()>0) ANSI.printErr(new String(error.readAllBytes()),null);
-		return out.toString();
 	}
 	
 	public static FFProbePacket createProbePacket(File file) {
@@ -86,7 +93,10 @@ public final class Helper {
 				String out=startAndWaitForProcess(builder,10l);
 				if(!out.isEmpty()) {
 					JsonObject o=JsonParser.parseString(out.toString()).getAsJsonObject();
-					if(o.has("format")) packet=LGSON.fromJson(o.get("format"),FFProbePacket.class);
+					if(o.has("format")) {
+						packet=LGSON.fromJson(o.get("format"),FFProbePacket.class);
+					}
+					
 				}
 			} catch (Exception e) {
 				ANSI.printErr("getProbePacket method failed.", e);
@@ -112,7 +122,9 @@ public final class Helper {
 		InfoPacket info=null;
 		try {
 			String out=startAndWaitForProcess(builder,10l);
-			if(!out.isEmpty()) info=LGSON.fromJson(out.toString(),InfoPacket.class);
+			if(!out.isEmpty()) {
+				info=LGSON.fromJson(out.toString(),InfoPacket.class);
+			}
 		} catch (Exception e) {
 			ANSI.printErr("getinfoPacket method failed.",e);
 		}
@@ -123,6 +135,7 @@ public final class Helper {
 		ProcessBuilder builder=new ProcessBuilder();
 		getOrCreateMediaDir(Config.DL_MEDIA_PATH).ifPresentOrElse(dir->builder.directory(dir),()->builder.directory(new File("./")));
 		boolean downloadable=false;
+		boolean temp=false;
 		
 		builder.command("yt-dlp"
 				,"--progress-delta","2"
@@ -154,7 +167,7 @@ public final class Helper {
 				switch(parse[0]) {
 					case("temp"):
 						getOrCreateMediaDir(Config.DL_MUSIC_PATH).ifPresent(dir->builder.directory(dir));;
-						downloadable=true;
+						downloadable=temp=true;
 						break;
 					case("music"):
 						builder.command().addAll(Arrays.asList("--ignore-errors"
@@ -192,8 +205,38 @@ public final class Helper {
 		InfoPacket infoPacket=Helper.createInfoPacket(url);
 		if(!url.isEmpty()) builder.command().add(url);
 		infoPacket.downloadable=downloadable;
+		infoPacket.temp=temp;
 		
 		return Map.entry(builder,infoPacket);
+	}
+	
+	public static byte[] extractImageFromMedia(File media) {
+		ProcessBuilder builder=new ProcessBuilder("ffmpeg"
+				,"-v","quiet"
+				,"-i",media.getAbsolutePath()
+				,"-map","0:v:0"
+				,"-c:v"
+				,"mjpeg"
+				,"-f","mjpeg"
+				,"-"
+			);
+		
+		Process process=null;
+		try {
+			process=builder.start();
+			
+			try(InputStream in=process.getInputStream();
+				ByteArrayOutputStream out=new ByteArrayOutputStream()) {
+				BufferedImage bimage=ImageIO.read(in);
+				if(ImageIO.write(bimage,"jpg",out)) return out.toByteArray();
+			}
+						
+		} catch (IOException e) {
+			ANSI.printErr(e.getMessage(),e);
+		}
+		
+		if(process!=null&&process.isAlive()) process.destroy();
+		return new byte[0];
 	}
 	
 	public static Optional<File> getOrCreateMediaDir(String name) {

@@ -16,30 +16,36 @@ import com.gmail.berndivader.streamserver.config.Config;
 
 public class MakeDownloadable implements Callable<Optional<String>>{
 	
-	private static final String sql="INSERT INTO `downloadables` (`uuid`, `path`, timestamp, downloads) VALUES(?, ?, ?, ?);";
-	private File file;
+	private static final String sql="INSERT INTO `downloadables` (`uuid`, `path`, timestamp, downloads, temp, image) VALUES(?, ?, ?, ?, ?, ?);";
+	private final File file;
+	private final boolean temp;
 	public Future<Optional<String>>future;
 	
-	public MakeDownloadable(File file) {
-		
+	public MakeDownloadable(File file,boolean temp) {
+		this.temp=temp;
 		this.file=file;
 		this.future=Helper.EXECUTOR.submit(this);
 	}
 	
 	@Override
 	public Optional<String> call() {
+		byte[]bytes=Helper.extractImageFromMedia(file);
 		UUID uuid=UUID.randomUUID();
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
+			connection.setAutoCommit(false);
 			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				statement.addBatch("START TRANSACTION;");
 				statement.setString(1,uuid.toString());
 				statement.setString(2,file.getAbsolutePath());
 				statement.setLong(3,System.currentTimeMillis()/1000l);
 				statement.setInt(4,0);
+				statement.setBoolean(5,temp);
+				statement.setBytes(6,bytes);
 				statement.addBatch();
 				statement.addBatch("COMMIT;");
 				statement.executeBatch();
 			} catch(SQLException e) {
+				ANSI.printErr("Failed to execute batch.",e);
 				connection.rollback();
 				throw e;
 			}
