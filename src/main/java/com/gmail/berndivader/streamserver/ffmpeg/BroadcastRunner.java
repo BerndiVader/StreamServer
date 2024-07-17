@@ -120,11 +120,11 @@ public final class BroadcastRunner extends TimerTask {
 		if(probePacket.isSet(probePacket.tags.title)) {
 			title=probePacket.tags.title;
 		} else {
-			int pos=probePacket.filename.lastIndexOf(".");
+			int pos=file.getName().lastIndexOf(".");
 			if(pos>0) {
-				title=probePacket.filename.substring(0,pos);
+				title=file.getName().substring(0,pos);
 			} else {
-				title=probePacket.filename;
+				title=file.getName();
 			}
 		}
 				

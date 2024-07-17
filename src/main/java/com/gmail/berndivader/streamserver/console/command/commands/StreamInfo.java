@@ -34,7 +34,7 @@ public class StreamInfo extends Command {
 						ANSI.println("Playtime:"+Helper.stringFloatToTime(BroadcastRunner.probePacket.duration));
 						break;
 					case "file":
-						ANSI.println("File:"+BroadcastRunner.probePacket.filename);
+						ANSI.println("File:"+BroadcastRunner.probePacket.getPath());
 						break;
 					case "bitrate":
 					case "bits":
@@ -49,7 +49,7 @@ public class StreamInfo extends Command {
 						ANSI.println("Date:"+BroadcastRunner.probePacket.tags.date);
 						ANSI.println("Comment:"+BroadcastRunner.probePacket.tags.comment);
 						ANSI.println("Playtime:"+Helper.stringFloatToTime(BroadcastRunner.probePacket.duration));
-						ANSI.println("File:"+BroadcastRunner.probePacket.filename);
+						ANSI.println("File:"+BroadcastRunner.probePacket.getPath());
 						ANSI.println("Bitrate:"+BroadcastRunner.probePacket.bit_rate);
 						ANSI.println("Format:"+BroadcastRunner.probePacket.format_name);
 						break;
