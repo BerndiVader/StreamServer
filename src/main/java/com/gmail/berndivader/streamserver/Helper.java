@@ -1,5 +1,7 @@
 package com.gmail.berndivader.streamserver;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -142,6 +144,7 @@ public final class Helper {
 				,"--restrict-filenames"
 				,"--embed-metadata"
 				,"--embed-thumbnail"
+				,"--no-playlist"
 				,"--output","%(title).64s.%(ext)s"
 		);
 		
@@ -176,7 +179,6 @@ public final class Helper {
 								,"--audio-format","mp3"
 								,"--audio-quality","160K"
 								,"--output","%(title).64s.%(ext)s"
-								,"--no-playlist"
 						));
 						getOrCreateMediaDir(Config.DL_MUSIC_PATH).ifPresent(dir->builder.directory(dir));;
 						break;
@@ -210,7 +212,7 @@ public final class Helper {
 		return Map.entry(builder,infoPacket);
 	}
 	
-	public static byte[] extractImageFromMedia(File media) {
+	public static byte[] extractImageFromMedia(File media,File dest) {
 		ProcessBuilder builder=new ProcessBuilder("ffmpeg"
 				,"-v","quiet"
 				,"-i",media.getAbsolutePath()
@@ -228,7 +230,20 @@ public final class Helper {
 			try(InputStream in=process.getInputStream();
 				ByteArrayOutputStream out=new ByteArrayOutputStream()) {
 				BufferedImage bimage=ImageIO.read(in);
-				if(ImageIO.write(bimage,"jpg",out)) return out.toByteArray();
+				
+				double ratio=(double)bimage.getHeight()/bimage.getWidth();				
+				int h=(int)(800*ratio);
+				int type=bimage.getType();
+				
+				Image temp=bimage.getScaledInstance(800,h,Image.SCALE_SMOOTH);
+				bimage=new BufferedImage(800,h,type);
+				Graphics2D g2d=bimage.createGraphics();
+				g2d.drawImage(temp,0,0,null);
+				g2d.dispose();
+								
+				if(dest==null) {
+					if(ImageIO.write(bimage,"jpg",out)) return out.toByteArray();
+				} else ImageIO.write(bimage,"jpg",dest);
 			}
 						
 		} catch (IOException e) {
