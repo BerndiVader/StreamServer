@@ -20,6 +20,7 @@ public class ConfigData {
 	String DL_MUSIC_PATH;
 	String DL_TEMP_PATH;
 	String DL_MEDIA_PATH;
+	String DL_WWW_THUMBNAIL_PATH;
 	
 	Long DL_TIMEOUT_SECONDS;
 	String DL_URL;
