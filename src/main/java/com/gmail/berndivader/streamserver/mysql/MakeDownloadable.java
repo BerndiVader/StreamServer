@@ -13,10 +13,11 @@ import java.util.concurrent.Future;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.config.Config;
+import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 
 public class MakeDownloadable implements Callable<Optional<String>>{
 	
-	private static final String sql="INSERT INTO `downloadables` (`uuid`, `path`, timestamp, downloads, temp, image) VALUES(?, ?, ?, ?, ?, ?);";
+	private static final String sql="INSERT INTO `downloadables` (`uuid`, `path`, timestamp, downloads, temp, `ffprobe`) VALUES(?, ?, ?, ?, ?, ?);";
 	private final File file;
 	private final boolean temp;
 	public Future<Optional<String>>future;
@@ -29,8 +30,9 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 	
 	@Override
 	public Optional<String> call() {
-		byte[]bytes=Helper.extractImageFromMedia(file);
 		UUID uuid=UUID.randomUUID();
+		FFProbePacket ffprobe=Helper.createProbePacket(file);
+		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			connection.setAutoCommit(false);
 			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
@@ -40,7 +42,7 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 				statement.setLong(3,System.currentTimeMillis()/1000l);
 				statement.setInt(4,0);
 				statement.setBoolean(5,temp);
-				statement.setBytes(6,bytes);
+				statement.setString(6,ffprobe.toString());
 				statement.addBatch();
 				statement.addBatch("COMMIT;");
 				statement.executeBatch();
@@ -53,6 +55,10 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 			ANSI.printErr("Failed to create downloadable media file.",e);
 			return Optional.ofNullable(null);
 		}
+		File thumbnail=new File(Config.DL_WWW_THUMBNAIL_PATH);
+		if(!thumbnail.exists()) thumbnail.mkdirs();
+		thumbnail=new File(Config.DL_WWW_THUMBNAIL_PATH,uuid.toString()+".jpg");
+		Helper.extractImageFromMedia(file,thumbnail);
 		return Optional.of(Config.DL_URL+"/download.php?uuid="+uuid.toString());
 	}
 
