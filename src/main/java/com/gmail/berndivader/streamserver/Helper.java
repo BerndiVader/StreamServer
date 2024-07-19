@@ -169,7 +169,7 @@ public final class Helper {
 			if(parse.length>0) {
 				switch(parse[0]) {
 					case("temp"):
-						getOrCreateMediaDir(Config.DL_MUSIC_PATH).ifPresent(dir->builder.directory(dir));;
+						getOrCreateMediaDir(Config.DL_TEMP_PATH).ifPresent(dir->builder.directory(dir));
 						downloadable=temp=true;
 						break;
 					case("music"):
