@@ -17,7 +17,10 @@ import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 
 public class MakeDownloadable implements Callable<Optional<String>>{
 	
-	private static final String sql="INSERT INTO `downloadables` (`uuid`, `path`, timestamp, downloads, temp, `ffprobe`) VALUES(?, ?, ?, ?, ?, ?);";
+	private static final String INSERT="INSERT INTO `downloadables` (`uuid`, `path`, timestamp, downloads, temp, `ffprobe`) VALUES(?, ?, ?, ?, ?, ?);";
+	private static final String TEST_FOR="SELECT `uuid` FROM `downloadables` WHERE `path`=?;";
+	private static final String UPDATE="UPDATE `downloadables` SET timestamp=?, `ffprobe`=? WHERE `path`=?;";
+	
 	private final File file;
 	private final boolean temp;
 	public Future<Optional<String>>future;
@@ -32,27 +35,34 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 	public Optional<String> call() {
 		UUID uuid=UUID.randomUUID();
 		FFProbePacket ffprobe=Helper.createProbePacket(file);
+		boolean exists=false;
 		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
-			connection.setAutoCommit(false);
-			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
-				statement.addBatch("START TRANSACTION;");
-				statement.setString(1,uuid.toString());
-				statement.setString(2,file.getAbsolutePath());
-				statement.setLong(3,System.currentTimeMillis()/1000l);
-				statement.setInt(4,0);
-				statement.setBoolean(5,temp);
-				statement.setString(6,ffprobe.toString());
-				statement.addBatch();
-				statement.addBatch("COMMIT;");
-				statement.executeBatch();
-			} catch(SQLException e) {
-				ANSI.printErr("Failed to execute batch.",e);
-				connection.rollback();
-				throw e;
+			try(PreparedStatement test_for=connection.prepareStatement(TEST_FOR,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
+				test_for.setString(1,file.getAbsolutePath());
+				ResultSet result=test_for.executeQuery();
+				if(exists=result.next()) uuid=UUID.fromString(result.getString("uuid"));
+			}
+			if(exists) {
+				try(PreparedStatement update=connection.prepareStatement(UPDATE,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
+					update.setLong(1,System.currentTimeMillis()/1000l);
+					update.setString(2,ffprobe.toString());
+					update.setString(3,file.getAbsolutePath());
+					update.executeUpdate();
+				}
+			} else {
+				try(PreparedStatement insert=connection.prepareStatement(INSERT,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
+					insert.setString(1,uuid.toString());
+					insert.setString(2,file.getAbsolutePath());
+					insert.setLong(3,System.currentTimeMillis()/1000l);
+					insert.setInt(4,0);
+					insert.setBoolean(5,temp);
+					insert.setString(6,ffprobe.toString());
+					insert.executeUpdate();
+				}
 			}
 		} catch (SQLException e) {
-			ANSI.printErr("Failed to create downloadable media file.",e);
+			ANSI.printErr("Failed to create or update downloadable media file.",e);
 			return Optional.ofNullable(null);
 		}
 		File thumbnail=new File(Config.DL_WWW_THUMBNAIL_PATH);
