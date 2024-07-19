@@ -152,7 +152,8 @@ public class DownloadMedia extends Command<Void> {
 						
 					}
 										
-					MessageEditSpec.Builder edit=MessageEditSpec.builder().componentsOrNull(null);
+					MessageEditSpec.Builder edit=MessageEditSpec.builder();
+					edit.components(new ArrayList<LayoutComponent>());
 					
 					switch(status) {
 					case TIMEOUT:
