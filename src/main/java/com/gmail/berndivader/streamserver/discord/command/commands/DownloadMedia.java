@@ -20,6 +20,8 @@ import com.gmail.berndivader.streamserver.mysql.MakeDownloadable;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateFields.Field;
@@ -86,22 +88,21 @@ public class DownloadMedia extends Command<Void> {
 				InfoPacket infoPacket=entry.getValue();
 				status=Status.RUNNING;
 				
-				try {					
-					message.edit(MessageEditSpec.create()
-							.withContentOrNull("Starting download...")
-								.withEmbeds(EmbedCreateSpec.builder()
+				try {
+					MessageEditSpec.Builder msgBuilder=MessageEditSpec.builder();
+					msgBuilder.addComponent(ActionRow.of(Button.danger(uuid.toString(),"Cancel")))
+					.contentOrNull("Starting download...")
+					.addEmbed(EmbedCreateSpec.builder()
 									.title(infoPacket.title)
 									.url(infoPacket.webpage_url)
 									.description(infoPacket.description)
 									.image(infoPacket.thumbnail)
 									.color(Color.BLUE)
 									.footer(infoPacket.format,null)
-								.build())
-							).doOnCancel(()->{
-						ANSI.printRaw("[BR]CANCELLED[BR]");
-					}).doOnError(e->{
-						ANSI.printErr(e.getMessage(),e.getCause());
-					}).subscribe();
+								.build());
+					
+					message.edit(msgBuilder.build()).doOnCancel(()->ANSI.printRaw("[BR]CANCELLED[BR]"))
+					.doOnError(e->ANSI.printErr(e.getMessage(),e.getCause())).subscribe();
 					
 					Disposable listener=message.getClient().on(ButtonInteractionEvent.class,event->{
 						if(event.getCustomId().equals(uuid)) {
