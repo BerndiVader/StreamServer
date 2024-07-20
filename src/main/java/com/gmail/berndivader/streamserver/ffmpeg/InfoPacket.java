@@ -4,18 +4,19 @@ import com.gmail.berndivader.streamserver.Helper;
 
 public class InfoPacket {
 		private static final String UNKNOWN="<UNKNOWN>";
+		private static final String EMTPY="";
 		
 		public String id=UNKNOWN;
 		public String title=UNKNOWN;
-		public String thumbnail=UNKNOWN;
+		public String thumbnail=EMTPY;
 		public String description=UNKNOWN;
-		public String channel_url=UNKNOWN;
-		public String webpage_url=UNKNOWN;
+		public String channel_url=EMTPY;
+		public String webpage_url=EMTPY;
 		public String channel=UNKNOWN;
 		public String uploader=UNKNOWN;
-		public String uploader_url=UNKNOWN;
-		public String upload_date=UNKNOWN;
-		public String duration_string=UNKNOWN;
+		public String uploader_url=EMTPY;
+		public String upload_date=EMTPY;
+		public String duration_string=EMTPY;
 		public String format=UNKNOWN;
 		public String filename=UNKNOWN;
 		public String local_filename=UNKNOWN;
@@ -29,7 +30,7 @@ public class InfoPacket {
 		}
 		
 		public boolean isSet(String field) {
-			return field!=null&&!field.equals(UNKNOWN);
+			return field!=null&&!field.equals(UNKNOWN)&&!field.equals(EMTPY);
 		}
 
 	}

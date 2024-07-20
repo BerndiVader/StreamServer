@@ -123,9 +123,11 @@ public final class Helper {
 		
 		InfoPacket info=null;
 		try {
-			String out=startAndWaitForProcess(builder,10l);
+			String out=startAndWaitForProcess(builder,20l);
 			if(!out.isEmpty()) {
-				info=LGSON.fromJson(out.toString(),InfoPacket.class);
+				int index=out.indexOf('{');
+				if(index!=-1) out=out.substring(index);
+				info=LGSON.fromJson(out,InfoPacket.class);
 			}
 		} catch (Exception e) {
 			ANSI.printErr("getinfoPacket method failed.",e);

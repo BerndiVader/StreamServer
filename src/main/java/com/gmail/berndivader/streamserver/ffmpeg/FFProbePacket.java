@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class FFProbePacket {
 	private static final String UNKNOWN="<UNKNOWN>";
+	private static final String EMPTY="";
 	
 	private String filename=UNKNOWN;
 	public Integer nb_streams=-1;
@@ -14,9 +15,9 @@ public class FFProbePacket {
 	public Integer nb_stream_groups=-1;
 	public String format_name=UNKNOWN;
 	public String format_long_name=UNKNOWN;
-	public String start_time=UNKNOWN;
-	public String duration=UNKNOWN;
-	public String size=UNKNOWN;
+	public String start_time=EMPTY;
+	public String duration=EMPTY;
+	public String size=EMPTY;
 	public String bit_rate=UNKNOWN;
 	public Integer probe_score=-1;
 	public Tags tags;
@@ -33,7 +34,7 @@ public class FFProbePacket {
 		@SerializedName(value="compatible_brands", alternate={"COMPATIBLE_BRANDS"})
 		public String compatible_brands=UNKNOWN;
 		@SerializedName(value="date", alternate={"DATE"})
-		public String date=UNKNOWN;
+		public String date=EMPTY;
 		@SerializedName(value="encoder", alternate={"ENCODER"})
 		public String encoder=UNKNOWN;
 		@SerializedName(value="comment", alternate={"COMMENT"})
@@ -43,7 +44,7 @@ public class FFProbePacket {
 		@SerializedName(value="synopsis", alternate={"SYNOPSIS"})
 		public String synopsis=UNKNOWN;
 		@SerializedName(value="purl", alternate={"PURL"})
-		public String purl=UNKNOWN;
+		public String purl=EMPTY;
 	}
 	
 	public String getFileName() {
@@ -60,7 +61,7 @@ public class FFProbePacket {
 	}
 	
 	public boolean isSet(String field) {
-		return field!=null&&!field.equals(UNKNOWN);
+		return field!=null&&!field.equals(UNKNOWN)&&!field.equals(EMPTY);
 	}
 
 }

@@ -7,8 +7,9 @@ import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.command.Commands;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
+import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
-import discord4j.core.DiscordClientBuilder;
+import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -18,6 +19,7 @@ import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
+import io.netty.resolver.DefaultAddressResolverGroup;
 import reactor.core.publisher.Mono;
 
 public final class DiscordBot {
@@ -36,8 +38,16 @@ public final class DiscordBot {
 		DiscordBot.status=Status.DISCONNECTED;
 		
 		Commands.instance=new Commands();
-
-		client=DiscordClientBuilder.create(Config.DISCORD_TOKEN).build().login()
+		
+		ReactorResources reactor=ReactorResources.builder()
+				.httpClient(ReactorResources.DEFAULT_HTTP_CLIENT.get()
+						.resolver(DefaultAddressResolverGroup.INSTANCE))
+				.build();
+		
+		client=DiscordClient.builder(Config.DISCORD_TOKEN)
+			.setReactorResources(reactor)
+			.build()
+			.login()
 		    .doOnSubscribe(t->{
 		        status=Status.CONNECTING;
 		        ANSI.println("[Try to connect to Discord...]");
