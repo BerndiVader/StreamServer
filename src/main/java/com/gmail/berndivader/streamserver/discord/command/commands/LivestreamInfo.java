@@ -20,7 +20,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="info",usage="Show stream status.")
+@DiscordCommand(name="liveinfo",usage="Info about the current running livestream.")
 public class LivestreamInfo extends Command<Message> {
 	
 	private Packet packet;

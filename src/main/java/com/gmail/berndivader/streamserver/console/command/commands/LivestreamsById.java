@@ -15,7 +15,7 @@ import com.gmail.berndivader.streamserver.youtube.packets.ErrorPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.LiveStreamPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
 
-@ConsoleCommand(name="ytlive",usage="Get livestream by channel id. Use --json for complete json response.")
+@ConsoleCommand(name="liveinfo",usage="Get livestream info by channel id. Use --json for complete json response.")
 public class LivestreamsById extends Command{
 
 	@Override
