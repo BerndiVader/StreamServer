@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.TimerTask;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -35,21 +36,61 @@ public final class BroadcastRunner extends TimerTask {
 	
 	boolean stop;
 	
-	public static FFmpegProgress progress;
-	public static FFProbePacket probePacket;
-	public static String message;
-	public static File playing;
+	private static FFmpegProgress progress;
+	private static FFProbePacket probePacket;
+	private static String message;
+	private static File playing;
 	private static FFmpegResultFuture ffmpeg;
-	public static int index;
+	public static AtomicInteger index=new AtomicInteger();
 	
-	private static File[] files;
-	private static File[] customs;	
+	private static CopyOnWriteArrayList<File>files;
+	private static CopyOnWriteArrayList<File>customs;
 	
 	public static BroadcastRunner instance;
 	
 	static {
-		files=new File[0];
-		customs=new File[0];		
+		files=new CopyOnWriteArrayList<File>();
+		customs=new CopyOnWriteArrayList<File>();
+	}
+	
+	public static synchronized FFmpegProgress progress() {
+		return progress;
+	}
+	
+	public static synchronized void progress(FFmpegProgress progress) {
+		BroadcastRunner.progress=progress;
+	}
+	
+	public static synchronized FFProbePacket probePacket() {
+		return probePacket;
+	}
+	
+	public static synchronized void probePacket(FFProbePacket packet) {
+		BroadcastRunner.probePacket=packet;
+	}
+	
+	public static synchronized String message() {
+		return message;
+	}
+	
+	public static synchronized void message(String message) {
+		BroadcastRunner.message=message;
+	}
+	
+	public static synchronized File playing() {
+		return playing;
+	}
+	
+	public static synchronized void playing(File playing) {
+		BroadcastRunner.playing=playing;
+	}
+	
+	public static synchronized FFmpegResultFuture ffmpeg() {
+		return ffmpeg;
+	}
+	
+	public static synchronized void ffmpeg(FFmpegResultFuture ffmpeg) {
+		BroadcastRunner.ffmpeg=ffmpeg;
 	}
 	
 	public BroadcastRunner() {
@@ -60,7 +101,7 @@ public final class BroadcastRunner extends TimerTask {
 		refreshFilelist();
 		shuffleFilelist();
 
-		index=0;
+		index.set(0);;
 		startStream();
 		
 		Helper.SCHEDULED_EXECUTOR.scheduleAtFixedRate(this, 0l, 1l, TimeUnit.SECONDS);
@@ -71,7 +112,7 @@ public final class BroadcastRunner extends TimerTask {
 		ANSI.print("[YELLOW]Stopping BroadcastRunner...");
 		
 		stop=true;
-    	if(ffmpeg!=null&&(!ffmpeg.isCancelled()||!ffmpeg.isDone())) {
+    	if(ffmpeg()!=null&&(!ffmpeg().isCancelled()||!ffmpeg().isDone())) {
     		ANSI.print("[YELLOW][Stop broadcasting...");
     		
     		FFmpegResult result=stopStream();
@@ -90,12 +131,12 @@ public final class BroadcastRunner extends TimerTask {
 	public void run() {
 		
     	if(!stop) {
-    		if(ffmpeg==null||ffmpeg.isCancelled()||ffmpeg.isDone()) startStream();
+    		if(ffmpeg()==null||ffmpeg().isCancelled()||ffmpeg().isDone()) startStream();
 		}
 		
 	}
 	
-	private void startStream() {
+	private static synchronized void startStream() {
 		
 		GetNextScheduled scheduled=new GetNextScheduled();
 		try {
@@ -108,17 +149,17 @@ public final class BroadcastRunner extends TimerTask {
 			ANSI.printErr("Get next scheduled file failed.",e);
 		}
 		
-		createStream(getFiles()[index]);
-		index=(index+1)%getFiles().length;
+		createStream(getFiles()[index.get()]);
+		index.set((index.get()+1)%getFiles().length);
 	}
 	
-	private static void createStream(File file) {
+	private static synchronized void createStream(File file) {
 		String path=file.getAbsolutePath();
-		probePacket=Helper.createProbePacket(file);
+		probePacket(Helper.createProbePacket(file));
 		
 		String title="";
-		if(probePacket.isSet(probePacket.tags.title)) {
-			title=probePacket.tags.title;
+		if(probePacket().isSet(probePacket().tags.title)) {
+			title=probePacket().tags.title;
 		} else {
 			int pos=file.getName().lastIndexOf(".");
 			if(pos>0) {
@@ -128,19 +169,19 @@ public final class BroadcastRunner extends TimerTask {
 			}
 		}
 				
-		String info=probePacket.tags.artist+":"+Helper.stringFloatToTime(probePacket.duration)+":"+probePacket.tags.description;
+		String info=probePacket().tags.artist+":"+Helper.stringFloatToTime(probePacket().duration)+":"+probePacket().tags.description;
 		new UpdateCurrent(title, info);
 		
 		if(Config.DISCORD_BOT_START&&DiscordBot.instance!=null) DiscordBot.instance.updateStatus(title);
 		
 		ANSI.println("[BLUE]Now playing: "
-			+probePacket.tags.title
-			+":"+probePacket.tags.artist
-			+":"+probePacket.tags.date
-			+":"+probePacket.tags.comment+"[RESET]");
+			+probePacket().tags.title
+			+":"+probePacket().tags.artist
+			+":"+probePacket().tags.date
+			+":"+probePacket().tags.comment+"[RESET]");
 		ANSI.prompt();
 				
-		ffmpeg=FFmpeg.atPath()
+		ffmpeg(FFmpeg.atPath()
 				.addInput(UrlInput.fromUrl(path)
 						.addArgument("-re")
 						)
@@ -157,20 +198,20 @@ public final class BroadcastRunner extends TimerTask {
 				.setOutputListener(new OutputListener() {
 					@Override
 					public void onOutput(String message) {
-						BroadcastRunner.message=message;
+						BroadcastRunner.message(message);
 					}
 				})
 				.setProgressListener(new ProgressListener() {
 					@Override
 					public void onProgress(FFmpegProgress progress) {
-						BroadcastRunner.progress=progress;
+						BroadcastRunner.progress(progress);
 					}
-				}).setOverwriteOutput(true).executeAsync();
-		if(ffmpeg!=null&&!ffmpeg.isDone()&&!ffmpeg.isCancelled()) playing=file;
+				}).setOverwriteOutput(true).executeAsync());
+		if(ffmpeg()!=null&&!ffmpeg().isDone()&&!ffmpeg().isCancelled()) playing(file);
 	}
 	
 	public static boolean isStreaming() {
-		return ffmpeg!=null&&!ffmpeg.isCancelled()&&!ffmpeg.isDone();
+		return ffmpeg()!=null&&!ffmpeg().isCancelled()&&!ffmpeg().isDone();
 	}
 	
 	public static void playFile(File file) {
@@ -181,13 +222,13 @@ public final class BroadcastRunner extends TimerTask {
 	}
 	
 	public static void playPosition(int idx) {
-		index=idx;
+		index.set(idx);
 		if(isStreaming()) stopStream();
 	}
 	
 	public static void restart() {
 		if(isStreaming()) stopStream();
-		createStream(playing);
+		createStream(playing());
 	}
 	
 	public static void next() {
@@ -196,15 +237,15 @@ public final class BroadcastRunner extends TimerTask {
 	
 	public static void previous() {
 		if(isStreaming()) {
-			index=(index-2+getFiles().length)%getFiles().length;
+			index.set((index.get()-2+getFiles().length)%getFiles().length);
 			stopStream();
 		}
 	}
 	
 	private static FFmpegResult stopStream() {
-		ffmpeg.graceStop();
+		ffmpeg().graceStop();
 		try {
-			return ffmpeg.get(20,TimeUnit.SECONDS);
+			return ffmpeg().get(20,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			ANSI.printErr("Failed to stop broadcast task.",e);
 		}
@@ -212,17 +253,17 @@ public final class BroadcastRunner extends TimerTask {
 	}
 	
 	public static File[] getFiles() {
-		return files;
+		return files.toArray(new File[0]);
 	}
 	
 	public static Optional<File> getFileByName(String name) {
 		File file=null;
 		int pos=getFilePosition(name);
 		if(pos!=-1) {
-			file=files[pos];
+			file=files.get(pos);
 		} else {
 			pos=getCustomFilePosition(name);
-			if(pos!=-1) file=customs[pos];
+			if(pos!=-1) file=customs.get(pos);
 		}
 		if(file!=null&&file.exists()&&file.isFile()&&file.canRead()) return Optional.of(file);
 		return Optional.empty();
@@ -230,8 +271,9 @@ public final class BroadcastRunner extends TimerTask {
 	
 	public static int getFilePosition(String name) {
 		if(!name.isEmpty()) {
-		    for(int i=0;i<files.length;i++) {
-		        if(files[i].getName().equalsIgnoreCase(name)) return i;
+			int size=files.size();
+		    for(int i=0;i<size;i++) {
+		        if(files.get(i).getName().equalsIgnoreCase(name)) return i;
 		    }
 		}
 		return -1;
@@ -239,8 +281,9 @@ public final class BroadcastRunner extends TimerTask {
 	
 	public static int getCustomFilePosition(String name) {
 		if(!name.isEmpty()) {
-			for(int i=0;i<customs.length;i++) {
-		        if(customs[i].getName().equalsIgnoreCase(name)) return i;
+			int size=customs.size();
+			for(int i=0;i<size;i++) {
+		        if(customs.get(i).getName().equalsIgnoreCase(name)) return i;
 			}
 		}
 		return -1;
@@ -249,18 +292,18 @@ public final class BroadcastRunner extends TimerTask {
 	public static List<String> getFilesAsList(String r) {
 	    String regex=r.contains("*")?r.replaceAll("\\*","(.*)"):"(.*)"+r+"(.*)";
 	    List<String>list=new ArrayList<String>();
-	    Stream.of(files,customs)
-	        .flatMap(Arrays::stream)
+	    Stream.concat(files.stream(),customs.stream())
 	        .map(File::getName)
 	        .filter(name->{
-	        	try {
-		            return name.toLowerCase().matches(regex);	
-	        	} catch (Exception e) {
-					if(Config.DEBUG) ANSI.printErr("getFilelistAsString method failed.",e);
-	        	}
-	        	return false;
-	        })
-	        .forEach(list::add);
+	        	
+	            try {
+	                return name.toLowerCase().matches(regex);
+	            } catch(Exception e) {
+	                if(Config.DEBUG) ANSI.printErr("getFilelistAsList method failed.",e);
+	            }
+	            return false;
+	            
+	        }).forEach(list::add);
 	    return list;
 	}
 
@@ -268,21 +311,21 @@ public final class BroadcastRunner extends TimerTask {
 	    AtomicInteger count=new AtomicInteger(0);
 	    StringBuilder playlist = new StringBuilder();
 	    String regex=r.contains("*")?r.replaceAll("\\*","(.*)"):"(.*)"+r+"(.*)";
-	
-	    Stream.of(files,customs)
-	        .flatMap(Arrays::stream)
-	        .map(File::getName)
-	        .filter(name->{
+
+	    Stream.concat(files.stream(),customs.stream())
+	    	.map(File::getName)
+	    	.filter(name-> {
+	    		
 				try {
 					return name.toLowerCase().matches(regex);
 				} catch (Exception e) {
 					if(Config.DEBUG) ANSI.printErr("getFilelistAsString method failed.",e);
 				}
 				return false;
-	        })
-	        .forEach(name->{
-	            playlist.append(name+"\n");
-	            count.incrementAndGet();
+	    		
+	    	}).forEach(name->{
+	    		playlist.append(name+"\n");
+	    		count.incrementAndGet();
 	        });
 	
 	    playlist.append("\nThere are ").append(count).append(" matches for ").append(regex);
@@ -291,11 +334,14 @@ public final class BroadcastRunner extends TimerTask {
 	
 	public static void shuffleFilelist() {
 		Random random=ThreadLocalRandom.current();
-		for (int i1=files.length-1;i1>0;i1--) {
-			int index=random.nextInt(i1+1);
-			File a=files[index];
-			files[index]=files[i1];
-			files[i1]=a;
+		synchronized(files) {
+			int size=files.size();
+			for (int i1=size-1;i1>0;i1--) {
+				int index=random.nextInt(i1+1);
+				File a=files.get(index);
+				files.set(index,files.get(i1));
+				files.set(i1,a);
+			}
 		}
 	}
 	
@@ -307,6 +353,7 @@ public final class BroadcastRunner extends TimerTask {
 	    		return new File[] {file};
 	    	}
 		}
+		
 		return new File[0];
 	}
 	
@@ -315,8 +362,13 @@ public final class BroadcastRunner extends TimerTask {
     	File custom=new File(Config.PLAYLIST_PATH_CUSTOM);
     	
     	FileFilter filter=pathName->pathName.getAbsolutePath().toLowerCase().endsWith(".mp4");
-    	files=getFiles(file,filter);
-    	customs=getFiles(custom,filter);
+    	synchronized(files) {
+        	files=new CopyOnWriteArrayList<File>(Arrays.asList(getFiles(file,filter)));
+		}
+    	synchronized(custom) {
+        	customs=new CopyOnWriteArrayList<File>(Arrays.asList(getFiles(custom,filter)));
+		}
+    	
 	}
 	
 	
