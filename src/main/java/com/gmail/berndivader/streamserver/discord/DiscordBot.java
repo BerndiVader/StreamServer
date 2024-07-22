@@ -70,8 +70,6 @@ public final class DiscordBot {
 					&&e.getMember().isPresent()
 					&&e.getMember().get().getRoleIds().contains(Snowflake.of(Config.DISCORD_ROLE_ID)))
 		    .flatMap(e->{
-		        if(!e.getMember().isPresent()||!e.getMember().get().getRoleIds().contains(Snowflake.of(Config.DISCORD_ROLE_ID))) return Mono.empty();
-		        
 		        Message message=e.getMessage();
 		        String content=message.getContent();
 		        String[]parse=content.split(" ",2);
