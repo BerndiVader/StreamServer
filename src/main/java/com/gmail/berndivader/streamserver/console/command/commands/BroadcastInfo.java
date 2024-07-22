@@ -19,10 +19,10 @@ public class BroadcastInfo extends Command {
 					ANSI.println("Is broadcasting: "+BroadcastRunner.isStreaming());
 					break;
 				case "file":
-					ANSI.println("Current File: "+BroadcastRunner.getFiles()[BroadcastRunner.index-1].getName());
+					ANSI.println("Current File: "+BroadcastRunner.getFiles()[BroadcastRunner.index.get()-1].getName());
 					break;
 				case "next":
-					ANSI.println("Next File: "+BroadcastRunner.getFiles()[BroadcastRunner.index].getName());
+					ANSI.println("Next File: "+BroadcastRunner.getFiles()[BroadcastRunner.index.get()].getName());
 					break;
 				default:
 					break;

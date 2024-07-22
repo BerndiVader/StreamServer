@@ -25,11 +25,11 @@ public class Current extends Command<Message> {
 
 	@Override
 	public Mono<Message> execute(String string, MessageChannel channel) {
-		if(BroadcastRunner.playing!=null) packet=Helper.createProbePacket(BroadcastRunner.playing);
+		if(BroadcastRunner.playing()!=null) packet=Helper.createProbePacket(BroadcastRunner.playing());
 
 		Builder embed=EmbedCreateSpec.builder();
 		embed.color(Color.CINNABAR);
-		if(BroadcastRunner.playing!=null) {
+		if(BroadcastRunner.playing()!=null) {
 			embed.title(packet.tags.title)
 			.author(packet.tags.artist,packet.tags.purl,null)
 			.description(packet.tags.description)

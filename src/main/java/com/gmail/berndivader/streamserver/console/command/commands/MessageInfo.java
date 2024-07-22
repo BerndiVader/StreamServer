@@ -12,7 +12,7 @@ public class MessageInfo extends Command {
 	@Override
 	public boolean execute(String[] args) {
 		if(BroadcastRunner.isStreaming()) {
-			String message=BroadcastRunner.message;
+			String message=BroadcastRunner.message();
 			if(message!=null) {
 				ANSI.println("Last ffmpeg output: "+message);
 			} else {

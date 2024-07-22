@@ -26,19 +26,19 @@ public class Play extends Command<Message> {
 		
 		
 		if(s.toLowerCase().equals("next")) {
-			File file=BroadcastRunner.getFiles()[BroadcastRunner.index];
+			File file=BroadcastRunner.getFiles()[BroadcastRunner.index.get()];
 			mono=createMessage(file,channel);
 			BroadcastRunner.next();
 		} else if(s.toLowerCase().equals("prev")) {
-			File file=BroadcastRunner.getFiles()[(BroadcastRunner.index-2+BroadcastRunner.getFiles().length)%BroadcastRunner.getFiles().length];
+			File file=BroadcastRunner.getFiles()[(BroadcastRunner.index.get()-2+BroadcastRunner.getFiles().length)%BroadcastRunner.getFiles().length];
 			mono=createMessage(file,channel);
 			BroadcastRunner.previous();
 		} else if(s.toLowerCase().equals("repeat")) {
-			if(BroadcastRunner.playing!=null) {
-				mono=createMessage(BroadcastRunner.playing,channel);
+			if(BroadcastRunner.playing()!=null) {
+				mono=createMessage(BroadcastRunner.playing(),channel);
 				BroadcastRunner.restart();
 			} else {
-				File file=BroadcastRunner.getFiles()[BroadcastRunner.index];
+				File file=BroadcastRunner.getFiles()[BroadcastRunner.index.get()];
 				mono=createMessage(file,channel);
 				BroadcastRunner.next();
 			}
