@@ -5,8 +5,8 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,20 +41,9 @@ public final class Helper {
 	
 	static {
 		EXECUTOR=Executors.newCachedThreadPool();
-		SCHEDULED_EXECUTOR=Executors.newSingleThreadScheduledExecutor();
+		SCHEDULED_EXECUTOR=Executors.newScheduledThreadPool(1);
 		GSON=new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 		LGSON=new GsonBuilder().setPrettyPrinting().setFieldNamingStrategy(s->s.getName().toLowerCase()).disableHtmlEscaping().create();
-	}
-			
-	public static String getStringFromStream(InputStream stream,int length) {
-		byte[]bytes=new byte[length];
-		try {
-			int size=stream.read(bytes,0,length);
-			return new String(bytes,0,size-1);
-		} catch (IOException e) {
-			ANSI.printErr("getStringFromStream method failed.",e);
-			return "";
-		}
 	}
 	
 	private static String startAndWaitForProcess(ProcessBuilder builder,long timeout) throws Exception {
@@ -63,24 +52,31 @@ public final class Helper {
 		Process process=builder.start();
 		
 		try(InputStream input=process.getInputStream();
-			InputStream error=process.getErrorStream()) {
+			InputStream error=process.getErrorStream();
+			PrintWriter output=new PrintWriter(process.getOutputStream())) {
 			
 			StringBuilder out=new StringBuilder();
-			int avail;
+			StringBuilder err=new StringBuilder();
+			byte[]bytes=new byte[4096];
+			int read=0;
 			
 			while(process.isAlive()) {
-				avail=input.available();
-				if(avail>0) {
-					out.append(new String(input.readAllBytes()));
-					start=System.currentTimeMillis();
+				while(input.available()!=0) {
+					if((read=input.read(bytes))!=-1) {
+						out.append(new String(bytes,0,read));
+						start=System.currentTimeMillis();
+					}
 				}
-				if(System.currentTimeMillis()-start>timeout) {
-					process.destroy();
-					throw new Exception("Process timed out.");
-				}
+				if(error.available()!=0) err.append(new String(error.readAllBytes()));
+				if(System.currentTimeMillis()-start>timeout) process.destroy();
 			}
 			
-			if(error.available()>0) ANSI.printErr(new String(error.readAllBytes()),null);
+			output.println();
+			output.flush();
+			while(input.available()!=0) if((read=input.read(bytes))!=-1) out.append(new String(bytes,0,read));
+			
+			if(error.available()>0) err.append(new String(error.readAllBytes()));
+			if(!err.isEmpty()) ANSI.printErr(err.toString(),null);
 			return out.toString();
 		}
 	}
@@ -95,10 +91,7 @@ public final class Helper {
 				String out=startAndWaitForProcess(builder,10l);
 				if(!out.isEmpty()) {
 					JsonObject o=JsonParser.parseString(out.toString()).getAsJsonObject();
-					if(o.has("format")) {
-						packet=LGSON.fromJson(o.get("format"),FFProbePacket.class);
-					}
-					
+					if(o.has("format")) packet=LGSON.fromJson(o.get("format"),FFProbePacket.class);
 				}
 			} catch (Exception e) {
 				ANSI.printErr("getProbePacket method failed.", e);
@@ -114,6 +107,7 @@ public final class Helper {
 			,"--quiet"
 			,"--no-warnings"
 			,"--dump-json"
+			,"--no-playlist"
 		);
 		if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
 			builder.command().add("--cookies");
@@ -132,7 +126,13 @@ public final class Helper {
 		} catch (Exception e) {
 			ANSI.printErr("getinfoPacket method failed.",e);
 		}
-		return info!=null?info:new InfoPacket();
+		
+		if(info==null) {
+			info=new InfoPacket();
+			info.webpage_url=url;
+		}
+		
+		return info;
 	}
 	
 	public static Entry<ProcessBuilder,InfoPacket> createDownloadBuilder(File defaultDirectory,String args) {
@@ -186,6 +186,7 @@ public final class Helper {
 						break;
 					case("link"):
 						downloadable=true;
+						temp=false;
 						break;
 					case("url"):
 						if(parse.length==2&&!parse[1].isBlank()) {
@@ -233,12 +234,20 @@ public final class Helper {
 				ByteArrayOutputStream out=new ByteArrayOutputStream()) {
 				BufferedImage bimage=ImageIO.read(in);
 				
-				double ratio=(double)bimage.getHeight()/bimage.getWidth();				
-				int h=(int)(800*ratio);
-				int type=bimage.getType();
+				int w,h;
+				if(bimage.getWidth()>bimage.getHeight()) {
+					double ratio=(double)bimage.getHeight()/bimage.getWidth();
+					w=640;
+					h=(int)(w*ratio);
+				} else {
+					double ratio=(double)bimage.getWidth()/bimage.getHeight();
+					h=460;
+					w=(int)(h*ratio);
+				}
 				
-				Image temp=bimage.getScaledInstance(800,h,Image.SCALE_SMOOTH);
-				bimage=new BufferedImage(800,h,type);
+				int type=bimage.getType();
+				Image temp=bimage.getScaledInstance(w,h,Image.SCALE_SMOOTH);
+				bimage=new BufferedImage(w,h,type);
 				Graphics2D g2d=bimage.createGraphics();
 				g2d.drawImage(temp,0,0,null);
 				g2d.dispose();
@@ -248,7 +257,7 @@ public final class Helper {
 				} else ImageIO.write(bimage,"jpg",dest);
 			}
 						
-		} catch (IOException e) {
+		} catch (Exception e) {
 			ANSI.printErr(e.getMessage(),e);
 		}
 		
