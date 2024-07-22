@@ -71,11 +71,11 @@ else
 
     ?>
         <div class="text-center bg-dark text-white" style="padding: 20px;">
-            <img src="<?php echo $thumbUrl; ?>" alt="Thumbnail" style="max-width: 100%; height: auto; margin-bottom: 20px;">
+            <img src="<?php echo $thumbUrl; ?>" alt="Thumbnail" class="img-thumbnail">
             <div class="text-center bg-dark text-white">
                 <?php
-                echo "<h1>".$probePacket->tags->title."</h1>";
-                echo "<p>".$probePacket->tags->comment."</p>";
+                echo "<h2><a href='".$probePacket->tags->comment."' class='link-info link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'>".$probePacket->tags->title."</a></h2>";
+                echo "<p>".$probePacket->tags->description."</p>";
                 ?>
             </div>
             <form method="POST">
