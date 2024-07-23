@@ -27,12 +27,13 @@ public class GetNextScheduled implements Callable<String> {
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			try(PreparedStatement scheduled=connection.prepareStatement("SELECT * FROM `scheduled` LIMIT 1",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				ResultSet result=scheduled.executeQuery();
-				result.last();
-				if(result.getRow()>0) {
+				if(result.next()) {
 					filename=result.getString("filename");
 					int index=result.getInt("id");
-					scheduled.addBatch("DELETE FROM `scheduled` WHERE `id` = "+index);
-					scheduled.executeBatch();
+					try(PreparedStatement delete=connection.prepareStatement("DELETE FROM `scheduled` WHERE `id`=?")) {
+						delete.setInt(1,index);
+						delete.executeUpdate();
+					}
 				}
 			}
 		} catch (SQLException e) {
