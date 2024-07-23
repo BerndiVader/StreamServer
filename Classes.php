@@ -9,7 +9,7 @@ class DatabaseTools
         $connection=new mysqli(Config::$host,Config::$user,Config::$pass,Config::$database,Config::$port);
         if($connection->connect_errno!=0)
         {
-            error_log("Error getting connection: ".$connection->connect_error);
+            error_log("Error getting connection: {$connection->connect_error}");
             throw new mysqli_sql_exception($connection->connect_error,$connection->connect_errno);
         }
         return $connection;
