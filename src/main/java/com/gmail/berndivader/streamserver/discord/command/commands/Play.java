@@ -24,25 +24,28 @@ public class Play extends Command<Message> {
 		
 		Mono<Message>mono=Mono.empty();
 		
-		
-		if(s.toLowerCase().equals("next")) {
-			File file=BroadcastRunner.getFiles()[BroadcastRunner.index.get()];
-			mono=createMessage(file,channel);
+		switch(s.toLowerCase()) {
+		case "next":
+			mono=createMessage(BroadcastRunner.getFiles()[BroadcastRunner.index.get()],channel);
 			BroadcastRunner.next();
-		} else if(s.toLowerCase().equals("prev")) {
-			File file=BroadcastRunner.getFiles()[(BroadcastRunner.index.get()-2+BroadcastRunner.getFiles().length)%BroadcastRunner.getFiles().length];
-			mono=createMessage(file,channel);
+			break;
+		case "prev":
+			mono=createMessage(
+					BroadcastRunner.getFiles()[(BroadcastRunner.index.get()-2+BroadcastRunner.getFiles().length)%BroadcastRunner.getFiles().length],
+					channel
+					);
 			BroadcastRunner.previous();
-		} else if(s.toLowerCase().equals("repeat")) {
+			break;
+		case "repeat":
 			if(BroadcastRunner.playing()!=null) {
 				mono=createMessage(BroadcastRunner.playing(),channel);
 				BroadcastRunner.restart();
 			} else {
-				File file=BroadcastRunner.getFiles()[BroadcastRunner.index.get()];
-				mono=createMessage(file,channel);
+				mono=createMessage(BroadcastRunner.getFiles()[BroadcastRunner.index.get()],channel);
 				BroadcastRunner.next();
 			}
-		} else {
+			break;
+		default:
 			final Optional<File>file=BroadcastRunner.getFileByName(s);
 			if(file.isPresent()) {
 				mono=createMessage(file.get(),channel);
@@ -54,7 +57,9 @@ public class Play extends Command<Message> {
 					.description(s)
 					.build());
 			}
+			break;
 		}
+		
 		return mono;
 	}
 	

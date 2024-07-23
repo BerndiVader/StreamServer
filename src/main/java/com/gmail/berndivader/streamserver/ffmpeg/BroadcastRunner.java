@@ -142,7 +142,7 @@ public final class BroadcastRunner extends TimerTask {
 		try {
 			String name=scheduled.future.get(20,TimeUnit.SECONDS);
 			if(name!=null) {
-				getFileByName(name.toLowerCase()).ifPresent(file->createStream(file));
+				getFileByName(name.toLowerCase()).ifPresent(BroadcastRunner::createStream);
 				return;
 			}
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -253,7 +253,7 @@ public final class BroadcastRunner extends TimerTask {
 	}
 	
 	public static File[] getFiles() {
-		return files.toArray(new File[0]);
+		return files.toArray(File[]::new);
 	}
 	
 	public static Optional<File> getFileByName(String name) {
@@ -345,12 +345,12 @@ public final class BroadcastRunner extends TimerTask {
 		}
 	}
 	
-	private static File[] getFiles(File file,FileFilter filter) {
-		if(file.exists()) {
-	    	if(file.isDirectory()) {
-	    		return file.listFiles(filter);
-	    	} else if(file.isFile()) {
-	    		return new File[] {file};
+	private static File[] getFiles(File directory,FileFilter filter) {
+		if(directory.exists()) {
+	    	if(directory.isDirectory()) {
+	    		return directory.listFiles(filter);
+	    	} else if(directory.isFile()) {
+	    		return new File[] {directory};
 	    	}
 		}
 		
@@ -358,15 +358,15 @@ public final class BroadcastRunner extends TimerTask {
 	}
 	
 	public static void refreshFilelist() {
-    	File file=new File(Config.PLAYLIST_PATH);
-    	File custom=new File(Config.PLAYLIST_PATH_CUSTOM);
+    	File playlistDir=new File(Config.PLAYLIST_PATH);
+    	File customDir=new File(Config.PLAYLIST_PATH_CUSTOM);
     	
     	FileFilter filter=pathName->pathName.getAbsolutePath().toLowerCase().endsWith(".mp4");
     	synchronized(files) {
-        	files=new CopyOnWriteArrayList<File>(Arrays.asList(getFiles(file,filter)));
+        	files=new CopyOnWriteArrayList<File>(Arrays.asList(getFiles(playlistDir,filter)));
 		}
-    	synchronized(custom) {
-        	customs=new CopyOnWriteArrayList<File>(Arrays.asList(getFiles(custom,filter)));
+    	synchronized(customDir) {
+        	customs=new CopyOnWriteArrayList<File>(Arrays.asList(getFiles(customDir,filter)));
 		}
     	
 	}

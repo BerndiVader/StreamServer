@@ -26,9 +26,8 @@ public class GetAllScheduled implements Callable<ArrayList<String>> {
 	public ArrayList<String> call() throws Exception {
 		ArrayList<String>files=new ArrayList<>();
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
-			try(PreparedStatement scheduled=connection.prepareStatement("SELECT * FROM `scheduled`",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
+			try(PreparedStatement scheduled=connection.prepareStatement("SELECT `filename` FROM `scheduled`",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				ResultSet result=scheduled.executeQuery();
-				result.beforeFirst();
 				while(result.next()) {
 					files.add(result.getString("filename"));
 				}

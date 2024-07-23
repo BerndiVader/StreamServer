@@ -19,7 +19,7 @@ public class CleanUpDownloadables implements Callable<Boolean>{
 	public Future<Boolean>future;
 	
 	public CleanUpDownloadables() {
-		this.future=Helper.EXECUTOR.submit(this);
+		future=Helper.EXECUTOR.submit(this);
 	}
 	
 	@Override

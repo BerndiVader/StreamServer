@@ -183,11 +183,10 @@ public class DownloadMedia extends Command<Void> {
 								} catch (InterruptedException | ExecutionException | TimeoutException e) {
 									ANSI.printErr(e.getMessage(),e);
 								}
-								optLink.ifPresentOrElse(link->{
-									embed.addField(Field.of("Downloadlink",link,false));
-								},()->{
-									embed.addField(Field.of("Downloadlink","Failed to create download link.",false));
-								});
+								optLink.ifPresentOrElse(
+									link->embed.addField(Field.of("Downloadlink",link,false)),
+									()->embed.addField(Field.of("Downloadlink","Failed to create download link.",false))
+								);
 							}
 						}
 						edit.addEmbed(embed.build());
@@ -218,9 +217,8 @@ public class DownloadMedia extends Command<Void> {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			}).doOnError(error->{
-				ANSI.printErr("Error while downloading media in discord command.",error);
-			}).subscribe();
+			}).doOnError(error->ANSI.printErr("Error while downloading media in discord command.",error))
+			.subscribe();
 		}
 	}
 
