@@ -15,19 +15,19 @@ include_once("Config.php");
 $scheme=isset($_SERVER["HTTPS"])&&$_SERVER["HTTPS"]!=="off"?"https":"http";
 $host=$_SERVER["HTTP_HOST"];
 $port=$_SERVER["SERVER_PORT"];
-$baseUrl=$scheme."://".$host;
+$baseUrl="{$scheme}://{$host}";
 
 if(($scheme==="http"&&$port!=="80")||($scheme==="https"&&$port!=="443")) 
 {
-    $baseUrl.=":".$port;
+    $baseUrl.=":{$port}";
 }
 
 ?>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <?php
 
-$uuid = htmlspecialchars(trim($_GET["uuid"] ?? ''));
-if (!preg_match('/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[4][0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/', $uuid))
+$uuid=htmlspecialchars(trim($_GET["uuid"]??""));
+if(!preg_match("/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[4][0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/",$uuid))
 {
     ?>
         <div class="alert alert-danger" role="alert">Sorry, something went wrong.</div>
@@ -35,9 +35,8 @@ if (!preg_match('/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[4][0-9a-fA-F]{3}-[89ABab][0-9a
     exit;
 }
 
-$entry = DatabaseTools::getEntry($uuid);
-
-if (!$entry) 
+$entry=DatabaseTools::getEntry($uuid);
+if(!$entry) 
 {
     ?>
         <div class="alert alert-warning" role="alert">The requested download does not exist, or the link is expired.</div>
@@ -55,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"]==="POST"&&isset($_POST["download"]))
     catch (\InvalidArgumentException $e)
     {
         ?>
-            <div class="alert alert-danger" role="alert">The requested file does not exist anymore.</div>'
+            <div class="alert alert-warning" role="alert">The requested file does not exist anymore.</div>'
         <?php
         exit;
     }
@@ -63,10 +62,6 @@ if ($_SERVER["REQUEST_METHOD"]==="POST"&&isset($_POST["download"]))
 else
 {
     $probePacket=json_decode($entry["ffprobe"]);
-    if($probePacket)
-    {
-    }
-
     $thumbUrl=$baseUrl."/thumbnails/".$entry["uuid"].".jpg";
 
     ?>
@@ -74,15 +69,35 @@ else
             <img src="<?php echo $thumbUrl; ?>" alt="Thumbnail" class="img-thumbnail">
             <div class="text-center bg-dark text-white">
                 <?php
-                echo "<h2><a href='".$probePacket->tags->comment."' class='link-info link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'>".$probePacket->tags->title."</a></h2>";
-                echo "<p>".$probePacket->tags->description."</p>";
+                echo "<p><small>
+                    Format: <b>{$probePacket->format_long_name}</b>, Release date: <b>"
+                    .convertDate($probePacket->tags->date)
+                    ."</b>, Duration: <b>"
+                    .convertDuration($probePacket->duration)."</b></small></p>";
+                echo "<h2><a href='{$probePacket->tags->comment}' class='link-info link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'>{$probePacket->tags->title}</a></h2>";
+                echo "<p>{$probePacket->tags->description}</p>";
                 ?>
             </div>
             <form method="POST">
-                <button type="submit" name="download" class="btn btn-primary">Download File</button>
+                <button type="submit" name="download" class="btn btn-primary">Download File [<?php
+                echo round($probePacket->size/1048576,2);
+                ?> MB]</button>
             </form>
         </div>
     <?php
+}
+
+function convertDuration($duration) 
+{
+    $h=floor($duration/3600);
+    $m=floor(($duration%3600)/60);
+    $s=$duration%60;
+    return sprintf('%02d:%02d:%02d',$h,$m,$s);
+}
+function convertDate($string)
+{
+    $date=DateTime::createFromFormat('Ymd',$string);
+    return $date->format("d.m.Y");
 }
 
 ?>
