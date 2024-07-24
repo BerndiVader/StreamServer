@@ -7,7 +7,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.nio.file.FileSystems;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -16,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
@@ -284,6 +292,34 @@ public final class Helper {
 	    int m=(int)((duration%3600)/60);
 	    int s=(int)(duration%60);		
 	    return String.format("%02d:%02d:%02d",h,m,s);
+	}
+	
+	public static List<String> getFilesByPath(String path,boolean sub,String glob) {
+		File dir=new File(path);
+		List<String>files=new ArrayList<String>();
+		if(dir.exists()&&dir.isDirectory()) addFiles(dir,files,sub,glob);
+		return files;
+	}
+	
+	private static void addFiles(File dir,List<String>files,boolean sub,String glob) {
+		PathMatcher matcher=FileSystems.getDefault().getPathMatcher("glob:"+glob);
+		Deque<File>stack=new ArrayDeque<File>();
+		stack.push(dir);
+
+		while(!stack.isEmpty()) {
+			File current=stack.pop();
+			File[]found=current.listFiles();
+		    if(found!=null) {
+		    	Stream.of(found).forEach(file->{
+		    		if(file.isFile()&&matcher.matches(Paths.get(file.getName()))) {
+		    			files.add(current.getName()+"/"+file.getName());
+		    		} else if(sub&&file.isDirectory()) {
+		    			stack.push(file);
+		    		}
+		    	});
+		    }
+		}
+
 	}
 	
 	public static void close() {
