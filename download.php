@@ -63,10 +63,11 @@ else
 {
     $probePacket=json_decode($entry["ffprobe"]);
     $thumbUrl=$baseUrl."/thumbnails/".$entry["uuid"].".jpg";
+    $thumbnail=base64_encode(file_get_contents($thumbUrl));
 
     ?>
         <div class="text-center bg-dark text-white" style="padding: 20px;">
-            <img src="<?php echo $thumbUrl; ?>" alt="Thumbnail" class="img-thumbnail">
+            <img src="data:image/jpeg;base64, <?php echo $thumbnail; ?>" alt="Thumbnail" class="img-thumbnail">
             <div class="text-center bg-dark text-white">
                 <?php
                 echo "<p><small>
@@ -74,30 +75,43 @@ else
                     .convertDate($probePacket->tags->date)
                     ."</b>, Duration: <b>"
                     .convertDuration($probePacket->duration)."</b></small></p>";
-                echo "<h2><a href='{$probePacket->tags->comment}' class='link-info link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'>{$probePacket->tags->title}</a></h2>";
+                echo "<h3><a href='{$probePacket->tags->comment}' class='link-info link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover'>{$probePacket->tags->title}</a></h3>";
+                echo "<h4>{$probePacket->tags->artist}</h4>";
                 echo "<p>{$probePacket->tags->description}</p>";
                 ?>
             </div>
             <form method="POST">
                 <button type="submit" name="download" class="btn btn-primary">Download File [<?php
-                echo round($probePacket->size/1048576,2);
+                echo convertBytesToMB($probePacket->size);
                 ?> MB]</button>
             </form>
         </div>
     <?php
 }
 
+function convertBytesToMB($bytes)
+{
+    if(!is_numeric($bytes)) return $bytes;
+    return round($bytes/1048576,2);
+}
+
 function convertDuration($duration) 
 {
+    if(!is_numeric($duration)) return $duration;
     $h=floor($duration/3600);
     $m=floor(($duration%3600)/60);
     $s=$duration%60;
     return sprintf('%02d:%02d:%02d',$h,$m,$s);
 }
+
 function convertDate($string)
 {
     $date=DateTime::createFromFormat('Ymd',$string);
-    return $date->format("d.m.Y");
+    if($date&&$date->format("Ymd")===$string)
+    {
+        return $date->format("d.m.Y");
+    }
+    return $string;
 }
 
 ?>
