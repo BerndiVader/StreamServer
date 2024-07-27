@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -28,13 +29,10 @@ import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 
 import com.gmail.berndivader.streamserver.config.Config;
-import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 public final class Helper {
 	
@@ -54,7 +52,7 @@ public final class Helper {
 		LGSON=new GsonBuilder().setPrettyPrinting().setFieldNamingStrategy(s->s.getName().toLowerCase()).disableHtmlEscaping().create();
 	}
 	
-	private static String startAndWaitForProcess(ProcessBuilder builder,long timeout) throws Exception {
+	public static String startAndWaitForProcess(ProcessBuilder builder,long timeout) throws Exception {
 		long start=System.currentTimeMillis();
 		timeout*=1000l;
 		Process process=builder.start();
@@ -76,7 +74,7 @@ public final class Helper {
 					}
 				}
 				if(error.available()!=0) err.append(new String(error.readAllBytes()));
-				if(System.currentTimeMillis()-start>timeout) process.destroy();
+				if(System.currentTimeMillis()-start>timeout) waitForProcess(process,10l);
 			}
 			
 			output.println();
@@ -88,64 +86,10 @@ public final class Helper {
 			return out.toString();
 		}
 	}
-	
-	public static FFProbePacket createProbePacket(File file) {
-		FFProbePacket packet=null;
-		if(file.exists()) {
-			ProcessBuilder builder=new ProcessBuilder();
-			builder.directory(new File("./"));
-			builder.command("ffprobe","-v","quiet","-print_format","json","-show_format",file.getAbsolutePath());
-			try {
-				String out=startAndWaitForProcess(builder,10l);
-				if(!out.isEmpty()) {
-					JsonObject o=JsonParser.parseString(out.toString()).getAsJsonObject();
-					if(o.has("format")) packet=LGSON.fromJson(o.get("format"),FFProbePacket.class);
-				}
-			} catch (Exception e) {
-				ANSI.printErr("getProbePacket method failed.", e);
-			}
-		}
-		return packet==null?new FFProbePacket():packet;
-	}
-	
-	public static InfoPacket createInfoPacket(String url) {
-		ProcessBuilder builder=new ProcessBuilder();
-		builder.directory(new File("./"));
-		builder.command("yt-dlp"
-			,"--quiet"
-			,"--no-warnings"
-			,"--dump-json"
-			,"--no-playlist"
-		);
-		if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
-			builder.command().add("--cookies");
-			builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
-		}
-		builder.command().add(url);
 		
-		InfoPacket info=null;
-		try {
-			String out=startAndWaitForProcess(builder,20l);
-			if(!out.isEmpty()) {
-				int index=out.indexOf('{');
-				if(index!=-1) out=out.substring(index);
-				info=LGSON.fromJson(out,InfoPacket.class);
-			}
-		} catch (Exception e) {
-			ANSI.printErr("getinfoPacket method failed.",e);
-		}
-		
-		if(info==null) {
-			info=new InfoPacket();
-			info.webpage_url=url;
-		}
-		
-		return info;
-	}
-	
 	public static Entry<ProcessBuilder,InfoPacket> createDownloadBuilder(File defaultDirectory,String args) {
 		ProcessBuilder builder=new ProcessBuilder();
-		getOrCreateMediaDir(Config.DL_MEDIA_PATH).ifPresentOrElse(dir->builder.directory(dir),()->builder.directory(new File("./")));
+		getOrCreateMediaDir(Config.mediaPath()).ifPresentOrElse(dir->builder.directory(dir),()->builder.directory(new File("./")));
 		boolean downloadable=false;
 		boolean temp=false;
 		
@@ -179,7 +123,7 @@ public final class Helper {
 			if(parse.length>0) {
 				switch(parse[0]) {
 					case("temp"):
-						getOrCreateMediaDir(Config.DL_TEMP_PATH).ifPresent(dir->builder.directory(dir));
+						getOrCreateMediaDir(Config.tempPath()).ifPresent(dir->builder.directory(dir));
 						downloadable=temp=true;
 						break;
 					case("music"):
@@ -190,7 +134,7 @@ public final class Helper {
 								,"--audio-quality","160K"
 								,"--output","%(title).64s.%(ext)s"
 						));
-						getOrCreateMediaDir(Config.DL_MUSIC_PATH).ifPresent(dir->builder.directory(dir));;
+						getOrCreateMediaDir(Config.musicPath()).ifPresent(dir->builder.directory(dir));;
 						break;
 					case("link"):
 						downloadable=true;
@@ -215,7 +159,7 @@ public final class Helper {
 			}
 		}
 		
-		InfoPacket infoPacket=Helper.createInfoPacket(url);
+		InfoPacket infoPacket=InfoPacket.build(url);
 		if(!url.isEmpty()) builder.command().add(url);
 		infoPacket.downloadable=downloadable;
 		infoPacket.temp=temp;
@@ -233,7 +177,7 @@ public final class Helper {
 				,"-f","mjpeg"
 				,"-"
 			);
-		
+		byte[]bytes=new byte[0];
 		Process process=null;
 		try {
 			process=builder.start();
@@ -261,16 +205,28 @@ public final class Helper {
 				g2d.dispose();
 								
 				if(dest==null) {
-					if(ImageIO.write(bimage,"jpg",out)) return out.toByteArray();
+					if(ImageIO.write(bimage,"jpg",out)) bytes=out.toByteArray();
 				} else ImageIO.write(bimage,"jpg",dest);
 			}
-						
+
 		} catch (Exception e) {
 			ANSI.printErr(e.getMessage(),e);
 		}
 		
-		if(process!=null&&process.isAlive()) process.destroy();
-		return new byte[0];
+		if(process!=null&&process.isAlive()) waitForProcess(process,10l);
+		return bytes;
+	}
+	
+	public static void waitForProcess(final Process process,long timeout) {
+		Helper.EXECUTOR.submit(()->{
+			try {
+				process.waitFor(timeout,TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				ANSI.printErr(e.getMessage(),e);
+				process.destroy();
+			}				
+		});
 	}
 	
 	public static Optional<File> getOrCreateMediaDir(String name) {
@@ -282,6 +238,7 @@ public final class Helper {
 	}
 		
 	public static String stringFloatToTime(String time) {
+		if(time.isEmpty()) return "";
 		float duration=0f;
 		try {
 			duration=Float.parseFloat(time);
