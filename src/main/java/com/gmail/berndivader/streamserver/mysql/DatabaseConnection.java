@@ -62,7 +62,7 @@ public class DatabaseConnection {
 	}
 	
 	public static Connection getNewConnection() throws SQLException {
-		return DriverManager.getConnection(Config.DATABASE_CONNECTION,Config.DATABASE_USER,Config.DATABASE_PWD);
+		return DriverManager.getConnection(Config.connectionString(),Config.DATABASE_USER,Config.DATABASE_PWD);
 	}
 	
 	public static boolean setup() throws BatchUpdateException {
@@ -75,10 +75,10 @@ public class DatabaseConnection {
 			connection.setAutoCommit(false);
 			try(Statement statement=connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				statement.addBatch("START TRANSACTION;");
-				statement.addBatch("CREATE TABLE IF NOT EXISTS `current` (`uuid` VARCHAR(512), `info` VARCHAR(512));");
+				statement.addBatch("CREATE TABLE IF NOT EXISTS `current` (`uuid` VARCHAR(36), `ffprobe` TEXT);");
 				statement.addBatch("CREATE TABLE IF NOT EXISTS `info` (`infotext` VARCHAR(50));");
-				statement.addBatch("CREATE TABLE IF NOT EXISTS `playlist` (`title` VARCHAR(512), `info` VARCHAR(512), `filepath` VARCHAR(512));");
-				statement.addBatch("CREATE TABLE if NOT EXISTS `scheduled` (`id` INT(11) AUTO_INCREMENT, `title` VARCHAR(512), `filename` VARCHAR(512), PRIMARY KEY (`id`));");
+				statement.addBatch("CREATE TABLE IF NOT EXISTS `playlist` (`title` VARCHAR(128), `info` VARCHAR(128), `filepath` VARCHAR(256));");
+				statement.addBatch("CREATE TABLE if NOT EXISTS `scheduled` (`id` INT(11) AUTO_INCREMENT, `title` VARCHAR(128), `filename` VARCHAR(256), PRIMARY KEY (`id`));");
 				statement.addBatch("CREATE TABLE IF NOT EXISTS `downloadables` (`uuid` VARCHAR(36) NOT NULL, `path` VARCHAR(256) NOT NULL, `timestamp` BIGINT NOT NULL, `downloads` INT NOT NULL, `temp` TINYINT(1) NOT NULL, `ffprobe` TEXT NOT NULL);");
 				statement.addBatch("TRUNCATE `current`; TRUNCATE `info`; TRUNCATE `playlist`; TRUNCATE `scheduled`; TRUNCATE `downloadables`;");
 				statement.addBatch("COMMIT;");
