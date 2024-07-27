@@ -64,7 +64,7 @@ public class Play extends Command<Message> {
 	}
 	
 	private static Mono<Message> createMessage(File file,MessageChannel channel) {
-		final FFProbePacket packet=Helper.createProbePacket(file);
+		final FFProbePacket packet=FFProbePacket.build(file);
 		
 		return channel.createMessage(EmbedCreateSpec.builder()
 				.title(packet.isSet(packet.tags.title)?packet.tags.title:"Now playing...")

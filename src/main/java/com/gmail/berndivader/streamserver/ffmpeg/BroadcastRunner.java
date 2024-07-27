@@ -155,7 +155,7 @@ public final class BroadcastRunner extends TimerTask {
 	
 	private static synchronized void createStream(File file) {
 		String path=file.getAbsolutePath();
-		probePacket(Helper.createProbePacket(file));
+		probePacket(FFProbePacket.build(file));
 		
 		String title="";
 		if(probePacket().isSet(probePacket().tags.title)) {
@@ -358,8 +358,8 @@ public final class BroadcastRunner extends TimerTask {
 	}
 	
 	public static void refreshFilelist() {
-    	File playlistDir=new File(Config.PLAYLIST_PATH);
-    	File customDir=new File(Config.PLAYLIST_PATH_CUSTOM);
+    	File playlistDir=new File(Config.working_dir,Config.PLAYLIST_PATH);
+    	File customDir=new File(Config.working_dir,Config.PLAYLIST_PATH_CUSTOM);
     	
     	FileFilter filter=pathName->pathName.getAbsolutePath().toLowerCase().endsWith(".mp4");
     	synchronized(files) {

@@ -19,13 +19,11 @@ import reactor.core.publisher.Mono;
 public class Current extends Command<Message> {
 	private FFProbePacket packet;
 	
-	public Current() {
-		packet=new FFProbePacket();
-	}
+	public Current() {}
 
 	@Override
 	public Mono<Message> execute(String string, MessageChannel channel) {
-		if(BroadcastRunner.playing()!=null) packet=Helper.createProbePacket(BroadcastRunner.playing());
+		packet=FFProbePacket.build(BroadcastRunner.playing());
 
 		Builder embed=EmbedCreateSpec.builder();
 		embed.color(Color.CINNABAR);

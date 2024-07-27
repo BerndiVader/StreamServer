@@ -57,11 +57,11 @@ public class DownloadMedia extends Command {
 			ANSI.printErr("Failed to run cleanup process.",e);
 		}
 
-		Optional<File>opt=Helper.getOrCreateMediaDir(Config.DL_MEDIA_PATH);
+		Optional<File>opt=Helper.getOrCreateMediaDir(Config.DL_ROOT_PATH);
 		if(opt.isEmpty()) return false;
 		
 		File directory=opt.get();
-				
+
 		Entry<ProcessBuilder,InfoPacket>entry=Helper.createDownloadBuilder(directory,args[0]);
 		ProcessBuilder builder=entry.getKey();
 		

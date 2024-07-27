@@ -139,7 +139,7 @@ public enum ANSI {
 	}
 	
 	private static void log(String string,Throwable throwable) {
-		File file=new File(Config.config_dir+"/"+"debug.log");
+		File file=new File(Config.config_dir,"debug.log");
 		if(!file.exists()) {
 			try {
 				file.createNewFile();

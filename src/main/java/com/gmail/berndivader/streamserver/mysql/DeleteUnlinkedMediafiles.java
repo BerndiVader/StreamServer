@@ -35,7 +35,7 @@ public class DeleteUnlinkedMediafiles implements Callable<Boolean>{
 		File[]files=null;
 		File[]thumbnails=null;
 		
-		File tempDir=new File(Config.DL_TEMP_PATH);
+		File tempDir=new File(Config.tempPath());
 		File thumbDir=new File(Config.DL_WWW_THUMBNAIL_PATH);
 		if(tempDir.exists()) files=tempDir.listFiles(file->file.isFile());
 		if(thumbDir.exists()) thumbnails=thumbDir.listFiles(file->file.isFile());

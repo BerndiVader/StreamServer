@@ -34,7 +34,7 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 	@Override
 	public Optional<String> call() {
 		UUID uuid=UUID.randomUUID();
-		FFProbePacket ffprobe=Helper.createProbePacket(file);
+		FFProbePacket ffprobe=FFProbePacket.build(file);
 		boolean exists=false;
 		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {

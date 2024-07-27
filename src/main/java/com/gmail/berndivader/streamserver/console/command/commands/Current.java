@@ -2,7 +2,6 @@ package com.gmail.berndivader.streamserver.console.command.commands;
 
 import java.io.File;
 
-import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
@@ -17,7 +16,7 @@ public class Current extends Command {
 		
 		if(args[0].isEmpty()) {
 			if(BroadcastRunner.isStreaming()&&BroadcastRunner.playing()!=null) {
-				FFProbePacket packet=Helper.createProbePacket(BroadcastRunner.playing());
+				FFProbePacket packet=FFProbePacket.build(BroadcastRunner.playing());
 				ANSI.println("[GREEN]"+packet.toString()+"[RESET]");
 			} else {
 				ANSI.println("[YELLOW]There is currently no media streaming.[RESET]");
@@ -25,7 +24,7 @@ public class Current extends Command {
 		} else {
 			File file=new File(args[0]);
 			if(file.exists()&&file.isFile()) {
-				FFProbePacket packet=Helper.createProbePacket(file);
+				FFProbePacket packet=FFProbePacket.build(file);
 				ANSI.println("[GREEN]"+packet.toString()+"[RESET]");
 			} else {
 				ANSI.println("[YELLOW]No file found.[RESET]");

@@ -28,7 +28,7 @@ public class Schedule extends Command<Message> {
 		
 		if(opt.isPresent()) {
 			new AddScheduled(opt.get().getName());
-			final FFProbePacket packet=Helper.createProbePacket(opt.get());
+			final FFProbePacket packet=FFProbePacket.build(opt.get());
 			mono=channel.createMessage(EmbedCreateSpec.builder()
 					.title(packet.isSet(packet.tags.title)?packet.tags.title:"Scheduled...")
 					.author(packet.isSet(packet.tags.artist)?packet.tags.artist:"","","")

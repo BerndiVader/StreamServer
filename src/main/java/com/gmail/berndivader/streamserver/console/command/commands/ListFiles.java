@@ -15,17 +15,17 @@ public class ListFiles extends Command {
 	public boolean execute(String[] arguments) {
 
 		String arg=arguments[0];
-		String path=Config.DL_MUSIC_PATH;
+		String path=Config.DL_ROOT_PATH;
 		boolean sub=false;
 		
 		if(arg.toUpperCase().startsWith("--MEDIA")) {
-			path=Config.DL_MEDIA_PATH;
+			path=Config.mediaPath();
 			arg=arg.toUpperCase().replaceFirst("--MEDIA","").trim();
 		} else if(arg.toUpperCase().startsWith("--MUSIC")) {
-			path=Config.DL_MUSIC_PATH;
+			path=Config.musicPath();
 			arg=arg.toUpperCase().replaceFirst("--MUSIC","").trim();
 		} else if(arg.toUpperCase().startsWith("--TEMP")) {
-			path=Config.DL_TEMP_PATH;
+			path=Config.tempPath();
 			arg=arg.toUpperCase().replaceFirst("--TEMP","").trim();
 		} else if(arg.toUpperCase().startsWith("--PLAYLIST")) {
 			path=Config.PLAYLIST_PATH;
@@ -34,7 +34,7 @@ public class ListFiles extends Command {
 			path=Config.PLAYLIST_PATH_CUSTOM;
 			arg=arg.toUpperCase().replaceFirst("--CUSTOM","").trim();
 		} else {
-			sub=true;			
+			sub=true;
 		}
 
 		List<String>files=Helper.getFilesByPath(path,sub,arg.isEmpty()?"*.*":arg);

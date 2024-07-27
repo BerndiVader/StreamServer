@@ -62,13 +62,13 @@ public class DownloadMedia extends Command<Void> {
 
 		@Override
 		public void run() {
-			Optional<File>opt=Helper.getOrCreateMediaDir(Config.DL_MUSIC_PATH);
+			Optional<File>opt=Helper.getOrCreateMediaDir(Config.DL_ROOT_PATH);
 			if(opt.isEmpty()) {
 				
 				channel.createMessage(EmbedCreateSpec.builder()
 						.title("ERROR")
 						.color(Color.RED)
-						.description("There was an issue with the download directory configured in Config.DL_MUSIC_PATH. It is either a file or the directory couldnt be created by the bot.")
+						.description("There was an issue with the download directory configured in Config.DL_ROOT_PATH. It is either a file or the directory couldnt be created by the bot.")
 						.build()
 				).subscribe();
 				return;
