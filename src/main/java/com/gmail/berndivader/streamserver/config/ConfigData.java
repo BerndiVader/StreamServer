@@ -17,6 +17,7 @@ public class ConfigData {
 	String PLAYLIST_PATH;
 	String PLAYLIST_PATH_CUSTOM;
 	
+	String DL_ROOT_PATH;
 	String DL_MUSIC_PATH;
 	String DL_TEMP_PATH;
 	String DL_MEDIA_PATH;
@@ -28,6 +29,9 @@ public class ConfigData {
 	Integer DL_INTERVAL_VALUE;
 	
 	String DATABASE_CONNECTION;
+	String DATABASE_HOST;
+	String DATABASE_PORT;
+	String DATABASE_NAME;
 	String DATABASE_USER;
 	String DATABASE_PWD;
 	

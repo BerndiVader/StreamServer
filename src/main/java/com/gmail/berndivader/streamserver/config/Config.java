@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Scanner;
 
@@ -31,9 +30,10 @@ public class Config {
 	public static String PLAYLIST_PATH="./playlist";
 	public static String PLAYLIST_PATH_CUSTOM="./custom";
 	
-	public static String DL_MUSIC_PATH="./music";
-	public static String DL_TEMP_PATH="./music/temp";
-	public static String DL_MEDIA_PATH="./music/media";
+	public static String DL_ROOT_PATH="./library";
+	private static String DL_MUSIC_PATH="/music";
+	private static String DL_TEMP_PATH="/temp";
+	private static String DL_MEDIA_PATH="/media";
 	public static String DL_WWW_THUMBNAIL_PATH="/absolute/path/to/thumbnails";
 	
 	public static Long DL_TIMEOUT_SECONDS=1800l;
@@ -41,7 +41,10 @@ public class Config {
 	public static String DL_INTERVAL_FORMAT="DAY";
 	public static Integer DL_INTERVAL_VALUE=14;
 	
-	public static String DATABASE_CONNECTION="jdbc:mysql://x.x.xxx.xxx:3306/ytbot";
+	public static String DATABASE_PREFIX="jdbc:mysql://";
+	public static String DATABASE_HOST="x.x.xxx.xxx";
+	public static String DATABASE_PORT="3306";
+	public static String DATABASE_NAME="ytbot";
 	public static String DATABASE_USER="default";
 	public static String DATABASE_PWD="default";
 	
@@ -58,7 +61,8 @@ public class Config {
 	
 	public static Boolean DEBUG=false;
 	
-	public static File working_dir,config_dir,config_file;
+	public static String working_dir;
+	public static File config_dir,config_file;
 	public static ConfigData data;
 	
 	public static Config instance;
@@ -67,13 +71,12 @@ public class Config {
         try {
    			HELP_TEXT=inputstreamToString(StreamServer.class.getResourceAsStream("/help.txt"));
    			DISCORD_HELP_TEXT=inputstreamToString(StreamServer.class.getResourceAsStream("/discord_help.txt"));
-            URI uri=StreamServer.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-            working_dir=new File(uri.getPath().replace(new File(uri).getName(),""));
+            working_dir=new File(StreamServer.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
         } catch (URISyntaxException ex) {
         	ANSI.printErr("URISyntaxException",ex);
         }
-		config_dir=new File(working_dir.getAbsolutePath()+"/config");
-		config_file=new File(config_dir.getAbsolutePath()+"/config.json");
+		config_dir=new File(working_dir,"config");
+		config_file=new File(config_dir,"config.json");
 		if(!config_dir.exists()) {
 			config_dir.mkdir();
 			createDefault();
@@ -81,7 +84,7 @@ public class Config {
 		if(!config_file.exists()) {
 			createDefault();
 		}
-		YOUTUBE_COOKIES=new File(config_dir.getAbsolutePath().concat("/cookies.txt"));
+		YOUTUBE_COOKIES=new File(config_dir,"cookies.txt");
 	}
 	
 	public Config() {
@@ -105,6 +108,7 @@ public class Config {
 		try (FileWriter writer=new FileWriter(config_file.getAbsoluteFile())) {
 			data.PLAYLIST_PATH=PLAYLIST_PATH;
 			data.PLAYLIST_PATH_CUSTOM=PLAYLIST_PATH_CUSTOM;
+			data.DL_ROOT_PATH=DL_ROOT_PATH;
 			data.DL_MUSIC_PATH=DL_MUSIC_PATH;
 			data.DL_TEMP_PATH=DL_TEMP_PATH;
 			data.DL_MEDIA_PATH=DL_MEDIA_PATH;
@@ -120,7 +124,9 @@ public class Config {
 			data.YOUTUBE_USE_COOKIES=YOUTUBE_USE_COOKIES;
 			data.YOUTUBE_CHANNEL_ID=YOUTUBE_CHANNEL_ID;
 			data.STREAM_BOT_START=STREAM_BOT_START;
-			data.DATABASE_CONNECTION=DATABASE_CONNECTION;
+			data.DATABASE_HOST=DATABASE_HOST;
+			data.DATABASE_PORT=DATABASE_PORT;
+			data.DATABASE_NAME=DATABASE_NAME;
 			data.DATABASE_USER=DATABASE_USER;
 			data.DATABASE_PWD=DATABASE_PWD;
 			data.DISCORD_TOKEN=DISCORD_TOKEN;
@@ -143,6 +149,7 @@ public class Config {
 			data=Helper.GSON.fromJson(reader,ConfigData.class);
 			if(data.PLAYLIST_PATH!=null) PLAYLIST_PATH=data.PLAYLIST_PATH;
 			if(data.PLAYLIST_PATH_CUSTOM!=null) PLAYLIST_PATH_CUSTOM=data.PLAYLIST_PATH_CUSTOM;
+			if(data.DL_ROOT_PATH!=null) DL_ROOT_PATH=data.DL_ROOT_PATH;
 			if(data.DL_MUSIC_PATH!=null) DL_MUSIC_PATH=data.DL_MUSIC_PATH;
 			if(data.DL_TEMP_PATH!=null) DL_TEMP_PATH=data.DL_TEMP_PATH;
 			if(data.DL_MEDIA_PATH!=null) DL_MEDIA_PATH=data.DL_MEDIA_PATH;
@@ -158,7 +165,9 @@ public class Config {
 			if(data.YOUTUBE_USE_COOKIES!=null) YOUTUBE_USE_COOKIES=data.YOUTUBE_USE_COOKIES;
 			if(data.YOUTUBE_CHANNEL_ID!=null) YOUTUBE_CHANNEL_ID=data.YOUTUBE_CHANNEL_ID;
 			if(data.STREAM_BOT_START!=null) STREAM_BOT_START=data.STREAM_BOT_START;
-			if(data.DATABASE_CONNECTION!=null) DATABASE_CONNECTION=data.DATABASE_CONNECTION;
+			if(data.DATABASE_HOST!=null) DATABASE_HOST=data.DATABASE_HOST;
+			if(data.DATABASE_PORT!=null) DATABASE_PORT=data.DATABASE_PORT;
+			if(data.DATABASE_NAME!=null) DATABASE_NAME=data.DATABASE_NAME;
 			if(data.DATABASE_USER!=null) DATABASE_USER=data.DATABASE_USER;
 			if(data.DATABASE_PWD!=null) DATABASE_PWD=data.DATABASE_PWD;
 			if(data.DISCORD_TOKEN!=null) DISCORD_TOKEN=data.DISCORD_TOKEN;
@@ -175,7 +184,23 @@ public class Config {
 		return true;
 	}
 	
-	static String inputstreamToString(InputStream is) {
+	public static String musicPath() {
+		return DL_ROOT_PATH+DL_MUSIC_PATH;
+	}
+	
+	public static String mediaPath() {
+		return DL_ROOT_PATH+DL_MEDIA_PATH;
+	}
+	
+	public static String tempPath() {
+		return DL_ROOT_PATH+DL_TEMP_PATH;
+	}
+	
+	public static String connectionString() {
+		return DATABASE_PREFIX+DATABASE_HOST+":"+DATABASE_PORT+"/"+DATABASE_NAME;
+	}
+	
+	private static String inputstreamToString(InputStream is) {
 		String output=null;
 		try (Scanner s=new Scanner(is)){
 			s.useDelimiter("\\A");
