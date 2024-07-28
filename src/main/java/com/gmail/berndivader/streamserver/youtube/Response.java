@@ -18,7 +18,7 @@ import com.google.gson.JsonParser;
 public abstract class Response<T> implements Callable<T> {
 	
 	private String query;
-
+	
 	public Response(String query) {
 		this.query=query;
 	}
@@ -26,10 +26,11 @@ public abstract class Response<T> implements Callable<T> {
 	@Override
 	public T call() throws Exception {
 		HttpUriRequest request=new HttpGet(query);
+
 		JsonObject json=Youtube.HTTP_CLIENT.execute(request,new ResponseHandler<JsonObject>() {
+			
 			@Override
 			public JsonObject handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-				
 				StringBuilder text=new StringBuilder();
 				try(BufferedReader reader=new BufferedReader(new InputStreamReader(response.getEntity().getContent(),StandardCharsets.UTF_8))) {
 					String line;
@@ -37,8 +38,8 @@ public abstract class Response<T> implements Callable<T> {
 				}
 				return JsonParser.parseString(text.toString()).getAsJsonObject();
 			}
+
 		});
-		
 		return !json.has("error")?handle(json):handleErr(json.get("error").getAsJsonObject());
 	}
 	

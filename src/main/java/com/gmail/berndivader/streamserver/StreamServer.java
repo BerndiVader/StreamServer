@@ -13,6 +13,7 @@ import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
 import com.gmail.berndivader.streamserver.mysql.DatabaseConnection.STATUS;
 import com.gmail.berndivader.streamserver.mysql.WipeDatabase;
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.gmail.berndivader.streamserver.youtube.Youtube;
 
 public final class StreamServer {
 	
@@ -53,6 +54,8 @@ public final class StreamServer {
 		}
 		
 		Helper.close();
+		Youtube.close();
+		
 		if(ConsoleRunner.forceExit) {
 			ANSI.println("[RED][FORCE EXIT][/RED]");
 			System.exit(0);
