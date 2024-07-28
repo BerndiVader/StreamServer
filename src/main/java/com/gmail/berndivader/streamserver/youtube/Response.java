@@ -1,8 +1,9 @@
 package com.gmail.berndivader.streamserver.youtube;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
 import java.util.concurrent.Callable;
 
 import org.apache.http.HttpResponse;
@@ -28,11 +29,13 @@ public abstract class Response<T> implements Callable<T> {
 		JsonObject json=Youtube.HTTP_CLIENT.execute(request,new ResponseHandler<JsonObject>() {
 			@Override
 			public JsonObject handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-				String text="";
-			    try(Scanner scanner=new Scanner(response.getEntity().getContent(), StandardCharsets.UTF_8.name())) {
-			        text=scanner.useDelimiter("\\A").next();
-			    }
-				return JsonParser.parseString(text).getAsJsonObject();
+				
+				StringBuilder text=new StringBuilder();
+				try(BufferedReader reader=new BufferedReader(new InputStreamReader(response.getEntity().getContent(),StandardCharsets.UTF_8))) {
+					String line;
+					while((line=reader.readLine())!=null)  text.append(line);
+				}
+				return JsonParser.parseString(text.toString()).getAsJsonObject();
 			}
 		});
 		
