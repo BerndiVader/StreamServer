@@ -3,6 +3,7 @@ package com.gmail.berndivader.streamserver.youtube.packets;
 import java.util.List;
 
 import com.gmail.berndivader.streamserver.Helper;
+import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 public class ErrorPacket extends Packet {
@@ -25,6 +26,7 @@ public class ErrorPacket extends Packet {
 	
 	public void printSimple() {
 		ANSI.printWarn("YT Request Error:"+code+" - "+message);
+		if(Config.DEBUG) ANSI.println(source.toString());
 	}
 	
 	public void printDetails() {

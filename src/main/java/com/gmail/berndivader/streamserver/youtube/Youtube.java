@@ -44,9 +44,9 @@ public final class Youtube {
 
 			@Override
 			protected Packet handleErr(JsonObject json) {
-				ANSI.println(json.toString());
-				ErrorPacket error=Helper.GSON.fromJson(json,ErrorPacket.class);
-				return error;
+				ErrorPacket packet=Helper.GSON.fromJson(json,ErrorPacket.class);
+				packet.source=json;
+				return packet;
 			}
 			
 		});
