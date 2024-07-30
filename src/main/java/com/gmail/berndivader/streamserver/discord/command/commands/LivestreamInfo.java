@@ -11,8 +11,10 @@ import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.youtube.Youtube;
 import com.gmail.berndivader.streamserver.youtube.packets.EmptyPacket;
+import com.gmail.berndivader.streamserver.youtube.packets.ErrorPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.LiveStreamPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
+import com.google.gson.JsonObject;
 
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -28,7 +30,7 @@ public class LivestreamInfo extends Command<Message> {
 	@Override
 	public Mono<Message> execute(String string, MessageChannel channel) {
 		
-		packet=new EmptyPacket();
+		packet=Packet.build(new JsonObject(),EmptyPacket.class);
 		Future<Packet>future=Youtube.livestreamsByChannelId(Config.YOUTUBE_CHANNEL_ID);
 		try {
 			packet=future.get(15l,TimeUnit.SECONDS);
@@ -48,10 +50,16 @@ public class LivestreamInfo extends Command<Message> {
 				.footer("Broadcastcontent: "+p.snippet.liveBroadcastContent,p.snippet.thumbnails.low.url)
 				.thumbnail(p.snippet.thumbnails.low.url)
 				.title(p.snippet.title);
-		} else {
+		} else if(packet instanceof ErrorPacket) {
+			ErrorPacket p=(ErrorPacket)packet;
 			builder.title("ERROR")
 				.color(Color.RED)
-				.description("Unable to get livestream status from YT.");
+				.title(p.code+":"+p.status)
+				.description(p.message);
+		} else {
+			builder.title("WARNING")
+				.color(Color.ORANGE)
+				.description("Youtube didnt answer the request.");
 		}
 		
 		return channel.createMessage(builder.build());

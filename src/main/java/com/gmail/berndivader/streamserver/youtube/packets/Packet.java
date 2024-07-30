@@ -1,10 +1,12 @@
 package com.gmail.berndivader.streamserver.youtube.packets;
 
+import com.gmail.berndivader.streamserver.Helper;
 import com.google.gson.JsonObject;
 
 public abstract class Packet {
 	
-	public JsonObject source;
+	protected JsonObject source;
+	protected Packet() {}
 	
 	public JsonObject getByPath(String name) {
 		if(source.has(name)) {
@@ -17,5 +19,12 @@ public abstract class Packet {
 	public String toString() {
 		return source.toString();
 	}
+	
+	public static Packet build(JsonObject source,Class<? extends Packet> clazz) {
+		Packet packet=Helper.GSON.fromJson(source,clazz);
+		packet.source=source;
+		return packet;
+	}
+		
 	
 }

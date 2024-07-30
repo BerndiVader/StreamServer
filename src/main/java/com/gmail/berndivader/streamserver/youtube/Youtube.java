@@ -35,18 +35,14 @@ public final class Youtube {
 			protected Packet handle(JsonObject json) {
 				JsonArray array=json.getAsJsonArray("items");
 				if(array.size()>0) {
-					LiveStreamPacket packet=Helper.GSON.fromJson(array.get(0).getAsJsonObject(),LiveStreamPacket.class);
-					packet.source=json;
-					return packet;
+					return Packet.build(array.get(0).getAsJsonObject(),LiveStreamPacket.class);
 				}
-				return new EmptyPacket();
+				return Packet.build(new JsonObject(),EmptyPacket.class);
 			}
 
 			@Override
 			protected Packet handleErr(JsonObject json) {
-				ErrorPacket packet=Helper.GSON.fromJson(json,ErrorPacket.class);
-				packet.source=json;
-				return packet;
+				return Packet.build(json,ErrorPacket.class);
 			}
 			
 		});

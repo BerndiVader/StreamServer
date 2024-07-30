@@ -14,6 +14,7 @@ import com.gmail.berndivader.streamserver.youtube.packets.EmptyPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.ErrorPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.LiveStreamPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
+import com.google.gson.JsonObject;
 
 @ConsoleCommand(name="liveinfo",usage="Get livestream info by channel id. Use --json for complete json response.")
 public class LivestreamsById extends Command{
@@ -27,7 +28,7 @@ public class LivestreamsById extends Command{
 			arg=arg.replace("--json","");
 		}
 		arg=arg.strip();
-		Packet packet=new EmptyPacket();
+		Packet packet=EmptyPacket.build(new JsonObject(),EmptyPacket.class);
 		if(arg.length()==0) arg=Config.YOUTUBE_CHANNEL_ID;
 		Future<Packet>future=Youtube.livestreamsByChannelId(arg);
 		try {
