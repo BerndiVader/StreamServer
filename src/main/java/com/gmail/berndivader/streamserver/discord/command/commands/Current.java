@@ -15,7 +15,7 @@ import discord4j.core.spec.EmbedCreateSpec.Builder;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="current",usage="Display current playing file.",requireds={Requireds.BROADCASTRUNNER})
+@DiscordCommand(name="fileinfo",usage="Display current playing file metadata.",requireds={Requireds.BROADCASTRUNNER})
 public class Current extends Command<Message> {
 	private FFProbePacket packet;
 	

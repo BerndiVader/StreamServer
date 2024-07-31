@@ -16,7 +16,7 @@ public class Schedule extends Command {
 			final String filename=args[0].endsWith(".mp4")?args[0]+".mp4":args[0];
 			BroadcastRunner.getFileByName(filename)
 				.ifPresentOrElse(file->new AddScheduled(file.getName()),
-				()->ANSI.printErr("No file found for "+filename,null));
+				()->ANSI.printErr("No file found for "+filename,new Throwable("File not found.")));
 		}
 		return true;
 	}

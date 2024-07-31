@@ -8,7 +8,7 @@ import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
-@ConsoleCommand(name="current", usage="Show current or give filename media ffprobe info.")
+@ConsoleCommand(name="fileinfo", usage="Show current or give filename media ffprobe info.")
 public class Current extends Command {
 
 	@Override

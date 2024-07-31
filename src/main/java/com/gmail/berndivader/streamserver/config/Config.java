@@ -20,6 +20,10 @@ public class Config {
 	public static String YOUTUBE_LINK="https://youtu.be/xxxxxxx";
 	public static String YOUTUBE_KEY="yt-api-key";
 	public static String YOUTUBE_CHANNEL_ID="yt-channel-id";
+	public static String YOUTUBE_CLIENT_ID="yt-client-id";
+	public static String YOUTUBE_CLIENT_SECRET="yt-client-secret";
+	public static String YOUTUBE_AUTH_REDIRECT="https://your.redirect.page";
+	public static String YOUTUBE_ACCESS_TOKEN="";
 	
 	public static Boolean YOUTUBE_USE_COOKIES=false;
 	public static File YOUTUBE_COOKIES;
@@ -123,6 +127,10 @@ public class Config {
 			data.YOUTUBE_KEY=YOUTUBE_KEY;
 			data.YOUTUBE_USE_COOKIES=YOUTUBE_USE_COOKIES;
 			data.YOUTUBE_CHANNEL_ID=YOUTUBE_CHANNEL_ID;
+			data.YOUTUBE_CLIENT_ID=YOUTUBE_CLIENT_ID;
+			data.YOUTUBE_CLIENT_SECRET=YOUTUBE_CLIENT_SECRET;
+			data.YOUTUBE_AUTH_REDIRECT=YOUTUBE_AUTH_REDIRECT;
+			data.YOUTUBE_ACCESS_TOKEN=YOUTUBE_ACCESS_TOKEN;
 			data.STREAM_BOT_START=STREAM_BOT_START;
 			data.DATABASE_HOST=DATABASE_HOST;
 			data.DATABASE_PORT=DATABASE_PORT;
@@ -164,6 +172,10 @@ public class Config {
 			if(data.YOUTUBE_KEY!=null) YOUTUBE_KEY=data.YOUTUBE_KEY;
 			if(data.YOUTUBE_USE_COOKIES!=null) YOUTUBE_USE_COOKIES=data.YOUTUBE_USE_COOKIES;
 			if(data.YOUTUBE_CHANNEL_ID!=null) YOUTUBE_CHANNEL_ID=data.YOUTUBE_CHANNEL_ID;
+			if(data.YOUTUBE_CLIENT_ID!=null) YOUTUBE_CLIENT_ID=data.YOUTUBE_CLIENT_ID;
+			if(data.YOUTUBE_CLIENT_SECRET!=null) YOUTUBE_CLIENT_SECRET=data.YOUTUBE_CLIENT_SECRET;			
+			if(data.YOUTUBE_AUTH_REDIRECT!=null) YOUTUBE_AUTH_REDIRECT=data.YOUTUBE_AUTH_REDIRECT;			
+			if(data.YOUTUBE_ACCESS_TOKEN!=null) YOUTUBE_ACCESS_TOKEN=data.YOUTUBE_ACCESS_TOKEN;			
 			if(data.STREAM_BOT_START!=null) STREAM_BOT_START=data.STREAM_BOT_START;
 			if(data.DATABASE_HOST!=null) DATABASE_HOST=data.DATABASE_HOST;
 			if(data.DATABASE_PORT!=null) DATABASE_PORT=data.DATABASE_PORT;
