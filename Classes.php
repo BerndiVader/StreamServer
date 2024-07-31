@@ -31,6 +31,15 @@ class DatabaseTools
         $result->close();
         return $array??null;
     }
+
+    public static function addOauth2Verification($uuid,$code)
+    {
+        $connection=DatabaseTools::getConnection();
+        $statement=$connection->prepare("INSERT INTO oauth2 (state,code) VALUES (?,?)");
+        $statement->bind_param("ss",$uuid,$code);
+        return $statement->execute();
+    }
+
 }
 
 class FileDownload
