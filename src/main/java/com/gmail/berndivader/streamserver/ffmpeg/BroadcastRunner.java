@@ -35,6 +35,7 @@ import com.gmail.berndivader.streamserver.term.ANSI;
 public final class BroadcastRunner extends TimerTask {
 	
 	boolean stop;
+	static boolean hold=false;
 	
 	private static FFmpegProgress progress;
 	private static FFProbePacket probePacket;
@@ -130,7 +131,7 @@ public final class BroadcastRunner extends TimerTask {
 	@Override
 	public void run() {
 		
-    	if(!stop) {
+    	if(!stop&&!hold) {
     		if(ffmpeg()==null||ffmpeg().isCancelled()||ffmpeg().isDone()) startStream();
 		}
 		
@@ -245,11 +246,20 @@ public final class BroadcastRunner extends TimerTask {
 	private static FFmpegResult stopStream() {
 		ffmpeg().graceStop();
 		try {
-			return ffmpeg().get(20,TimeUnit.SECONDS);
+			return ffmpeg().get(20l,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			ANSI.printErr("Failed to stop broadcast task.",e);
 		}
 		return null;
+	}
+	
+	public static void stopAndHold() {
+		hold=true;
+		stopStream();
+	}
+	
+	public static void unhold() {
+		hold=false;
 	}
 	
 	public static File[] getFiles() {
