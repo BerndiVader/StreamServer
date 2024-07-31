@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download Page</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body class="bg-dark text-white"></body>
-
 <?php
+include_once("header.php");
+
 include_once("Classes.php");
 include_once("Config.php");
 
@@ -21,10 +13,6 @@ if(($scheme==="http"&&$port!=="80")||($scheme==="https"&&$port!=="443"))
 {
     $baseUrl.=":{$port}";
 }
-
-?>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<?php
 
 $uuid=htmlspecialchars(trim($_GET["uuid"]??""));
 if(!preg_match("/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[4][0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/",$uuid))
@@ -114,6 +102,4 @@ function convertDate($string)
     return $string;
 }
 
-?>
-</body>
-</html>
+include_once("footer.php");
