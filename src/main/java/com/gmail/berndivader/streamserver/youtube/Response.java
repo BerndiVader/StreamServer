@@ -13,13 +13,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.gmail.berndivader.streamserver.youtube.packets.ErrorPacket;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public abstract class Response<T> implements Callable<T> {
 	
 
-	private static final String JSON_ERROR="{\"code\":-1,\"message\":\"%s\",\"errors\":[{\"message\":\"%s\",\"domain\":\"global\",\"%s\":\"badRequest\"}],\"status\":\"%s\"}";
 	private String query;
 	
 	public Response(String query) {
@@ -47,15 +47,11 @@ public abstract class Response<T> implements Callable<T> {
 			});
 		} catch (IOException e) {
 			ANSI.printErr(e.getMessage(),e);
-			json=Response.buildJsonError("Connection to Youtube failed.","ConnectionError","CONNECTION_ERROR");
+			json=ErrorPacket.buildJsonError("Connection to Youtube failed.","ConnectionError","CONNECTION_ERROR").source();
 			
 		}
 		
 		return !json.has("error")?handle(json):handleErr(json.get("error").getAsJsonObject());
-	}
-	
-	private static JsonObject buildJsonError(String message,String reason,String status) {
-		return JsonParser.parseString(String.format(JSON_ERROR,message,message,reason,status)).getAsJsonObject();
 	}
 	
 	protected abstract T handle(JsonObject json);

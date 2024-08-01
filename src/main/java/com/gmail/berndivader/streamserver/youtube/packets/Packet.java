@@ -20,6 +20,10 @@ public abstract class Packet {
 		return source.toString();
 	}
 	
+	public JsonObject source() {
+		return this.source;
+	}
+	
 	public static Packet build(JsonObject source,Class<? extends Packet> clazz) {
 		Packet packet=Helper.GSON.fromJson(source,clazz);
 		packet.source=source;
