@@ -330,7 +330,7 @@ public final class BroadcastRunner extends TimerTask {
 	}
 	
 	private static FFmpegResult stopStream() {
-		if(ffmpeg()!=null&&(ffmpeg().isCancelled()||ffmpeg().isDone())) {
+		if(ffmpeg()!=null&&!ffmpeg().isCancelled()&&!ffmpeg().isDone()) {
 			ffmpeg().graceStop();
 			try {
 				return ffmpeg().get(20l,TimeUnit.SECONDS);
