@@ -8,7 +8,6 @@ import java.util.concurrent.TimeoutException;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.console.command.Command;
-import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.youtube.Youtube;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
@@ -18,11 +17,11 @@ public class StartLiveStream extends Command {
 
 	@Override
 	public boolean execute(String[] args) {
-		Future<Packet>future=Youtube.createLiveStream("MCH Varo 1-4","24/7 Stream von allen alten Varo Videos.","private");
+		Future<Packet>future=Youtube.createLivestream("MCH Varo 1-4","24/7 Stream von allen alten Varo Videos.","private");
 		
+		Packet packet=null;
 		try {
-			future.get(20l,TimeUnit.SECONDS);
-			BroadcastRunner.restart();
+			packet=future.get(15l,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			ANSI.printErr(e.getMessage(),e);
 		}

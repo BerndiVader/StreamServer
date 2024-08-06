@@ -1,19 +1,46 @@
 package com.gmail.berndivader.streamserver.youtube.packets;
 
 import com.gmail.berndivader.streamserver.Helper;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public abstract class Packet {
 	
+	public class Thumbnail {
+		public String url;
+		public int width;
+		public int height;
+	}	
+	
 	protected JsonObject source;
 	protected Packet() {}
 	
-	public JsonObject getByPath(String name) {
-		if(source.has(name)) {
-			return source.getAsJsonObject(name);
-		} 
-		return new JsonObject();
+	public static String stringFromPath(JsonElement json,String path) {
+		String[]names=path.split("\\.");
+		JsonElement current=json;
+		for(String name:names) {
+			if(current.getAsJsonObject().has(name)) {
+	            current=current.getAsJsonObject().get(name);
+			} else {
+				return "";
+			}
+		}
+		return current!=null?current.getAsString():"";
 	}
+	
+	public static JsonElement elementFromPath(JsonElement json,String path) {
+		String[]names=path.split("\\.");
+		JsonElement current=json;
+		for(String name:names) {
+			if(current.isJsonObject()&&current.getAsJsonObject().has(name)) {
+	            current=current.getAsJsonObject().get(name);
+			} else {
+				return new JsonObject();
+			}
+		}
+		return current!=null?current:new JsonObject();
+	}
+	
 	
 	@Override
 	public String toString() {

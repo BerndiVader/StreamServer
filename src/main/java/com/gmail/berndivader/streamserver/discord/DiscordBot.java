@@ -85,11 +85,13 @@ public final class DiscordBot {
                 		:message.getChannel();
                 
                 return mono.flatMap(channel->{
-                    if (channel==null) return Mono.empty();
-                    return command.exec(args,channel)
-                        .doOnError(error->ANSI.printErr(error.getMessage(),error));
+                	if (channel==null) return Mono.empty();
+                	return command.exec(args,channel);
                 });
                 
+		    })
+		    .onErrorContinue((throwable,object)->{
+		    	ANSI.printErr(throwable.getMessage(),throwable);
 		    }).subscribe();
 		
 		client.onDisconnect().doOnSuccess(t->{

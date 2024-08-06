@@ -6,57 +6,90 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
-import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.gmail.berndivader.streamserver.youtube.BroadcastStatus;
 import com.gmail.berndivader.streamserver.youtube.Youtube;
 import com.gmail.berndivader.streamserver.youtube.packets.EmptyPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.ErrorPacket;
-import com.gmail.berndivader.streamserver.youtube.packets.LiveStreamPacket;
+import com.gmail.berndivader.streamserver.youtube.packets.LiveBroadcastPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
 import com.google.gson.JsonObject;
 
-@ConsoleCommand(name="liveinfo",usage="Get livestream info by channel id. Use --json for complete json response.")
+@ConsoleCommand(name="livestatus",usage="Get info and status of running live broadcast from Youtube.")
 public class LivestreamsById extends Command{
 
 	@Override
 	public boolean execute(String[] args) {
 		String arg=args[0];
 		boolean printJson=false;
-		if(arg.contains("--json")) {
-			printJson=true;
-			arg=arg.replace("--json","");
-		}
-		arg=arg.strip();
-		Packet packet=EmptyPacket.build(new JsonObject(),EmptyPacket.class);
-		if(arg.length()==0) arg=Config.YOUTUBE_CHANNEL_ID;
-		Future<Packet>future=Youtube.livestreamsByChannelId(arg);
+		printJson=arg.contains("--json");
+		
+		Packet p=Packet.build(new JsonObject(),EmptyPacket.class);
+		Future<Packet>future=Youtube.getLiveBroadcast(BroadcastStatus.active);
+		
 		try {
-			packet=future.get(15l,TimeUnit.SECONDS);
+			p=future.get(15l,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr("Error while waiting for streamby future.",e);
+			ANSI.printErr("Error while waiting for Youtube response.",e);
 		}
-		if(packet instanceof LiveStreamPacket) {
-			LiveStreamPacket lp=(LiveStreamPacket)packet;
+		
+		if(p instanceof LiveBroadcastPacket) {
+			LiveBroadcastPacket packet=(LiveBroadcastPacket)p;
 			if(printJson) {
-				ANSI.println(lp.toString());
+				ANSI.println(packet.source().toString());
 			} else {
-				String out="[BLUE]Channel: [YELLOW]"+lp.snippet.channelTitle;
-				out+="[BLUE][BR]Title: [YELLOW]"+ lp.snippet.title;
-				out+="[BLUE][BR]Description: [YELLOW]"+lp.snippet.description;
-				out+="[BLUE][BR]Publish time: [YELLOW]"+lp.snippet.publishTime;
-				out+="[BLUE][BR]Video id: [YELLOW]"+lp.id.videoId;
-				out+="[BLUE][BR]Kind: [YELLOW]"+lp.id.kind;
-				out+="[BLUE][BR]Content: [YELLOW]"+lp.snippet.liveBroadcastContent;
-				ANSI.println(out);
+				StringBuilder out=new StringBuilder();
+				out.append("[BLUE]Title: [YELLOW]".concat(packet.snippet.title));
+				out.append("[BR][BLUE]Description: [YELLOW]".concat(packet.snippet.description));
+				out.append("[BR][BLUE]Publish time: [YELLOW]".concat(packet.snippet.publishedAt));
+				out.append("[BR][BLUE]Kind: [YELLOW]".concat(packet.kind));
+				out.append("[BR][BLUE]Video URL: [YELLOW]https://www.youtube.com/watch?v=".concat(packet.id));
+				out.append("[BR][BLUE]Channel URL: [YELLOW]https://www.youtube.com/channel/".concat(packet.snippet.channelId));
+				ANSI.println(out.toString());
 			}
-		} else if(packet instanceof EmptyPacket) {
-			ANSI.println("[YELLOW]There is no livestream broadcasting on this channel.");
-		} else if(packet instanceof ErrorPacket) {
-			ErrorPacket er=(ErrorPacket)packet;
-			er.printSimple();
+		} else if(p instanceof ErrorPacket) {
+			ErrorPacket packet=(ErrorPacket)p;
+			packet.printSimple();
+		} else if(p instanceof EmptyPacket) {
+			ANSI.println("Currently, no live broadcast running.");
 		}
+	
 		return true;
 	}
-
 }
+				
+//				JsonObject entry=json.getAsJsonArray("items").get(0).getAsJsonObject();
+//				JsonObject snippet=entry.get("snippet").getAsJsonObject();
+//				String out="[BLUE][BR]Title: [YELLOW]"+snippet.get("title").getAsString();
+//				out+="[BLUE][BR]Description: [YELLOW]"+snippet.get("description").getAsString();
+//				out+="[BLUE][BR]Publish time: [YELLOW]"+snippet.get("publishedAt").getAsString();
+//				out+="[BLUE][BR]Video id: [YELLOW]"+entry.get("id").getAsString();
+//				out+="[BLUE][BR]Kind: [YELLOW]"+Youtube.fromPath(entry,"liveBroadcastContent");
+//				out+="[BLUE][BR]URL: [YELLOW]https://www.youtube.com/watch?v="+Youtube.fromPath(entry,"id").replaceAll("\"","");
+//				ANSI.println(out);
+//			}
+		
+//		if(json.has("items")) {
+//			if(printJson) {
+//				ANSI.println(json.toString());
+//			} else {
+//				JsonObject entry=json.getAsJsonArray("items").get(0).getAsJsonObject();
+//				JsonObject snippet=entry.get("snippet").getAsJsonObject();
+//				String out="[BLUE][BR]Title: [YELLOW]"+snippet.get("title").getAsString();
+//				out+="[BLUE][BR]Description: [YELLOW]"+snippet.get("description").getAsString();
+//				out+="[BLUE][BR]Publish time: [YELLOW]"+snippet.get("publishedAt").getAsString();
+//				out+="[BLUE][BR]Video id: [YELLOW]"+entry.get("id").getAsString();
+//				out+="[BLUE][BR]Kind: [YELLOW]"+Youtube.fromPath(entry,"liveBroadcastContent");
+//				out+="[BLUE][BR]URL: [YELLOW]https://www.youtube.com/watch?v="+Youtube.fromPath(entry,"id").replaceAll("\"","");
+//				ANSI.println(out);
+//			}
+//		} else if(json.isEmpty()) {
+//			ANSI.println("[YELLOW]There is no livestream broadcasting on this channel.");
+//		} else if(json.has("error")) {
+//			ANSI.printWarn(json.toString());
+//		}
+//		return true;
+//	}
+
+//}

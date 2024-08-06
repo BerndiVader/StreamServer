@@ -6,13 +6,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
-import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.gmail.berndivader.streamserver.youtube.BroadcastStatus;
 import com.gmail.berndivader.streamserver.youtube.Youtube;
 import com.gmail.berndivader.streamserver.youtube.packets.EmptyPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.ErrorPacket;
-import com.gmail.berndivader.streamserver.youtube.packets.LiveStreamPacket;
+import com.gmail.berndivader.streamserver.youtube.packets.LiveBroadcastPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
 import com.google.gson.JsonObject;
 
@@ -31,35 +31,34 @@ public class LivestreamInfo extends Command<Message> {
 	public Mono<Message> execute(String string, MessageChannel channel) {
 		
 		packet=Packet.build(new JsonObject(),EmptyPacket.class);
-		Future<Packet>future=Youtube.livestreamsByChannelId(Config.YOUTUBE_CHANNEL_ID);
+		Future<Packet>future=Youtube.getLiveBroadcast(BroadcastStatus.active);
 		try {
 			packet=future.get(15l,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			ANSI.printErr(e.getMessage(),e);
 		}
-		
+				
 		EmbedCreateSpec.Builder builder=EmbedCreateSpec.builder();
 		
-		if(packet instanceof LiveStreamPacket) {
-			LiveStreamPacket p=(LiveStreamPacket)packet;
+		if(packet instanceof LiveBroadcastPacket) {
+			LiveBroadcastPacket live=(LiveBroadcastPacket)packet;
 			builder.color(Color.CINNABAR)
-				.author(p.snippet.channelTitle,"https://www.youtube.com/channel/"+p.snippet.channelId,p.snippet.thumbnails.low.url)
-				.image(p.snippet.thumbnails.medium.url)
-				.url("https://www.youtube.com/watch?v="+p.id.videoId)
-				.description(p.snippet.description)
-				.footer("Broadcastcontent: "+p.snippet.liveBroadcastContent,p.snippet.thumbnails.low.url)
-				.thumbnail(p.snippet.thumbnails.low.url)
-				.title(p.snippet.title);
-		} else if(packet instanceof ErrorPacket) {
-			ErrorPacket p=(ErrorPacket)packet;
+				.image(live.snippet.thumbnails.get("medium").url)
+				.url("https://www.youtube.com/watch?v="+live.id)
+				.description(live.snippet.description)
+				.footer("Broadcastcontent: "+live.kind,live.snippet.thumbnails.get("default").url)
+				.thumbnail(live.snippet.thumbnails.get("default").url)
+				.title(live.snippet.title);
+		}else if(packet instanceof ErrorPacket) {
+			ErrorPacket error=(ErrorPacket)packet;
 			builder.title("ERROR")
 				.color(Color.RED)
-				.title(p.code+":"+p.status)
-				.description(p.message);
-		} else {
+				.title(error.status)
+				.description(error.message);
+		}else {
 			builder.title("WARNING")
-				.color(Color.ORANGE)
-				.description("Youtube didnt answer the request.");
+			.color(Color.ORANGE)
+			.description("Youtube didnt answer the request.");			
 		}
 		
 		return channel.createMessage(builder.build());
