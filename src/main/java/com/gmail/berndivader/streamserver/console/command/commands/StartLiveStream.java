@@ -1,30 +1,39 @@
 package com.gmail.berndivader.streamserver.console.command.commands;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
-import com.gmail.berndivader.streamserver.annotation.Requireds;
+import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.command.Command;
-import com.gmail.berndivader.streamserver.term.ANSI;
-import com.gmail.berndivader.streamserver.youtube.Youtube;
-import com.gmail.berndivader.streamserver.youtube.packets.Packet;
+import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
+import com.gmail.berndivader.streamserver.youtube.PrivacyStatus;
 
-@ConsoleCommand(name="startlive",usage="(title, description, privacy) - Start the livestream on Youtube.",requireds={Requireds.BROADCASTRUNNER})
+@ConsoleCommand(name="createlive",usage="(title, description, privacy) - Try to reinitate and start livebroadcast on Youtube.")
 public class StartLiveStream extends Command {
 
 	@Override
 	public boolean execute(String[] args) {
-		Future<Packet>future=Youtube.createLivestream("MCH Varo 1-4","24/7 Stream von allen alten Varo Videos.","private");
 		
-		Packet packet=null;
-		try {
-			packet=future.get(15l,TimeUnit.SECONDS);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr(e.getMessage(),e);
+		String[]opts=new String[0];
+		
+		if(!args[0].isEmpty()) {
+			opts=args[0].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",-1);
+			
+			for(int i=0;i<opts.length;i++) {
+				String opt=opts[i];
+				if(opt.startsWith("\"")) opt=opt.substring(1);
+				if(opt.endsWith("\"")) opt=opt.substring(0,opt.length()-1);
+				opts[i]=opt;
+			}
+			
 		}
+				
+		String title=opts.length>0?opts[0]:Config.BROADCAST_DEFAULT_TITLE;
+		String description=opts.length>1?opts[1]:Config.BROADCAST_DEFAULT_DESCRIPTION;
+		String priv=opts.length>2?opts[2].toUpperCase():Config.BROADCAST_DEFAULT_PRIVACY.toUpperCase();
+		
+		PrivacyStatus privacy=PrivacyStatus.isEnum(priv)?PrivacyStatus.valueOf(priv):PrivacyStatus.UNLISTED;
+		
+		
+		BroadcastRunner.checkOrReInitiateLiveBroadcast(title,description,privacy);
 		
 		return true;
 	}
