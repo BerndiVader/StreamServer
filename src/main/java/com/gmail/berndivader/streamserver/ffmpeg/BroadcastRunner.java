@@ -32,17 +32,18 @@ import com.gmail.berndivader.streamserver.mysql.GetNextScheduled;
 import com.gmail.berndivader.streamserver.mysql.UpdateCurrent;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.youtube.BroadcastStatus;
+import com.gmail.berndivader.streamserver.youtube.PrivacyStatus;
 import com.gmail.berndivader.streamserver.youtube.Youtube;
 import com.gmail.berndivader.streamserver.youtube.packets.EmptyPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.ErrorPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.LiveBroadcastPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.LiveStreamPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
+import com.gmail.berndivader.streamserver.youtube.packets.UnknownPacket;
 
 public final class BroadcastRunner extends TimerTask {
 	
 	boolean stop;
-	static boolean hold=false;
 	
 	private static FFmpegProgress progress;
 	private static FFProbePacket probePacket;
@@ -141,88 +142,77 @@ public final class BroadcastRunner extends TimerTask {
 	@Override
 	public void run() {
 
-		if(!stop&&!hold) {
+		if(!stop) {
 			counter++;
     		if(ffmpeg()==null||ffmpeg().isCancelled()||ffmpeg().isDone()) startStream();
-			//if(counter>3599l) checkBroadcast();
+			if(counter>3599l) {
+				
+				String priv=Config.BROADCAST_DEFAULT_PRIVACY.toUpperCase();
+				PrivacyStatus privacy=PrivacyStatus.isEnum(priv)?PrivacyStatus.valueOf(priv):PrivacyStatus.UNLISTED;
+
+				checkOrReInitiateLiveBroadcast(Config.BROADCAST_DEFAULT_TITLE,Config.BROADCAST_DEFAULT_DESCRIPTION,privacy);
+				counter=0l;
+			}
 		}
 		
 	}
 	
-	public static synchronized void checkBroadcast() {
+	public static synchronized void checkOrReInitiateLiveBroadcast(String title,String description,PrivacyStatus privacy) {
+		if(Config.DEBUG) ANSI.println("[BLUE]Test if broadcast is still live on Youtube...[RESET]");
 		try {
-			Packet packet=getPacket(BroadcastStatus.active);
+			Packet packet=Youtube.getLiveBroadcastWithTries(BroadcastStatus.active,2);
 			if(packet instanceof EmptyPacket) {
-				packet=Youtube.insertLiveBroadcast("test","test","public").get(15l,TimeUnit.SECONDS);
-				if(packet instanceof LiveBroadcastPacket) {
-					ANSI.println(packet.source().toString());
-					stopAndHold();
-					restartBroadcast((LiveBroadcastPacket)packet);
-				} else if(packet instanceof ErrorPacket) {
-					handleFailure((ErrorPacket)packet);
+				ANSI.println("[ORANGE]Try to reinstall livebroadcast on Youtube...");
+				
+				packet=Youtube.getDefaultLiveStream().get(15l,TimeUnit.SECONDS);
+				if(packet instanceof LiveStreamPacket) {
+					ANSI.println("[GREEN]Got livestream resource identified by STREAM_KEY...");
+					
+					LiveStreamPacket live=(LiveStreamPacket)packet;
+					packet=Youtube.insertLiveBroadcast(title,description,privacy).get(15l,TimeUnit.SECONDS);
+					if(packet instanceof LiveBroadcastPacket) {
+						ANSI.println("[GREEN]Installed a new autostart livebroadcast resource on Youtube...");
+						
+						LiveBroadcastPacket broadcast=(LiveBroadcastPacket)packet;
+						packet=Youtube.bindBroadcastToStream(broadcast.id,live.id).get(15l,TimeUnit.SECONDS);
+						if(packet instanceof LiveBroadcastPacket) {
+							ANSI.println("[GREEN]Merged the default livestream with the new livebroadcast together...");
+							
+							broadcast=(LiveBroadcastPacket)packet;
+							if(Config.DEBUG) ANSI.println(broadcast.source().toString());
+							
+							ANSI.println("[BLUE]The new livestream should go live in a few seconds.[PROMPT]");
+						}
+					}
 				}
+				
+				if(packet instanceof ErrorPacket) {
+					ANSI.println("[RED]FAILED!");
+					ErrorPacket error=(ErrorPacket)packet;
+					error.printSimple();
+				} else if(packet instanceof EmptyPacket) {
+					ANSI.println("[RED]FAILED!");
+					ANSI.printWarn("Received EmptyPacket!");
+					if(Config.DEBUG) ANSI.println(packet.source().toString());
+				} else if(packet instanceof UnknownPacket){
+					ANSI.println("[RED]FAILED!");
+					ANSI.printWarn("Unknown packet received!");
+					if(Config.DEBUG) ANSI.println(packet.source().toString());
+				}
+				
 			} else if(packet instanceof ErrorPacket) {
-				handleFailure((ErrorPacket)packet);
+				ErrorPacket error=(ErrorPacket)packet;
+				error.printSimple();
+			} else if(packet instanceof LiveBroadcastPacket) {
+				LiveBroadcastPacket broadcast=(LiveBroadcastPacket)packet;
+				ANSI.println("Broadcast is live on Youtube.");
+				if(Config.DEBUG) ANSI.println(broadcast.source().toString());
 			}
 		} catch(Exception e) {
-			handleFailure(e);
+			ANSI.printErr("Failed to restart live broadcast on Youtube.",e);
 		}
-		unhold();
 	}
-
-	private static Packet getPacket(BroadcastStatus status) throws InterruptedException, ExecutionException, TimeoutException {
-		Packet packet=null;
-		int tries=0;
-		do {
-			packet=Youtube.getLiveBroadcast(status).get(15l,TimeUnit.SECONDS);
-			tries++;
-		} while (packet instanceof ErrorPacket&&tries<2);
-		return packet;
-	}
-
-	private static void restartBroadcast(LiveBroadcastPacket broadcastPacket) throws InterruptedException, ExecutionException, TimeoutException {
-		ANSI.print("[YELLOW]Try to restart liveBroadcast on Youtube[BLUE]...");
 		
-		Packet p=Youtube.createLivestream("Test","Test","public").get(15l,TimeUnit.SECONDS);
-		if (p instanceof LiveStreamPacket) {
-			LiveStreamPacket liveStreamPacket=(LiveStreamPacket)p;
-			ANSI.println(liveStreamPacket.source().toString());
-			Config.STREAM_KEY=liveStreamPacket.cdn.ingestionInfo.streamName;
-			Config.saveConfig();
-			unhold();
-			startStream();
-			Thread.sleep(3000l);
-			Packet p1=Youtube.bindBroadcastToStream(broadcastPacket.id,liveStreamPacket.id).get(15l,TimeUnit.SECONDS);
-			if(p1 instanceof LiveBroadcastPacket) {
-				Packet p2=Youtube.transitionBroadcastStatus(broadcastPacket.id,"live").get(15l,TimeUnit.SECONDS);
-				if(p2 instanceof LiveBroadcastPacket) {
-					ANSI.println("[GREEN]DONE!");
-					counter=0l;
-				} else {
-					ANSI.println(p2.source().toString());
-					throw new RuntimeException("Failed to restart live broadcast on Youtube. Retry in 10 seconds.");
-				}
-			} else {
-				ANSI.println(p1.source().toString());
-				throw new RuntimeException("Failed to restart live broadcast on Youtube. Retry in 10 seconds.");
-			}
-		} else {
-			throw new RuntimeException("Failed to restart live broadcast on Youtube. Retry in 10 seconds.");
-		}
-	}
-
-	private static void handleFailure(ErrorPacket error) {
-		ANSI.printErr("Failed to restart live broadcast on Youtube. Retry in 10 seconds.",new RuntimeException());
-		error.printSimple();
-		counter=3589l;
-	}
-
-	private static void handleFailure(Exception e) {
-		ANSI.printErr("Failed to restart live broadcast on Youtube. Retry in 10 seconds.",e);
-		counter=3589l;
-	}
-	
-	
 	private static synchronized void startStream() {
 		
 		GetNextScheduled scheduled=new GetNextScheduled();
@@ -339,15 +329,6 @@ public final class BroadcastRunner extends TimerTask {
 			}
 		}
 		return null;
-	}
-	
-	public static void stopAndHold() {
-		hold=true;
-		stopStream();
-	}
-	
-	public static void unhold() {
-		hold=false;
 	}
 	
 	public static File[] getFiles() {

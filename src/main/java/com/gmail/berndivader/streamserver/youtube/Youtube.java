@@ -28,6 +28,8 @@ import com.gmail.berndivader.streamserver.youtube.packets.LiveBroadcastPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.LiveStreamPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
 import com.gmail.berndivader.streamserver.youtube.packets.UnknownPacket;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -56,9 +58,9 @@ public final class Youtube {
 
 				VerifyOAuth2 verify=new VerifyOAuth2(code,state);
 				try {
-					if(!verify.future.get(10l,TimeUnit.SECONDS)) throw(new Exception("Failed to verify OAuth2 request."));
+					if(!verify.future.get(10l,TimeUnit.SECONDS)) throw new RuntimeException("Failed to verify OAuth2 request.");
 				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					throw(new Exception("Failed to verify OAuth2 request.",e));
+					throw new Exception("Failed to verify OAuth2 request.",e);
 				}
 
 				HttpPost post=new HttpPost("https://oauth2.googleapis.com/token");
@@ -79,8 +81,9 @@ public final class Youtube {
 					if(json.has("access_token")) accessToken=json.get("access_token").getAsString();
 					if(json.has("error")) {
 						ANSI.println("[RED]failed!");
-						ANSI.printErr(json.get("error").getAsString()+" Reason: "+json.get("error_description").getAsString(),new Throwable("OAuth2 registration failed."));
+						ANSI.printErr(json.get("error").getAsString()+" Reason: "+json.get("error_description").getAsString(),new RuntimeException("OAuth2 registration failed."));
 					}
+					ANSI.println(json.toString());
 					return new AbstractMap.SimpleEntry<String,String>(accessToken,refreshToken);
 				});
 
@@ -148,12 +151,20 @@ public final class Youtube {
 		}		
 	}
 
+	public static Packet getLiveBroadcastWithTries(BroadcastStatus status,int tries) throws InterruptedException, ExecutionException, TimeoutException {
+		Packet packet=null;
+		do {
+			packet=Youtube.getLiveBroadcast(status).get(15l,TimeUnit.SECONDS);
+		} while(packet instanceof ErrorPacket&&tries-->0);
+		return packet;
+	}
+	
 	public static Future<Packet>getLiveBroadcast(BroadcastStatus broadcastStatus) {
 		return Helper.EXECUTOR.submit(()->{
 			BroadcastStatus status=broadcastStatus;
 			if (OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
 
-			String url=URL.concat("liveBroadcasts?part=id,snippet,contentDetails,status&broadcastStatus="+status.name()+"&key=").concat(Config.YOUTUBE_KEY);
+			String url=URL.concat("liveBroadcasts?part=id,snippet,contentDetails,monetizationDetails,status&broadcastStatus="+status.name()+"&key=").concat(Config.YOUTUBE_KEY);
 			HttpGet get=new HttpGet(url);
 			get.setHeader("Authorization","Bearer ".concat(Config.YOUTUBE_ACCESS_TOKEN));
 			get.addHeader("Accept","application/json");
@@ -182,11 +193,11 @@ public final class Youtube {
 		});
 	}
 
-	public static Future<Packet>insertLiveBroadcast(String title,String description,String privacy) {
+	public static Future<Packet>insertLiveBroadcast(String title,String description,PrivacyStatus privacy) {
 		return Helper.EXECUTOR.submit(()->{
 			if(OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
 
-			String url=URL.concat("liveBroadcasts?part=snippet,status&key=").concat(Config.YOUTUBE_KEY);
+			String url=URL.concat("liveBroadcasts?part=id,snippet,contentDetails,status&key=").concat(Config.YOUTUBE_KEY);
 
 			HttpPost post=new HttpPost(url);
 			post.setHeader("Authorization","Bearer ".concat(Config.YOUTUBE_ACCESS_TOKEN));
@@ -196,17 +207,23 @@ public final class Youtube {
 			JsonObject snippet=new JsonObject();
 			snippet.addProperty("title",title);
 			snippet.addProperty("description",description);
-			ZonedDateTime now=ZonedDateTime.now();
+			ZonedDateTime now=ZonedDateTime.now().plusMinutes(1l);
 			DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 			String scheduledStartTime=now.format(formatter);	        
 			snippet.addProperty("scheduledStartTime",scheduledStartTime);
 
 			JsonObject status=new JsonObject();
-			status.addProperty("privacyStatus",privacy);
+			status.addProperty("privacyStatus",privacy.getName());
+			status.addProperty("selfDeclaredMadeForKids",false);
+			
+			JsonObject contentDetails=new JsonObject();
+			contentDetails.addProperty("enableAutoStart",true);
+			contentDetails.addProperty("enableEmbed",true);
 
 			JsonObject liveBroadcast=new JsonObject();
 			liveBroadcast.add("snippet",snippet);
 			liveBroadcast.add("status",status);
+			liveBroadcast.add("contentDetails",contentDetails);
 
 			post.setEntity(new StringEntity(liveBroadcast.toString(),"UTF-8"));
 
@@ -229,7 +246,7 @@ public final class Youtube {
 		});
 	}
 
-	public static Future<Packet>createLivestream(String title,String description,String privacy) {
+	public static Future<Packet>insertLivestream(String title,String description,String privacy) {
 
 		return Helper.EXECUTOR.submit(()->{
 			if(OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
@@ -298,7 +315,7 @@ public final class Youtube {
 			try {
 				return HTTP_CLIENT.execute(post,response-> {
 					JsonObject json=JsonParser.parseString(EntityUtils.toString(response.getEntity())).getAsJsonObject();
-					if(json==null||json.isJsonNull()) {
+					if(json==null||json.isJsonNull()||json.isEmpty()) {
 						return ErrorPacket.buildError("Request to bind liveBroadcast to liveStream failed.","Nulljson was returned.","CUSTOM");
 					} else if(json.has("error")) {
 						return Packet.build(json, ErrorPacket.class);
@@ -341,6 +358,41 @@ public final class Youtube {
 				return ErrorPacket.buildError("Request to transition liveBroadcast status failed.",e.getMessage(),"CUSTOM");
 			}
 		});
+	}
+	
+	public static Future<Packet> getDefaultLiveStream() {
+		return Helper.EXECUTOR.submit(()->{
+			if (OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
+
+			String url=URL.concat("liveStreams?part=id,snippet,cdn,status&mine=true&key=").concat(Config.YOUTUBE_KEY);
+			HttpGet get=new HttpGet(url);
+			get.setHeader("Authorization","Bearer ".concat(Config.YOUTUBE_ACCESS_TOKEN));
+			get.addHeader("Accept","application/json");
+
+			try {
+				return HTTP_CLIENT.execute(get,response-> {
+					JsonObject json=JsonParser.parseString(EntityUtils.toString(response.getEntity())).getAsJsonObject();
+					if(json==null||json.isJsonNull()) {
+						return ErrorPacket.buildError("Request to get default livestream resource failed.","Nulljson was returned.","CUSTOM");
+					} else if(json.has("error")) {
+						return Packet.build(json,ErrorPacket.class);
+					} else if(json.has("kind")&&json.get("kind").getAsString().equals("youtube#liveStreamListResponse")) {
+						if(json.has("items")&&!json.getAsJsonArray("items").isEmpty()) {
+							JsonArray array=json.getAsJsonArray("items");
+							for(JsonElement element:array) {
+								LiveStreamPacket packet=(LiveStreamPacket)Packet.build(element.getAsJsonObject(),LiveStreamPacket.class);
+								if(packet.cdn.ingestionInfo.streamName.equals(Config.STREAM_KEY)) return packet;
+							}
+						}
+						return Packet.build(json,EmptyPacket.class);
+					} else {
+						return Packet.build(json,UnknownPacket.class);
+					}
+				});
+			} catch(Exception e) {
+				return ErrorPacket.buildError("Request to get default livestream resource failed.",e.getMessage(),"CUSTOM");
+			}
+		});		
 	}
 
 	public static void close() {
