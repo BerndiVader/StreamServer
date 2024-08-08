@@ -5,6 +5,7 @@ import java.util.List;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.google.gson.JsonParser;
 
 public class ErrorPacket extends Packet {
 
@@ -29,7 +30,7 @@ public class ErrorPacket extends Packet {
 	}
 	
 	public void printSimple() {
-		ANSI.printWarn("YT Request Error:"+code+" - "+message);
+		ANSI.printWarn("Youtube error code: "+code+", Message: "+message);
 		if(Config.DEBUG) ANSI.println(source.toString());
 	}
 	
@@ -39,7 +40,7 @@ public class ErrorPacket extends Packet {
 	}
 	
 	public static ErrorPacket buildError(String message,String reason,String status) {
-		return Helper.GSON.fromJson(String.format(JSON_ERROR,message,message,reason,status),ErrorPacket.class);
-	}	
-		
+		return (ErrorPacket)Packet.build(JsonParser.parseString(String.format(JSON_ERROR,message,message,reason,status)).getAsJsonObject(),ErrorPacket.class);
+	}
+
 }
