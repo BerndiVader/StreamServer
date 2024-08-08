@@ -17,6 +17,10 @@ public class Config {
 	public static String STREAM_KEY="xxxx-xxxx-xxxx-xxxx-xxxx";
 	public static String STREAM_URL="rtmp://a.rtmp.youtube.com/live2";
 	
+	public static String BROADCAST_DEFAULT_TITLE="Lorem ipsum";
+	public static String BROADCAST_DEFAULT_DESCRIPTION="Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+	public static String BROADCAST_DEFAULT_PRIVACY="private";
+	
 	public static String YOUTUBE_LINK="https://youtu.be/xxxxxxx";
 	public static String YOUTUBE_KEY="yt-api-key";
 	public static String YOUTUBE_CHANNEL_ID="yt-channel-id";
@@ -125,6 +129,9 @@ public class Config {
 			data.DL_INTERVAL_VALUE=DL_INTERVAL_VALUE;
 			data.STREAM_KEY=STREAM_KEY;
 			data.STREAM_URL=STREAM_URL;
+			data.BROADCAST_DEFAULT_TITLE=BROADCAST_DEFAULT_TITLE;
+			data.BROADCAST_DEFAULT_DESCRIPTION=BROADCAST_DEFAULT_DESCRIPTION;
+			data.BROADCAST_DEFAULT_PRIVACY=BROADCAST_DEFAULT_PRIVACY;
 			data.YOUTUBE_LINK=YOUTUBE_LINK;
 			data.YOUTUBE_KEY=YOUTUBE_KEY;
 			data.YOUTUBE_USE_COOKIES=YOUTUBE_USE_COOKIES;
@@ -172,6 +179,9 @@ public class Config {
 			if(data.DL_INTERVAL_VALUE!=null) DL_INTERVAL_VALUE=data.DL_INTERVAL_VALUE;
 			if(data.STREAM_KEY!=null) STREAM_KEY=data.STREAM_KEY;
 			if(data.STREAM_URL!=null) STREAM_URL=data.STREAM_URL;
+			if(data.BROADCAST_DEFAULT_TITLE!=null) BROADCAST_DEFAULT_TITLE=data.BROADCAST_DEFAULT_TITLE;
+			if(data.BROADCAST_DEFAULT_DESCRIPTION!=null) BROADCAST_DEFAULT_DESCRIPTION=data.BROADCAST_DEFAULT_DESCRIPTION;
+			if(data.BROADCAST_DEFAULT_PRIVACY!=null) BROADCAST_DEFAULT_PRIVACY=data.BROADCAST_DEFAULT_PRIVACY;
 			if(data.YOUTUBE_LINK!=null) YOUTUBE_LINK=data.YOUTUBE_LINK;
 			if(data.YOUTUBE_KEY!=null) YOUTUBE_KEY=data.YOUTUBE_KEY;
 			if(data.YOUTUBE_USE_COOKIES!=null) YOUTUBE_USE_COOKIES=data.YOUTUBE_USE_COOKIES;
