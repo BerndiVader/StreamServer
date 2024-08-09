@@ -73,6 +73,7 @@ public final class Broadcast {
 					}
 				});
 			} catch (Exception e) {
+				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
 				return ErrorPacket.buildError("Request liveBroadcast status failed.",e.getMessage(),"CUSTOM");
 			}
 
@@ -127,6 +128,7 @@ public final class Broadcast {
 					}
 				});
 			} catch(Exception e) {
+				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
 				return ErrorPacket.buildError("Request to insert liveBroadcast failed.",e.getMessage(),"CUSTOM");
 			}
 		});
@@ -182,9 +184,9 @@ public final class Broadcast {
 					}
 				});
 			} catch (IOException e) {
-				ANSI.printErr(e.getMessage(),e);
+				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
+				return ErrorPacket.buildError("Request to insert a new liveStream failed.", e.getMessage(),"CUSTOM");
 			}
-			return Packet.build(new JsonObject(),ErrorPacket.class);
 		});		
 	}
 
@@ -212,6 +214,7 @@ public final class Broadcast {
 					}
 				});
 			} catch (Exception e) {
+				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
 				return ErrorPacket.buildError("Request to bind liveBroadcast to liveStream failed.", e.getMessage(),"CUSTOM");
 			}
 		});
@@ -241,8 +244,48 @@ public final class Broadcast {
 					}
 				});
 			} catch(Exception e) {
+				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
 				return ErrorPacket.buildError("Request to transition liveBroadcast status failed.",e.getMessage(),"CUSTOM");
 			}
+		});
+	}
+	
+	public static Future<Packet> getLiveStreamById(String id) {
+		return Helper.EXECUTOR.submit(()->{
+			
+			if (OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
+
+			String url=Youtube.URL.concat(String.format("liveStreams?id=%s&part=id,snippet,cdn,status&key=%s",id,Config.YOUTUBE_KEY));
+			HttpGet get=new HttpGet(url);
+			get.setHeader("Authorization","Bearer ".concat(Config.YOUTUBE_ACCESS_TOKEN));
+			get.addHeader("Accept","application/json");
+			
+			try {
+				
+				return Youtube.HTTP_CLIENT.execute(get,response-> {
+					JsonObject json=JsonParser.parseString(EntityUtils.toString(response.getEntity())).getAsJsonObject();
+					if(json==null||json.isJsonNull()) {
+						return ErrorPacket.buildError("Request to get livestream resource by id failed.","Nulljson was returned.","CUSTOM");
+					} else if(json.has("error")) {
+						return Packet.build(json,ErrorPacket.class);
+					} else if(json.has("kind")&&json.get("kind").getAsString().equals("youtube#liveStreamListResponse")) {
+						if(json.has("items")&&!json.getAsJsonArray("items").isEmpty()) {
+							JsonArray array=json.getAsJsonArray("items");
+							for(JsonElement element:array) {
+								return Packet.build(element.getAsJsonObject(),LiveStreamPacket.class);
+							}
+						}
+						return Packet.build(json,EmptyPacket.class);
+					} else {
+						return Packet.build(json,UnknownPacket.class);
+					}
+				});
+				
+			} catch(Exception e) {
+				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
+				return ErrorPacket.buildError("Request to get livestream resource by id failed.",e.getMessage(),"CUSTOM");
+			}
+
 		});
 	}
 	
@@ -279,6 +322,7 @@ public final class Broadcast {
 					}
 				});
 			} catch(Exception e) {
+				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
 				return ErrorPacket.buildError("Request to get default livestream resource failed.",e.getMessage(),"CUSTOM");
 			}
 		});		
