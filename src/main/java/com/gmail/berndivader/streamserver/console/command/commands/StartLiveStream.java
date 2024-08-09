@@ -1,12 +1,19 @@
 package com.gmail.berndivader.streamserver.console.command.commands;
 
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.youtube.PrivacyStatus;
 
-@ConsoleCommand(name="createlive",usage="(title, description, privacy) - Try to reinitate and start livebroadcast on Youtube.")
+@ConsoleCommand(
+		name="createlive",
+		usage="(title, description, privacy) - Try to reinitate and start livebroadcast on Youtube. No args will use default settings. "
+				+"If string contains ',' use doublequotes.",
+		requireds={Requireds.BROADCASTRUNNER}
+	)
+
 public class StartLiveStream extends Command {
 
 	@Override

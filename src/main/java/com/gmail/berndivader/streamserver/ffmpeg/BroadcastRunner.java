@@ -31,9 +31,9 @@ import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.mysql.GetNextScheduled;
 import com.gmail.berndivader.streamserver.mysql.UpdateCurrent;
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.gmail.berndivader.streamserver.youtube.Broadcast;
 import com.gmail.berndivader.streamserver.youtube.BroadcastStatus;
 import com.gmail.berndivader.streamserver.youtube.PrivacyStatus;
-import com.gmail.berndivader.streamserver.youtube.Youtube;
 import com.gmail.berndivader.streamserver.youtube.packets.EmptyPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.ErrorPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.LiveBroadcastPacket;
@@ -160,21 +160,21 @@ public final class BroadcastRunner extends TimerTask {
 	public static synchronized void checkOrReInitiateLiveBroadcast(String title,String description,PrivacyStatus privacy) {
 		if(Config.DEBUG) ANSI.println("[BLUE]Test if broadcast is still live on Youtube...[RESET]");
 		try {
-			Packet packet=Youtube.getLiveBroadcastWithTries(BroadcastStatus.active,2);
+			Packet packet=Broadcast.getLiveBroadcastWithTries(BroadcastStatus.active,2);
 			if(packet instanceof EmptyPacket) {
 				ANSI.println("[ORANGE]Try to reinstall livebroadcast on Youtube...");
 				
-				packet=Youtube.getDefaultLiveStream().get(15l,TimeUnit.SECONDS);
+				packet=Broadcast.getDefaultLiveStream().get(15l,TimeUnit.SECONDS);
 				if(packet instanceof LiveStreamPacket) {
 					ANSI.println("[GREEN]Got livestream resource identified by STREAM_KEY...");
 					
 					LiveStreamPacket live=(LiveStreamPacket)packet;
-					packet=Youtube.insertLiveBroadcast(title,description,privacy).get(15l,TimeUnit.SECONDS);
+					packet=Broadcast.insertLiveBroadcast(title,description,privacy).get(15l,TimeUnit.SECONDS);
 					if(packet instanceof LiveBroadcastPacket) {
 						ANSI.println("[GREEN]Installed a new autostart livebroadcast resource on Youtube...");
 						
 						LiveBroadcastPacket broadcast=(LiveBroadcastPacket)packet;
-						packet=Youtube.bindBroadcastToStream(broadcast.id,live.id).get(15l,TimeUnit.SECONDS);
+						packet=Broadcast.bindBroadcastToStream(broadcast.id,live.id).get(15l,TimeUnit.SECONDS);
 						if(packet instanceof LiveBroadcastPacket) {
 							ANSI.println("[GREEN]Merged the default livestream with the new livebroadcast together...");
 							

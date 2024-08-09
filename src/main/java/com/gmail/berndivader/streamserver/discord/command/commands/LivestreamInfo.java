@@ -8,8 +8,8 @@ import java.util.concurrent.TimeoutException;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.gmail.berndivader.streamserver.youtube.Broadcast;
 import com.gmail.berndivader.streamserver.youtube.BroadcastStatus;
-import com.gmail.berndivader.streamserver.youtube.Youtube;
 import com.gmail.berndivader.streamserver.youtube.packets.EmptyPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.ErrorPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.LiveBroadcastPacket;
@@ -31,7 +31,7 @@ public class LivestreamInfo extends Command<Message> {
 	public Mono<Message> execute(String string, MessageChannel channel) {
 		
 		packet=Packet.build(new JsonObject(),EmptyPacket.class);
-		Future<Packet>future=Youtube.getLiveBroadcast(BroadcastStatus.active);
+		Future<Packet>future=Broadcast.getLiveBroadcast(BroadcastStatus.active);
 		try {
 			packet=future.get(15l,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
