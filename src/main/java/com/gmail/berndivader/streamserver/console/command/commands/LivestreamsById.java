@@ -1,15 +1,14 @@
 package com.gmail.berndivader.streamserver.console.command.commands;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.gmail.berndivader.streamserver.youtube.Broadcast;
 import com.gmail.berndivader.streamserver.youtube.BroadcastStatus;
-import com.gmail.berndivader.streamserver.youtube.Youtube;
 import com.gmail.berndivader.streamserver.youtube.packets.EmptyPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.ErrorPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.LiveBroadcastPacket;
@@ -26,28 +25,29 @@ public class LivestreamsById extends Command{
 		printJson=arg.contains("--json");
 		
 		Packet p=Packet.build(new JsonObject(),EmptyPacket.class);
-		Future<Packet>future=Youtube.getLiveBroadcast(BroadcastStatus.active);
-		
 		try {
-			p=future.get(15l,TimeUnit.SECONDS);
+			p=Broadcast.getLiveBroadcastWithTries(BroadcastStatus.active,2);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr("Error while waiting for Youtube response.",e);
+			ANSI.printErr(e.getMessage(),e);
+			p=ErrorPacket.buildError(e.getMessage(),"Failed to execute livestatus command.","CUSTOM");
 		}
 		
 		if(p instanceof LiveBroadcastPacket) {
-			LiveBroadcastPacket packet=(LiveBroadcastPacket)p;
+			LiveBroadcastPacket broadcast=(LiveBroadcastPacket)p;
+			Broadcast.currentLiveBroadcast=Optional.ofNullable(broadcast);
 			if(printJson) {
-				ANSI.println(packet.source().toString());
+				ANSI.println(broadcast.source().toString());
 			} else {
 				StringBuilder out=new StringBuilder();
-				out.append("[BLUE]Title: [YELLOW]".concat(packet.snippet.title));
-				out.append("[BR][BLUE]Description: [YELLOW]".concat(packet.snippet.description));
-				out.append("[BR][BLUE]Publish time: [YELLOW]".concat(packet.snippet.publishedAt));
-				out.append("[BR][BLUE]Kind: [YELLOW]".concat(packet.kind));
-				out.append("[BR][BLUE]Video URL: [YELLOW]https://www.youtube.com/watch?v=".concat(packet.id));
-				out.append("[BR][BLUE]Channel URL: [YELLOW]https://www.youtube.com/channel/".concat(packet.snippet.channelId));
+				out.append("[BLUE]Title: [YELLOW]".concat(broadcast.snippet.title));
+				out.append("[BR][BLUE]Description: [YELLOW]".concat(broadcast.snippet.description));
+				out.append("[BR][BLUE]Publish time: [YELLOW]".concat(broadcast.snippet.publishedAt));
+				out.append("[BR][BLUE]Kind: [YELLOW]".concat(broadcast.kind));
+				out.append("[BR][BLUE]Video URL: [YELLOW]https://www.youtube.com/watch?v=".concat(broadcast.id));
+				out.append("[BR][BLUE]Channel URL: [YELLOW]https://www.youtube.com/channel/".concat(broadcast.snippet.channelId));
 				ANSI.println(out.toString());
 			}
+			
 		} else if(p instanceof ErrorPacket) {
 			ErrorPacket packet=(ErrorPacket)p;
 			packet.printSimple();
@@ -58,38 +58,4 @@ public class LivestreamsById extends Command{
 		return true;
 	}
 }
-				
-//				JsonObject entry=json.getAsJsonArray("items").get(0).getAsJsonObject();
-//				JsonObject snippet=entry.get("snippet").getAsJsonObject();
-//				String out="[BLUE][BR]Title: [YELLOW]"+snippet.get("title").getAsString();
-//				out+="[BLUE][BR]Description: [YELLOW]"+snippet.get("description").getAsString();
-//				out+="[BLUE][BR]Publish time: [YELLOW]"+snippet.get("publishedAt").getAsString();
-//				out+="[BLUE][BR]Video id: [YELLOW]"+entry.get("id").getAsString();
-//				out+="[BLUE][BR]Kind: [YELLOW]"+Youtube.fromPath(entry,"liveBroadcastContent");
-//				out+="[BLUE][BR]URL: [YELLOW]https://www.youtube.com/watch?v="+Youtube.fromPath(entry,"id").replaceAll("\"","");
-//				ANSI.println(out);
-//			}
-		
-//		if(json.has("items")) {
-//			if(printJson) {
-//				ANSI.println(json.toString());
-//			} else {
-//				JsonObject entry=json.getAsJsonArray("items").get(0).getAsJsonObject();
-//				JsonObject snippet=entry.get("snippet").getAsJsonObject();
-//				String out="[BLUE][BR]Title: [YELLOW]"+snippet.get("title").getAsString();
-//				out+="[BLUE][BR]Description: [YELLOW]"+snippet.get("description").getAsString();
-//				out+="[BLUE][BR]Publish time: [YELLOW]"+snippet.get("publishedAt").getAsString();
-//				out+="[BLUE][BR]Video id: [YELLOW]"+entry.get("id").getAsString();
-//				out+="[BLUE][BR]Kind: [YELLOW]"+Youtube.fromPath(entry,"liveBroadcastContent");
-//				out+="[BLUE][BR]URL: [YELLOW]https://www.youtube.com/watch?v="+Youtube.fromPath(entry,"id").replaceAll("\"","");
-//				ANSI.println(out);
-//			}
-//		} else if(json.isEmpty()) {
-//			ANSI.println("[YELLOW]There is no livestream broadcasting on this channel.");
-//		} else if(json.has("error")) {
-//			ANSI.printWarn(json.toString());
-//		}
-//		return true;
-//	}
 
-//}
