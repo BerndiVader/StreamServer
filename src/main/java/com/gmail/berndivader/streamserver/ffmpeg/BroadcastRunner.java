@@ -44,6 +44,7 @@ import com.gmail.berndivader.streamserver.youtube.packets.UnknownPacket;
 public final class BroadcastRunner extends TimerTask {
 	
 	boolean stop;
+	public static boolean hold;
 	
 	private static FFmpegProgress progress;
 	private static FFProbePacket probePacket;
@@ -108,6 +109,7 @@ public final class BroadcastRunner extends TimerTask {
 		ANSI.print("[YELLOW]Starting BroadcastRunner...");
 
 		stop=false;
+		hold=false;
 		
 		refreshFilelist();
 		shuffleFilelist();
@@ -142,7 +144,7 @@ public final class BroadcastRunner extends TimerTask {
 	@Override
 	public void run() {
 
-		if(!stop) {
+		if(!stop&&!hold) {
 			counter++;
     		if(ffmpeg()==null||ffmpeg().isCancelled()||ffmpeg().isDone()) startStream();
 			if(counter>3599l) {
@@ -226,8 +228,13 @@ public final class BroadcastRunner extends TimerTask {
 			ANSI.printErr("Get next scheduled file failed.",e);
 		}
 		
-		createStream(getFiles()[index.get()]);
-		index.set((index.get()+1)%getFiles().length);
+		File[]files=getFiles();
+		if(files.length>0) {
+			createStream(getFiles()[index.get()]);
+			index.set((index.get()+1)%getFiles().length);
+		} else {
+			BroadcastRunner.hold=true;
+		}
 	}
 	
 	private static synchronized void createStream(File file) {
