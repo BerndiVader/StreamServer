@@ -18,6 +18,8 @@ public class ListFiles extends Command {
 		String path=Config.DL_ROOT_PATH;
 		boolean sub=false;
 		
+		String search=arg;
+		
 		if(arg.toUpperCase().startsWith("--MEDIA")) {
 			path=Config.mediaPath();
 			arg=arg.toUpperCase().replaceFirst("--MEDIA","").trim();
@@ -36,6 +38,8 @@ public class ListFiles extends Command {
 		} else {
 			sub=true;
 		}
+		
+		arg=search.substring(search.length()-arg.length());
 
 		List<String>files=Helper.getFilesByPath(path,sub,arg.isEmpty()?"*.*":arg);
 		files.stream().forEach(ANSI::println);
