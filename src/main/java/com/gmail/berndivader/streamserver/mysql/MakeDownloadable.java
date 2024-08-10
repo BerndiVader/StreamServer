@@ -1,6 +1,7 @@
 package com.gmail.berndivader.streamserver.mysql;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,9 +38,16 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 		FFProbePacket ffprobe=FFProbePacket.build(file);
 		boolean exists=false;
 		
+		String path=file.getAbsolutePath();
+		try {
+			path=file.getCanonicalPath();
+		} catch (IOException e) {
+			ANSI.printErr(e.getMessage(),e);
+		}
+		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			try(PreparedStatement test_for=connection.prepareStatement(TEST_FOR,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
-				test_for.setString(1,file.getAbsolutePath());
+				test_for.setString(1,path);
 				ResultSet result=test_for.executeQuery();
 				if(exists=result.next()) uuid=UUID.fromString(result.getString("uuid"));
 			}
@@ -53,7 +61,7 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 			} else {
 				try(PreparedStatement insert=connection.prepareStatement(INSERT,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 					insert.setString(1,uuid.toString());
-					insert.setString(2,file.getAbsolutePath());
+					insert.setString(2,path);
 					insert.setLong(3,System.currentTimeMillis()/1000l);
 					insert.setInt(4,0);
 					insert.setBoolean(5,temp);

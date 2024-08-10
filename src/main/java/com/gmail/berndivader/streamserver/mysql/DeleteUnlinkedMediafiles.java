@@ -1,6 +1,7 @@
 package com.gmail.berndivader.streamserver.mysql;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -43,7 +44,15 @@ public class DeleteUnlinkedMediafiles implements Callable<Boolean>{
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			try(PreparedStatement downloadables=connection.prepareStatement(DOWNLOADABLES,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				ResultSet result=downloadables.executeQuery();
-				while(result.next()) media.put(result.getString(1),result.getString(2));
+				while(result.next()) {
+					String path=result.getString(2);
+					try {
+						path=new File(path).getCanonicalPath();
+					} catch (IOException e) {
+						ANSI.printErr(e.getMessage(),e);
+					}
+					media.put(result.getString(1),path);
+				}
 			}
 		} catch (SQLException e) {
 			ANSI.printErr("Failed to collect downloadables from database.",e);
@@ -55,7 +64,14 @@ public class DeleteUnlinkedMediafiles implements Callable<Boolean>{
 			if(Files.notExists(Path.of(entry.getValue()),LinkOption.NOFOLLOW_LINKS)) values+=values.length()==0?"'"+entry.getKey()+"'":",'"+entry.getKey()+"'";
 		}
 		
-		File[]unlinked=Arrays.stream(files).filter(file->!media.containsValue(file.getAbsolutePath())).toArray(File[]::new);
+		File[]unlinked=Arrays.stream(files).filter(file->{
+			try {
+				return !media.containsValue(file.getCanonicalPath());
+			} catch (IOException e) {
+				ANSI.printErr(e.getMessage(),e);
+				return !media.containsValue(file.getAbsolutePath());
+			}
+		}).toArray(File[]::new);
 		File[]unlinkedThumbnails=Arrays.stream(thumbnails).filter(file->!media.containsKey(file.getName().replace(".jpg",""))).toArray(File[]::new);
 		
 		int result=0;
