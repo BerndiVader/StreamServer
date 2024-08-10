@@ -21,7 +21,7 @@ import com.gmail.berndivader.streamserver.mysql.CleanUpDownloadables;
 import com.gmail.berndivader.streamserver.mysql.MakeDownloadable;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
-@ConsoleCommand(name="dl",usage="Download media. Usage: dl --url <http source> or use --help",requireds = {Requireds.DATABASE})
+@ConsoleCommand(name="dl",usage="Download media: .dl [--music][--temp][--link][--click] <valid_url>",requireds={Requireds.DATABASE})
 public class DownloadMedia extends Command {
 		
 	private class InterruptHandler implements Callable<Boolean> {

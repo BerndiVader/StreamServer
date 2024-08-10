@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.youtube.Broadcast;
@@ -22,7 +23,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="liveinfo",usage="Info about the current running livestream.")
+@DiscordCommand(name="livestatus",usage="Get info from Youtube about the current running live broadcast.",requireds={Requireds.BROADCASTRUNNER})
 public class LivestreamInfo extends Command<Message> {
 	
 	private Packet packet;

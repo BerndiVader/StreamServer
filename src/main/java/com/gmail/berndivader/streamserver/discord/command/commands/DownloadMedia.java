@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
@@ -32,7 +33,7 @@ import discord4j.rest.util.Color;
 import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="dl",usage="Download media. [--no-default] [--dir] [--yes-playlist] --url <valid_url>")
+@DiscordCommand(name="dl",usage="Download media: .dl [--music][--temp][--link][--click] <valid_url>",requireds={Requireds.DATABASE})
 public class DownloadMedia extends Command<Void> {
 
 	private class ProcessRunnable implements Runnable {

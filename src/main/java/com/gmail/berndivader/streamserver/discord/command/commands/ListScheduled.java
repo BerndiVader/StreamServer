@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.mysql.GetAllScheduled;
 import com.gmail.berndivader.streamserver.term.ANSI;
@@ -16,7 +17,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
-@DiscordCommand(name="allscheduled",usage="List all scheduled files.")
+@DiscordCommand(name="allscheduled",usage="List all scheduled files.",requireds={Requireds.DATABASE})
 public class ListScheduled extends Command<Message>{
 
 	@Override
