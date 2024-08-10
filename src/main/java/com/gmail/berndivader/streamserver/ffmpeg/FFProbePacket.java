@@ -1,6 +1,7 @@
 package com.gmail.berndivader.streamserver.ffmpeg;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
@@ -76,7 +77,13 @@ public class FFProbePacket {
 		FFProbePacket packet=new FFProbePacket();
 		if(file!=null&&file.exists()) {
 			ProcessBuilder builder=new ProcessBuilder();
-			builder.command("ffprobe","-v","quiet","-print_format","json","-show_format",file.getAbsolutePath());
+			String path=file.getAbsolutePath();
+			try {
+				path=file.getCanonicalPath();
+			} catch (IOException e) {
+				ANSI.printErr(e.getMessage(),e);
+			}
+			builder.command("ffprobe","-v","quiet","-print_format","json","-show_format",path);
 			try {
 				String out=Helper.startAndWaitForProcess(builder,10l);
 				if(!out.isEmpty()) {
