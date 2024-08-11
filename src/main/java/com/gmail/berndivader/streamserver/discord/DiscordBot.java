@@ -11,12 +11,11 @@ import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.EventDispatcher;
+import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
 import io.netty.resolver.DefaultAddressResolverGroup;
@@ -27,7 +26,6 @@ public final class DiscordBot {
 	public static DiscordBot instance;
 	
 	private final GatewayDiscordClient client;
-	private EventDispatcher dispatcher;
 	public static Status status;
 	
 	static {
@@ -48,24 +46,22 @@ public final class DiscordBot {
 			.setReactorResources(reactor)
 			.build()
 			.login()
-		    .doOnSubscribe(t->{
+		    .doOnSubscribe(sub->{
 		        status=Status.CONNECTING;
 		        ANSI.println("[Try to connect to Discord...]");
 		    })
-		    .doOnSuccess(t->{
+		    .doOnSuccess(c->{
 		        status=Status.CONNECTED;
 		        ANSI.println("[Connection to Discord OPEN!]");
 		    })
-		    .doOnError(error->{
+		    .doOnError(err->{
 		        status=Status.FAILED;
-		        ANSI.printErr("Connection to Discord failed.", error);
+		        ANSI.printErr("Connection to Discord failed.",err);
 		    }).block();
-		
 		
 		if(status!=Status.CONNECTED) return;
 		
-		dispatcher=client.getEventDispatcher();
-		dispatcher.on(MessageCreateEvent.class)
+		client.on(MessageCreateEvent.class)
 			.filter(e->e.getMessage().getContent().startsWith(".")
 					&&e.getMember().isPresent()
 					&&e.getMember().get().getRoleIds().contains(Snowflake.of(Config.DISCORD_ROLE_ID)))
@@ -80,11 +76,7 @@ public final class DiscordBot {
 		        if(command==null) return Mono.empty();
 		        String args=parse.length==2?parse[1]:"";
 		        
-                Mono<? extends MessageChannel>mono=Config.DISCORD_RESPONSE_TO_PRIVATE
-                		?message.getAuthor().get().getPrivateChannel()
-                		:message.getChannel();
-                
-                return mono.flatMap(channel->{
+                return message.getChannel().flatMap(channel->{
                 	if (channel==null) return Mono.empty();
                 	return command.exec(args,channel);
                 });
