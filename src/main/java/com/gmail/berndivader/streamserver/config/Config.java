@@ -61,11 +61,7 @@ public class Config {
 	public static String DISCORD_TOKEN="default";
 	public static String DISCORD_CHANNEL="Mett TV";
 	public static Long DISCORD_ROLE_ID=0l;
-	@Deprecated	
-	public static String DISCORD_ROLE="Deprecated";
-	public static String DISCORD_COMMAND_PREFIX=".mtv";
-	public static Boolean DISCORD_RESPONSE_TO_PRIVATE=true;
-	
+		
 	public static String HELP_TEXT;
 	public static String DISCORD_HELP_TEXT;
 	
@@ -150,10 +146,7 @@ public class Config {
 			data.DATABASE_PWD=DATABASE_PWD;
 			data.DISCORD_TOKEN=DISCORD_TOKEN;
 			data.DISCORD_CHANNEL=DISCORD_CHANNEL;
-			data.DISCORD_ROLE=DISCORD_ROLE;
 			data.DISCORD_ROLE_ID=DISCORD_ROLE_ID;
-			data.DISCORD_COMMAND_PREFIX=DISCORD_COMMAND_PREFIX;
-			data.DISCORD_RESPONSE_TO_PRIVATE=DISCORD_RESPONSE_TO_PRIVATE;
 			data.DISCORD_BOT_START=DISCORD_BOT_START;
 	        Helper.GSON.toJson(data,writer);
 		} catch (IOException e) {
@@ -200,10 +193,7 @@ public class Config {
 			if(data.DATABASE_PWD!=null) DATABASE_PWD=data.DATABASE_PWD;
 			if(data.DISCORD_TOKEN!=null) DISCORD_TOKEN=data.DISCORD_TOKEN;
 			if(data.DISCORD_CHANNEL!=null) DISCORD_CHANNEL=data.DISCORD_CHANNEL;
-			if(data.DISCORD_ROLE!=null) DISCORD_ROLE=data.DISCORD_ROLE;
 			if(data.DISCORD_ROLE_ID!=null) DISCORD_ROLE_ID=data.DISCORD_ROLE_ID;
-			if(data.DISCORD_COMMAND_PREFIX!=null) DISCORD_COMMAND_PREFIX=data.DISCORD_COMMAND_PREFIX;
-			if(data.DISCORD_RESPONSE_TO_PRIVATE!=null) DISCORD_RESPONSE_TO_PRIVATE=data.DISCORD_RESPONSE_TO_PRIVATE;
 			if(data.DISCORD_BOT_START!=null) DISCORD_BOT_START=data.DISCORD_BOT_START;
 		} catch (IOException e) {
 			ANSI.printErr("Error while loading config file.",e);
