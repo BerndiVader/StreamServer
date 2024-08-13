@@ -1,18 +1,24 @@
 package com.gmail.berndivader.streamserver.config;
 
+import java.util.HashMap;
+
+import com.gmail.berndivader.streamserver.discord.permission.Guild;
+import com.gmail.berndivader.streamserver.discord.permission.User;
+import com.google.gson.annotations.SerializedName;
+
 public class ConfigData {
 	
-	String STREAM_KEY;
-	String STREAM_URL;
+	@SerializedName("STREAM_KEY")
+	String YOUTUBE_STREAM_KEY;
+	@SerializedName("STREAM_URL")
+	String YOUTUBE_STREAM_URL;
 	
 	String BROADCAST_DEFAULT_TITLE;
 	String BROADCAST_DEFAULT_DESCRIPTION;
 	String BROADCAST_DEFAULT_PRIVACY;
 	
-	
-	String YOUTUBE_LINK;
-	String YOUTUBE_KEY;
-	String YOUTUBE_CHANNEL_ID;
+	@SerializedName("YOUTUBE_KEY")
+	String YOUTUBE_API_KEY;
 	String YOUTUBE_CLIENT_ID;
 	String YOUTUBE_CLIENT_SECRET;
 	String YOUTUBE_AUTH_REDIRECT;
@@ -47,7 +53,11 @@ public class ConfigData {
 	String DATABASE_PWD;
 	
 	String DISCORD_TOKEN;
-	String DISCORD_CHANNEL;
+	@SerializedName("DISCORD_CHANNEL")
+	String DISCORD_VOICE_CHANNEL_NAME;
 	Long DISCORD_ROLE_ID;
+	
+	HashMap<Long,Guild>DISCORD_PERMITTED_GUILDS;
+	HashMap<Long,User>DISCORD_PERMITTED_USERS;
 	
 }

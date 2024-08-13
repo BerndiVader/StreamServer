@@ -6,24 +6,29 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.StreamServer;
+import com.gmail.berndivader.streamserver.discord.permission.Guild;
+import com.gmail.berndivader.streamserver.discord.permission.User;
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.gmail.berndivader.streamserver.youtube.PrivacyStatus;
 
 public class Config {
-	
-	public static String STREAM_KEY="xxxx-xxxx-xxxx-xxxx-xxxx";
-	public static String STREAM_URL="rtmp://a.rtmp.youtube.com/live2";
+			
+	public static HashMap<Long,Guild>DISCORD_PERMITTED_GUILDS=new HashMap<Long,Guild>();
+	public static HashMap<Long,User>DISCORD_PERMITTED_USERS=new HashMap<Long,User>();
 	
 	public static String BROADCAST_DEFAULT_TITLE="Lorem ipsum";
 	public static String BROADCAST_DEFAULT_DESCRIPTION="Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
 	public static String BROADCAST_DEFAULT_PRIVACY="private";
 	
-	public static String YOUTUBE_LINK="https://youtu.be/xxxxxxx";
-	public static String YOUTUBE_KEY="yt-api-key";
-	public static String YOUTUBE_CHANNEL_ID="yt-channel-id";
+	public static String YOUTUBE_STREAM_KEY="xxxx-xxxx-xxxx-xxxx-xxxx";
+	public static String YOUTUBE_STREAM_URL="rtmp://a.rtmp.youtube.com/live2";
+	
+	public static String YOUTUBE_API_KEY="yt-api-key";
 	public static String YOUTUBE_CLIENT_ID="yt-client-id";
 	public static String YOUTUBE_CLIENT_SECRET="yt-client-secret";
 	public static String YOUTUBE_AUTH_REDIRECT="https://your.redirect.page";
@@ -59,9 +64,10 @@ public class Config {
 	public static String DATABASE_PWD="default";
 	
 	public static String DISCORD_TOKEN="default";
-	public static String DISCORD_CHANNEL="Mett TV";
+	public static String DISCORD_VOICE_CHANNEL_NAME="Mett TV";
 	public static Long DISCORD_ROLE_ID=0l;
-		
+	public static Long DISCORD_CHANNEL_ID=0l;
+	
 	public static String HELP_TEXT;
 	public static String DISCORD_HELP_TEXT;
 	
@@ -123,15 +129,13 @@ public class Config {
 			data.DL_URL=DL_URL;
 			data.DL_INTERVAL_FORMAT=DL_INTERVAL_FORMAT;
 			data.DL_INTERVAL_VALUE=DL_INTERVAL_VALUE;
-			data.STREAM_KEY=STREAM_KEY;
-			data.STREAM_URL=STREAM_URL;
+			data.YOUTUBE_STREAM_KEY=YOUTUBE_STREAM_KEY;
+			data.YOUTUBE_STREAM_URL=YOUTUBE_STREAM_URL;
 			data.BROADCAST_DEFAULT_TITLE=BROADCAST_DEFAULT_TITLE;
 			data.BROADCAST_DEFAULT_DESCRIPTION=BROADCAST_DEFAULT_DESCRIPTION;
 			data.BROADCAST_DEFAULT_PRIVACY=BROADCAST_DEFAULT_PRIVACY;
-			data.YOUTUBE_LINK=YOUTUBE_LINK;
-			data.YOUTUBE_KEY=YOUTUBE_KEY;
+			data.YOUTUBE_API_KEY=YOUTUBE_API_KEY;
 			data.YOUTUBE_USE_COOKIES=YOUTUBE_USE_COOKIES;
-			data.YOUTUBE_CHANNEL_ID=YOUTUBE_CHANNEL_ID;
 			data.YOUTUBE_CLIENT_ID=YOUTUBE_CLIENT_ID;
 			data.YOUTUBE_CLIENT_SECRET=YOUTUBE_CLIENT_SECRET;
 			data.YOUTUBE_AUTH_REDIRECT=YOUTUBE_AUTH_REDIRECT;
@@ -145,9 +149,11 @@ public class Config {
 			data.DATABASE_USER=DATABASE_USER;
 			data.DATABASE_PWD=DATABASE_PWD;
 			data.DISCORD_TOKEN=DISCORD_TOKEN;
-			data.DISCORD_CHANNEL=DISCORD_CHANNEL;
+			data.DISCORD_VOICE_CHANNEL_NAME=DISCORD_VOICE_CHANNEL_NAME;
 			data.DISCORD_ROLE_ID=DISCORD_ROLE_ID;
 			data.DISCORD_BOT_START=DISCORD_BOT_START;
+			data.DISCORD_PERMITTED_GUILDS=DISCORD_PERMITTED_GUILDS;
+			data.DISCORD_PERMITTED_USERS=DISCORD_PERMITTED_USERS;
 	        Helper.GSON.toJson(data,writer);
 		} catch (IOException e) {
 			ok=false;
@@ -170,15 +176,13 @@ public class Config {
 			if(data.DL_URL!=null) DL_URL=data.DL_URL;
 			if(data.DL_INTERVAL_FORMAT!=null) DL_INTERVAL_FORMAT=data.DL_INTERVAL_FORMAT;
 			if(data.DL_INTERVAL_VALUE!=null) DL_INTERVAL_VALUE=data.DL_INTERVAL_VALUE;
-			if(data.STREAM_KEY!=null) STREAM_KEY=data.STREAM_KEY;
-			if(data.STREAM_URL!=null) STREAM_URL=data.STREAM_URL;
+			if(data.YOUTUBE_STREAM_KEY!=null) YOUTUBE_STREAM_KEY=data.YOUTUBE_STREAM_KEY;
+			if(data.YOUTUBE_STREAM_URL!=null) YOUTUBE_STREAM_URL=data.YOUTUBE_STREAM_URL;
 			if(data.BROADCAST_DEFAULT_TITLE!=null) BROADCAST_DEFAULT_TITLE=data.BROADCAST_DEFAULT_TITLE;
 			if(data.BROADCAST_DEFAULT_DESCRIPTION!=null) BROADCAST_DEFAULT_DESCRIPTION=data.BROADCAST_DEFAULT_DESCRIPTION;
 			if(data.BROADCAST_DEFAULT_PRIVACY!=null) BROADCAST_DEFAULT_PRIVACY=data.BROADCAST_DEFAULT_PRIVACY;
-			if(data.YOUTUBE_LINK!=null) YOUTUBE_LINK=data.YOUTUBE_LINK;
-			if(data.YOUTUBE_KEY!=null) YOUTUBE_KEY=data.YOUTUBE_KEY;
+			if(data.YOUTUBE_API_KEY!=null) YOUTUBE_API_KEY=data.YOUTUBE_API_KEY;
 			if(data.YOUTUBE_USE_COOKIES!=null) YOUTUBE_USE_COOKIES=data.YOUTUBE_USE_COOKIES;
-			if(data.YOUTUBE_CHANNEL_ID!=null) YOUTUBE_CHANNEL_ID=data.YOUTUBE_CHANNEL_ID;
 			if(data.YOUTUBE_CLIENT_ID!=null) YOUTUBE_CLIENT_ID=data.YOUTUBE_CLIENT_ID;
 			if(data.YOUTUBE_CLIENT_SECRET!=null) YOUTUBE_CLIENT_SECRET=data.YOUTUBE_CLIENT_SECRET;			
 			if(data.YOUTUBE_AUTH_REDIRECT!=null) YOUTUBE_AUTH_REDIRECT=data.YOUTUBE_AUTH_REDIRECT;			
@@ -192,9 +196,12 @@ public class Config {
 			if(data.DATABASE_USER!=null) DATABASE_USER=data.DATABASE_USER;
 			if(data.DATABASE_PWD!=null) DATABASE_PWD=data.DATABASE_PWD;
 			if(data.DISCORD_TOKEN!=null) DISCORD_TOKEN=data.DISCORD_TOKEN;
-			if(data.DISCORD_CHANNEL!=null) DISCORD_CHANNEL=data.DISCORD_CHANNEL;
+			if(data.DISCORD_VOICE_CHANNEL_NAME!=null) DISCORD_VOICE_CHANNEL_NAME=data.DISCORD_VOICE_CHANNEL_NAME;
 			if(data.DISCORD_ROLE_ID!=null) DISCORD_ROLE_ID=data.DISCORD_ROLE_ID;
 			if(data.DISCORD_BOT_START!=null) DISCORD_BOT_START=data.DISCORD_BOT_START;
+			if(data.DISCORD_PERMITTED_GUILDS!=null) DISCORD_PERMITTED_GUILDS=data.DISCORD_PERMITTED_GUILDS;
+			if(data.DISCORD_PERMITTED_USERS!=null) DISCORD_PERMITTED_USERS=data.DISCORD_PERMITTED_USERS;
+			
 		} catch (IOException e) {
 			ANSI.printErr("Error while loading config file.",e);
 			return false;
@@ -216,6 +223,11 @@ public class Config {
 	
 	public static String connectionString() {
 		return DATABASE_PREFIX+DATABASE_HOST+":"+DATABASE_PORT+"/"+DATABASE_NAME;
+	}
+	
+	public static PrivacyStatus broadcastPrivacyStatus() {
+		String priv=BROADCAST_DEFAULT_PRIVACY.toUpperCase();
+		return PrivacyStatus.isEnum(priv)?PrivacyStatus.valueOf(priv):PrivacyStatus.UNLISTED;
 	}
 	
 	private static String inputstreamToString(InputStream is) {
