@@ -122,7 +122,7 @@ public final class BroadcastRunner extends TimerTask {
 		counter=0l;
 		startStream();
 		
-		Helper.SCHEDULED_EXECUTOR.scheduleAtFixedRate(this, 0l, 1l, TimeUnit.SECONDS);
+		Helper.SCHEDULED_EXECUTOR.scheduleAtFixedRate(this, 0l, 2l, TimeUnit.SECONDS);
 		ANSI.println("[GREEN]DONE![RESET]");
 	}
 	
@@ -151,7 +151,7 @@ public final class BroadcastRunner extends TimerTask {
 		if(!stop&&!hold) {
 			counter++;
     		if(ffmpeg()==null||ffmpeg().isCancelled()||ffmpeg().isDone()) startStream();
-			if(counter>3599l) {
+			if(counter>1799l) {
 				
 				checkOrReInitiateLiveBroadcast(Config.BROADCAST_DEFAULT_TITLE,Config.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
 				counter=0l;
