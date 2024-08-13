@@ -4,6 +4,7 @@ import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.command.Commands;
+import com.gmail.berndivader.streamserver.discord.permission.Permission;
 
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -12,6 +13,7 @@ import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
+@Permission
 @DiscordCommand(name="help",usage="Show Help.")
 public class Help extends Command<Message> {
 	

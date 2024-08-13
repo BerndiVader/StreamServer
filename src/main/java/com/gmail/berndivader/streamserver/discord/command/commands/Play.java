@@ -7,6 +7,8 @@ import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.discord.command.Command;
+import com.gmail.berndivader.streamserver.discord.permission.Permission;
+import com.gmail.berndivader.streamserver.discord.permission.User.Rank;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 
@@ -16,6 +18,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
+@Permission(required=Rank.MEMBER)
 @DiscordCommand(name="play",usage="[filename|next|last|repeat]",requireds={Requireds.BROADCASTRUNNER})
 public class Play extends Command<Message> {
 		

@@ -16,6 +16,8 @@ import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.command.Command;
+import com.gmail.berndivader.streamserver.discord.permission.Permission;
+import com.gmail.berndivader.streamserver.discord.permission.User.Rank;
 import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
 import com.gmail.berndivader.streamserver.mysql.MakeDownloadable;
 import com.gmail.berndivader.streamserver.term.ANSI;
@@ -33,6 +35,7 @@ import discord4j.rest.util.Color;
 import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 
+@Permission(required=Rank.MEMBER)
 @DiscordCommand(name="dl",usage="Download media: .dl [--music][--temp][--link][--click] <valid_url>",requireds={Requireds.DATABASE})
 public class DownloadMedia extends Command<Void> {
 

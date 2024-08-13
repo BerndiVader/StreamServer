@@ -6,6 +6,7 @@ import java.util.stream.IntStream;
 
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.discord.command.Command;
+import com.gmail.berndivader.streamserver.discord.permission.Permission;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
 import discord4j.core.object.entity.Message;
@@ -15,6 +16,7 @@ import discord4j.rest.util.Color;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Permission
 @DiscordCommand(name="playlist",usage="[filter] -> Search for files.")
 public class Playlist extends Command<List<Message>> {
 	

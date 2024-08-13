@@ -7,6 +7,8 @@ import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.discord.command.Command;
+import com.gmail.berndivader.streamserver.discord.permission.Permission;
+import com.gmail.berndivader.streamserver.discord.permission.User.Rank;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 import com.gmail.berndivader.streamserver.mysql.AddScheduled;
@@ -17,6 +19,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
+@Permission(required=Rank.MEMBER)
 @DiscordCommand(name="schedule",usage="[filename] -> Add file to schedule table.",requireds={Requireds.BROADCASTRUNNER,Requireds.DATABASE})
 public class Schedule extends Command<Message> {
 	
