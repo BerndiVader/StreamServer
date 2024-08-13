@@ -58,7 +58,7 @@ public class UserPermissions extends Command {
 		} else {
 			ANSI.println("[MAGENTA]Permitted members:");
 			Config.DISCORD_PERMITTED_USERS.forEach((id,user)->{
-				ANSI.println("[YELLOW]Name:[BLUE]"+user.name+" [YELLOW]Id:[BLUE]"+id+" [YELLOW]Rank:"+user.rank.name());
+				ANSI.println("[YELLOW]Name:[BLUE]"+user.name+" [YELLOW]Id:[BLUE]"+id+" [YELLOW]Rank:[BLUE]"+user.rank.name());
 			});
 		}
 		Config.saveConfig();
