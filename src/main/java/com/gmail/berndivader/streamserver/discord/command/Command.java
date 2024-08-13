@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 
 public abstract class Command<T> {
 	
-	public final Mono<T> exec(String string,MessageChannel channel,Member member) {
+	public Mono<T> exec(String string,MessageChannel channel,Member member) {
 		
 		
 		if(Permissions.Users.permitted(member.getId().asLong(),this.getClass().getDeclaredAnnotation(Permission.class).required())) {
