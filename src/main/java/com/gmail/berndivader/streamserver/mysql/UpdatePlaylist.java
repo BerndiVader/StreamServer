@@ -13,10 +13,10 @@ import java.util.concurrent.TimeoutException;
 
 import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
-import com.github.kokorin.jaffree.ffprobe.Format;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
+import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 
 public class UpdatePlaylist implements Callable<Boolean> {
 	
@@ -29,7 +29,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 		
 		if(IS_COMMAND=fromConsole) {
 			if(future.get(20,TimeUnit.MINUTES)) {
-				ANSI.println("[BR][SUCSESSFUL MYSQL PLAYLIST UPDATE]");
+				ANSI.println("[BR][SUCESSFUL MYSQL PLAYLIST UPDATE]");
 			} else {
 				ANSI.printWarn("[BR][FAILED MYSQL PLAYLIST UPDATE]");
 			}
@@ -53,9 +53,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 			try(PreparedStatement statement=connection.prepareStatement(SQL,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				
 				ANSI.println("[BEGIN MYSQL PLAYLIST UPDATE]");
-				if(IS_COMMAND) {
-					ANSI.print("[GREEN]|");
-				}
+				if(IS_COMMAND) ANSI.print("[GREEN]|");
 				
 				statement.addBatch("START TRANSACTION;");
 				statement.addBatch("TRUNCATE TABLE playlist;");
@@ -66,18 +64,10 @@ public class UpdatePlaylist implements Callable<Boolean> {
 						ANSI.print(SPINNER[i1%SPINNER.length]);
 					}
 					
-					String path=files[i1].getAbsolutePath().replace("\\","/");
-					String title=files[i1].getName();
-					String comment="null:null:null";
-					title=title.substring(0,title.length()-4);
-					
-					FFprobeResult result=getFFprobeResult(path);
-					if(result!=null) {
-						Format format=result.getFormat();
-						if(format!=null) {
-							comment=format.getTag("artist")+":"+format.getTag("date")+":"+format.getTag("comment");
-						}
-					}
+					FFProbePacket packet=FFProbePacket.build(files[i1]);
+					String path=packet.getPath();
+					String title=packet.tags.title;
+					String comment=packet.toString();
 					
 					statement.setString(1,title);
 					statement.setString(2,path);
