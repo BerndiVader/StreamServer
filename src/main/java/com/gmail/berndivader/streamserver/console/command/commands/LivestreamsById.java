@@ -1,6 +1,5 @@
 package com.gmail.berndivader.streamserver.console.command.commands;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -37,7 +36,6 @@ public class LivestreamsById extends Command{
 		
 		if(p instanceof LiveBroadcastPacket) {
 			LiveBroadcastPacket broadcast=(LiveBroadcastPacket)p;
-			Broadcast.currentLiveBroadcast=Optional.ofNullable(broadcast);
 			if(printJson) {
 				ANSI.println(broadcast.source().toString());
 			} else {

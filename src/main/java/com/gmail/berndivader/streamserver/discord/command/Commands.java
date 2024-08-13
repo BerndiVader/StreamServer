@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -87,17 +88,17 @@ public final class Commands {
 		}
 	}
 	
-	public Command<?> newCommandInstance(String name) {
+	public Optional<Command<?>> build(String name) {
 		if(name.isEmpty()) name="help";
 		Class<Command<?>>command=commands.get(name);
 		if(command!=null) {
 			try {
-				return command.getDeclaredConstructor().newInstance();
+				return Optional.of(command.getDeclaredConstructor().newInstance());
 			} catch (Exception e) {
 				ANSI.printErr("Error while collect discord commands.",e);
 			}
 		}
-		return null;
+		return Optional.empty();
 	}
 		
 }

@@ -52,6 +52,8 @@ public final class BroadcastRunner extends TimerTask {
 	private static File playing;
 	private static FFmpegResultFuture ffmpeg;
 	public static AtomicInteger index=new AtomicInteger();
+	public static Packet liveBroadcast=Packet.emtpy();
+	public static Packet liveStream=Packet.emtpy();
 	
 	private static long counter;
 	
@@ -113,6 +115,8 @@ public final class BroadcastRunner extends TimerTask {
 		
 		refreshFilelist();
 		shuffleFilelist();
+		
+		checkOrReInitiateLiveBroadcast(Config.BROADCAST_DEFAULT_TITLE,Config.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
 
 		index.set(0);
 		counter=0l;
@@ -149,10 +153,7 @@ public final class BroadcastRunner extends TimerTask {
     		if(ffmpeg()==null||ffmpeg().isCancelled()||ffmpeg().isDone()) startStream();
 			if(counter>3599l) {
 				
-				String priv=Config.BROADCAST_DEFAULT_PRIVACY.toUpperCase();
-				PrivacyStatus privacy=PrivacyStatus.isEnum(priv)?PrivacyStatus.valueOf(priv):PrivacyStatus.UNLISTED;
-
-				checkOrReInitiateLiveBroadcast(Config.BROADCAST_DEFAULT_TITLE,Config.BROADCAST_DEFAULT_DESCRIPTION,privacy);
+				checkOrReInitiateLiveBroadcast(Config.BROADCAST_DEFAULT_TITLE,Config.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
 				counter=0l;
 			}
 		}
@@ -162,11 +163,11 @@ public final class BroadcastRunner extends TimerTask {
 	public static synchronized void checkOrReInitiateLiveBroadcast(String title,String description,PrivacyStatus privacy) {
 		if(Config.DEBUG) ANSI.println("[BLUE]Test if broadcast is still live on Youtube...[RESET]");
 		try {
-			Packet packet=Broadcast.getLiveBroadcastWithTries(BroadcastStatus.active,2);
+			Packet packet=liveBroadcast=Broadcast.getLiveBroadcastWithTries(BroadcastStatus.active,2);
 			if(packet instanceof EmptyPacket) {
 				ANSI.println("[ORANGE]Try to reinstall livebroadcast on Youtube...");
 				
-				packet=Broadcast.getDefaultLiveStream().get(15l,TimeUnit.SECONDS);
+				packet=liveStream=Broadcast.getDefaultLiveStream().get(15l,TimeUnit.SECONDS);
 				if(packet instanceof LiveStreamPacket) {
 					ANSI.println("[GREEN]Got livestream resource identified by STREAM_KEY...");
 					
@@ -269,7 +270,7 @@ public final class BroadcastRunner extends TimerTask {
 				.addInput(UrlInput.fromUrl(path)
 						.addArgument("-re")
 						)
-				.addOutput(UrlOutput.toUrl(Config.STREAM_URL+"/"+Config.STREAM_KEY)
+				.addOutput(UrlOutput.toUrl(Config.YOUTUBE_STREAM_URL+"/"+Config.YOUTUBE_STREAM_KEY)
 						.setCodec(StreamType.VIDEO,"copy")
 						.addArguments("-b:v","2M")
 						.setCodec(StreamType.AUDIO,"copy")

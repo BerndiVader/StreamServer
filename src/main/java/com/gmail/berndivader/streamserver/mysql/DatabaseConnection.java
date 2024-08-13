@@ -80,7 +80,7 @@ public class DatabaseConnection {
 				statement.addBatch("CREATE TABLE IF NOT EXISTS `playlist` (`title` VARCHAR(128), `info` VARCHAR(128), `filepath` VARCHAR(256));");
 				statement.addBatch("CREATE TABLE if NOT EXISTS `scheduled` (`id` INT(11) AUTO_INCREMENT, `title` VARCHAR(128), `filename` VARCHAR(256), PRIMARY KEY (`id`));");
 				statement.addBatch("CREATE TABLE IF NOT EXISTS `downloadables` (`uuid` VARCHAR(36) NOT NULL, `path` VARCHAR(256) NOT NULL, `timestamp` BIGINT NOT NULL, `downloads` INT NOT NULL, `temp` TINYINT(1) NOT NULL, `ffprobe` TEXT NOT NULL);");
-				statement.addBatch("CREATE TABLE IF NOT EXISTS `oauth2` (`state` VARCHAR(36) NOT NULL, `code` VARCHAR(256) NOT NULL);");
+				statement.addBatch("CREATE TABLE IF NOT EXISTS `oauth2` (`state` VARCHAR(36) NOT NULL, `code` VARCHAR(256) NOT NULL);");				
 				statement.addBatch("TRUNCATE `current`; TRUNCATE `info`; TRUNCATE `playlist`; TRUNCATE `scheduled`; TRUNCATE `downloadables`; TRUNCATE `oauth2`;");
 				statement.addBatch("COMMIT;");
 				

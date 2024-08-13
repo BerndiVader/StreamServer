@@ -56,6 +56,10 @@ public abstract class Packet {
 		packet.source=source;
 		return packet;
 	}
+	
+	public static Packet emtpy() {
+		return Packet.build(new JsonObject(),EmptyPacket.class);
+	}
 		
 	
 }

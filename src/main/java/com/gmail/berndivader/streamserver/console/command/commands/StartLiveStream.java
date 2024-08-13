@@ -11,7 +11,7 @@ import com.gmail.berndivader.streamserver.youtube.PrivacyStatus;
 		name="createlive",
 		usage="(title, description, privacy) - Try to reinitate and start livebroadcast on Youtube. No args will use default settings. "
 				+"If string contains ',' use doublequotes.",
-		requireds={Requireds.BROADCASTRUNNER}
+		requireds={Requireds.BROADCASTRUNNER,Requireds.DATABASE}
 	)
 
 public class StartLiveStream extends Command {
