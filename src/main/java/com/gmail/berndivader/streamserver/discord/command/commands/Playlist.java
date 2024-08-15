@@ -31,7 +31,7 @@ public class Playlist extends Command<List<Message>> {
 		StringBuilder builder=new StringBuilder();
 		list.forEach(name->{
 			if(builder.length()+name.length()<1975) {
-				builder.append(name+"\n");
+				builder.append("`"+name+"`\n");
 			} else {
 				messages.add(builder.toString());
 				builder.setLength(0);
@@ -45,7 +45,7 @@ public class Playlist extends Command<List<Message>> {
 			return channel.createMessage(EmbedCreateSpec.builder()
 					.color(Color.CINNABAR)
 					.title(i==0?"Playlist result":"Playlist continue")
-					.description("```"+messages.get(i)+"```")
+					.description(messages.get(i))
 					.footer(i==messages.size()-1?"Found ".concat(Integer.toString(filesSize)).concat(" matches"):"",null)
 					.build());
 			

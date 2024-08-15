@@ -47,7 +47,7 @@ public final class BroadcastRunner extends TimerTask {
 	public static boolean hold;
 	
 	private static FFmpegProgress progress;
-	private static FFProbePacket probePacket;
+	private static FFProbePacket playingPacket;
 	private static String message;
 	private static File playing;
 	private static FFmpegResultFuture ffmpeg;
@@ -75,12 +75,12 @@ public final class BroadcastRunner extends TimerTask {
 		BroadcastRunner.progress=progress;
 	}
 	
-	public static synchronized FFProbePacket probePacket() {
-		return probePacket;
+	public static synchronized FFProbePacket playingPacket() {
+		return playingPacket;
 	}
 	
-	public static synchronized void probePacket(FFProbePacket packet) {
-		BroadcastRunner.probePacket=packet;
+	public static synchronized void playingPacket(FFProbePacket packet) {
+		BroadcastRunner.playingPacket=packet;
 	}
 	
 	public static synchronized String message() {
@@ -240,11 +240,11 @@ public final class BroadcastRunner extends TimerTask {
 	
 	private static synchronized void createStream(File file) {
 		String path=file.getAbsolutePath();
-		probePacket(FFProbePacket.build(file));
+		playingPacket(FFProbePacket.build(file));
 		
 		String title="";
-		if(probePacket().isSet(probePacket().tags.title)) {
-			title=probePacket().tags.title;
+		if(playingPacket().isSet(playingPacket().tags.title)) {
+			title=playingPacket().tags.title;
 		} else {
 			int pos=file.getName().lastIndexOf(".");
 			if(pos>0) {
@@ -254,16 +254,16 @@ public final class BroadcastRunner extends TimerTask {
 			}
 		}
 				
-		String info=probePacket().tags.artist+":"+Helper.stringFloatToTime(probePacket().duration)+":"+probePacket().tags.description;
+		String info=playingPacket().tags.artist+":"+Helper.stringFloatToTime(playingPacket().duration)+":"+playingPacket().tags.description;
 		new UpdateCurrent(title, info);
 		
 		if(Config.DISCORD_BOT_START&&DiscordBot.instance!=null) DiscordBot.instance.updateStatus(title);
 		
 		ANSI.println("[BLUE]Now playing: "
-			+probePacket().tags.title
-			+":"+probePacket().tags.artist
-			+":"+probePacket().tags.date
-			+":"+probePacket().tags.comment+"[RESET]");
+			+playingPacket().tags.title
+			+":"+playingPacket().tags.artist
+			+":"+playingPacket().tags.date
+			+":"+playingPacket().tags.comment+"[RESET]");
 		ANSI.prompt();
 				
 		ffmpeg(FFmpeg.atPath()
