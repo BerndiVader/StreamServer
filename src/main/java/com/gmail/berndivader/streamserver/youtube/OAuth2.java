@@ -126,6 +126,6 @@ public final class OAuth2 {
 	}		
 
 	public static boolean isExpired() {
-		return System.currentTimeMillis()/1000l-Config.YOUTUBE_TOKEN_TIMESTAMP>3599l;
+		return System.currentTimeMillis()/1000l-Config.YOUTUBE_TOKEN_TIMESTAMP>Config.YOUTUBE_TOKEN_EXPIRE_TIME;
 	}		
 }

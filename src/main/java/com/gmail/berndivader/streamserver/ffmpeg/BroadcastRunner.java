@@ -55,7 +55,7 @@ public final class BroadcastRunner extends TimerTask {
 	public static Packet liveBroadcast=Packet.emtpy();
 	public static Packet liveStream=Packet.emtpy();
 	
-	private static long counter;
+	private static long expiredCounter;
 	
 	private static CopyOnWriteArrayList<File>files;
 	private static CopyOnWriteArrayList<File>customs;
@@ -119,10 +119,10 @@ public final class BroadcastRunner extends TimerTask {
 		checkOrReInitiateLiveBroadcast(Config.BROADCAST_DEFAULT_TITLE,Config.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
 
 		index.set(0);
-		counter=0l;
+		expiredCounter=0l;
 		startStream();
 		
-		Helper.SCHEDULED_EXECUTOR.scheduleAtFixedRate(this, 0l, 2l, TimeUnit.SECONDS);
+		Helper.SCHEDULED_EXECUTOR.scheduleAtFixedRate(this,0l,2l,TimeUnit.SECONDS);
 		ANSI.println("[GREEN]DONE![RESET]");
 	}
 	
@@ -149,12 +149,12 @@ public final class BroadcastRunner extends TimerTask {
 	public void run() {
 
 		if(!stop&&!hold) {
-			counter++;
+			expiredCounter+=2l;
     		if(ffmpeg()==null||ffmpeg().isCancelled()||ffmpeg().isDone()) startStream();
-			if(counter>1799l) {
+			if(expiredCounter>Config.YOUTUBE_TOKEN_EXPIRE_TIME) {
 				
 				checkOrReInitiateLiveBroadcast(Config.BROADCAST_DEFAULT_TITLE,Config.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
-				counter=0l;
+				expiredCounter=0l;
 			}
 		}
 		
