@@ -15,8 +15,11 @@ import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.config.Config;
+import com.gmail.berndivader.streamserver.discord.ButtonAction;
+import com.gmail.berndivader.streamserver.discord.ButtonAction.ID;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.permission.Permission;
+import com.gmail.berndivader.streamserver.discord.permission.Permissions;
 import com.gmail.berndivader.streamserver.discord.permission.User.Rank;
 import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
 import com.gmail.berndivader.streamserver.mysql.MakeDownloadable;
@@ -24,7 +27,6 @@ import com.gmail.berndivader.streamserver.term.ANSI;
 
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.Button;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateFields.Field;
@@ -92,9 +94,10 @@ public class DownloadMedia extends Command<Void> {
 				InfoPacket infoPacket=entry.getValue();
 				status=Status.RUNNING;
 				
+				
 				try {
 					MessageEditSpec.Builder msgBuilder=MessageEditSpec.builder();
-					msgBuilder.addComponent(ActionRow.of(Button.danger(uuid.toString(),"Cancel")))
+					msgBuilder.addComponent(ActionRow.of(ButtonAction.Builder.cancel(uuid),ButtonAction.Builder.schedule(ID.SCHEDULE,member.getId().asLong())))
 					.contentOrNull("Starting download...")
 					.addEmbed(EmbedCreateSpec.builder()
 									.title(infoPacket.title)
@@ -109,7 +112,11 @@ public class DownloadMedia extends Command<Void> {
 					.doOnError(e->ANSI.printErr(e.getMessage(),e.getCause())).subscribe();
 					
 					Disposable listener=message.getClient().on(ButtonInteractionEvent.class,event->{
+						
 						if(event.getCustomId().equals(uuid)) {
+							long creatorId=member.getId().asLong();
+							long clickerId=event.getInteraction().getId().asLong();
+							if(!Permissions.Users.permitted(clickerId,Rank.ADMIN)||creatorId!=clickerId) return Mono.empty();
 							status=Status.ABORTED;
 							return event.edit(InteractionApplicationCommandCallbackSpec.create()
 									.withContent("")
@@ -227,9 +234,9 @@ public class DownloadMedia extends Command<Void> {
 	}
 
 	@Override
-	public Mono<Void> execute(String string, MessageChannel channel) {
+	public Mono<Void> exec() {
 		
-		return Mono.fromRunnable(new ProcessRunnable(string, channel));
+		return Mono.fromRunnable(new ProcessRunnable(string,channel));
 		
 	}
 	
