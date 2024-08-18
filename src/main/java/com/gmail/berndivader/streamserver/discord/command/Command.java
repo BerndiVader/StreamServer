@@ -9,16 +9,22 @@ import reactor.core.publisher.Mono;
 
 public abstract class Command<T> {
 	
-	public Mono<T> exec(String string,MessageChannel channel,Member member) {
-		
+	protected Member member;
+	protected MessageChannel channel;
+	protected String string;
+	
+	public Mono<T> execute(String string,MessageChannel channel,Member member) {
+		this.member=member;
+		this.channel=channel;
+		this.string=string;
 		
 		if(Permissions.Users.permitted(member.getId().asLong(),this.getClass().getDeclaredAnnotation(Permission.class).required())) {
-			return execute(string,channel);
+			return exec();
 		} else {
 			return Mono.empty();
 		}
 	}
 	
-	protected abstract Mono<T> execute(String string,MessageChannel channel);
+	protected abstract Mono<T> exec();
 	
 }
