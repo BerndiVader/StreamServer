@@ -23,9 +23,10 @@ import reactor.core.publisher.Mono;
 public class Play extends Command<Message> {
 		
 	@Override
-	public Mono<Message> execute(String s,MessageChannel channel) {
+	public Mono<Message> exec() {
 		
 		Mono<Message>mono=Mono.empty();
+		String s=string;
 		
 		switch(s.toLowerCase()) {
 		case "next":

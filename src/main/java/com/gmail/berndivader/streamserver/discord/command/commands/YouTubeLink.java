@@ -7,7 +7,6 @@ import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.youtube.packets.LiveBroadcastPacket;
 
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
@@ -17,7 +16,7 @@ import reactor.core.publisher.Mono;
 public class YouTubeLink extends Command<Message> {
 
 	@Override
-	public Mono<Message> execute(String string, MessageChannel channel) {
+	public Mono<Message> exec() {
 		
 		if(BroadcastRunner.liveBroadcast instanceof LiveBroadcastPacket) {
 			LiveBroadcastPacket live=(LiveBroadcastPacket)BroadcastRunner.liveBroadcast;

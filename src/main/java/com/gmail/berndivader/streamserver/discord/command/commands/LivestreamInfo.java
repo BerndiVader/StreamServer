@@ -19,7 +19,6 @@ import com.gmail.berndivader.streamserver.youtube.packets.Packet;
 import com.google.gson.JsonObject;
 
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
@@ -31,7 +30,7 @@ public class LivestreamInfo extends Command<Message> {
 	private Packet packet;
 
 	@Override
-	public Mono<Message> execute(String string, MessageChannel channel) {
+	public Mono<Message> exec() {
 		
 		packet=Packet.build(new JsonObject(),EmptyPacket.class);
 		Future<Packet>future=Broadcast.getLiveBroadcast(BroadcastStatus.active);

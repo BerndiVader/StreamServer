@@ -13,7 +13,6 @@ import com.gmail.berndivader.streamserver.mysql.GetAllScheduled;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
@@ -23,7 +22,7 @@ import reactor.core.publisher.Mono;
 public class ListScheduled extends Command<Message>{
 
 	@Override
-	public Mono<Message> execute(String string, MessageChannel channel) {
+	public Mono<Message> exec() {
 		
 		GetAllScheduled scheduled=new GetAllScheduled();
 		ArrayList<String>files=null;

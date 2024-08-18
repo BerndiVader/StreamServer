@@ -10,7 +10,6 @@ import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.EmbedCreateSpec.Builder;
 import discord4j.rest.util.Color;
@@ -24,7 +23,7 @@ public class Current extends Command<Message> {
 	public Current() {}
 
 	@Override
-	public Mono<Message> execute(String string, MessageChannel channel) {
+	public Mono<Message> exec() {
 		packet=FFProbePacket.build(BroadcastRunner.playing());
 
 		Builder embed=EmbedCreateSpec.builder();

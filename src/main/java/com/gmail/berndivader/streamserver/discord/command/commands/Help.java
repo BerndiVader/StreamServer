@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 public class Help extends Command<Message> {
 	
 	@Override
-	public Mono<Message> exec(String string,MessageChannel channel,Member member) {
+	public Mono<Message> execute(String string,MessageChannel channel,Member member) {
 
 		if(Permissions.Users.permitted(member.getId().asLong(),this.getClass().getDeclaredAnnotation(Permission.class).required())) {
 			Rank rank=Rank.GUEST;
@@ -35,7 +35,7 @@ public class Help extends Command<Message> {
 	}
 		
 	@Override
-	protected Mono<Message> execute(String string, MessageChannel channel) {
+	protected Mono<Message> exec() {
 		return null;
 	}
 	

@@ -14,7 +14,6 @@ import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 import com.gmail.berndivader.streamserver.mysql.AddScheduled;
 
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
@@ -24,9 +23,9 @@ import reactor.core.publisher.Mono;
 public class Schedule extends Command<Message> {
 	
 	@Override
-	public Mono<Message> execute(String name, MessageChannel channel) {
+	public Mono<Message> exec() {
 		
-		Optional<File>opt=BroadcastRunner.getFileByName(name);
+		Optional<File>opt=BroadcastRunner.getFileByName(string);
 		Mono<Message>mono=Mono.empty();
 		
 		if(opt.isPresent()) {
@@ -42,7 +41,7 @@ public class Schedule extends Command<Message> {
 			mono=channel.createMessage(EmbedCreateSpec.builder()
 					.color(Color.RED)
 					.title("No file found for")
-					.description(name)
+					.description(string)
 					.build());
 		}
 		
