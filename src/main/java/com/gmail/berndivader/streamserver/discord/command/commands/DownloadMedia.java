@@ -16,7 +16,6 @@ import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.ButtonAction;
-import com.gmail.berndivader.streamserver.discord.ButtonAction.ID;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.permission.Permission;
 import com.gmail.berndivader.streamserver.discord.permission.Permissions;
@@ -94,20 +93,19 @@ public class DownloadMedia extends Command<Void> {
 				InfoPacket infoPacket=entry.getValue();
 				status=Status.RUNNING;
 				
-				
 				try {
-					MessageEditSpec.Builder msgBuilder=MessageEditSpec.builder();
-					msgBuilder.addComponent(ActionRow.of(ButtonAction.Builder.cancel(uuid),ButtonAction.Builder.schedule(ID.SCHEDULE,member.getId().asLong())))
-					.contentOrNull("Starting download...")
-					.addEmbed(EmbedCreateSpec.builder()
-									.title(infoPacket.title)
-									.url(infoPacket.webpage_url)
-									.description(infoPacket.description)
-									.image(infoPacket.thumbnail)
-									.color(Color.BLUE)
-									.footer(infoPacket.format,null)
-								.build());
+					EmbedCreateSpec.Builder embedBuilder=EmbedCreateSpec.builder()
+						.title(infoPacket.title)
+						.url(infoPacket.webpage_url)
+						.description(infoPacket.description)
+						.image(infoPacket.thumbnail)
+						.color(Color.BLUE)
+						.footer(infoPacket.format,null);
 					
+					MessageEditSpec.Builder msgBuilder=MessageEditSpec.builder();
+					msgBuilder.addComponent(ActionRow.of(ButtonAction.Builder.cancel(uuid)))
+					.contentOrNull("```css\n.Starting download...```")
+					.addEmbed(embedBuilder.build());
 					message.edit(msgBuilder.build()).doOnCancel(()->ANSI.printRaw("[BR]CANCELLED[BR]"))
 					.doOnError(e->ANSI.printErr(e.getMessage(),e.getCause())).subscribe();
 					
@@ -115,8 +113,8 @@ public class DownloadMedia extends Command<Void> {
 						
 						if(event.getCustomId().equals(uuid)) {
 							long creatorId=member.getId().asLong();
-							long clickerId=event.getInteraction().getId().asLong();
-							if(!Permissions.Users.permitted(clickerId,Rank.ADMIN)||creatorId!=clickerId) return Mono.empty();
+							long clickerId=event.getInteraction().getUser().getId().asLong();
+							if(!Permissions.Users.permitted(clickerId,Rank.MOD)||creatorId!=clickerId) return Mono.empty();
 							status=Status.ABORTED;
 							return event.edit(InteractionApplicationCommandCallbackSpec.create()
 									.withContent("")
@@ -151,7 +149,7 @@ public class DownloadMedia extends Command<Void> {
 									String[]temp=line.split("\"");
 									if(temp.length>0) infoPacket.local_filename=temp[1];
 								}
-								message.edit(MessageEditSpec.create().withContentOrNull(line)).subscribe();
+								message.edit(MessageEditSpec.create().withContentOrNull("```css\n."+line+"```")).subscribe();
 							} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l) {
 								status=Status.TIMEOUT;
 								break;
@@ -176,7 +174,7 @@ public class DownloadMedia extends Command<Void> {
 								.build());
 						break;
 					case FINISHED:
-						edit.contentOrNull("FINISHED");
+						edit.contentOrNull("```diff\n+FINISHED```");
 						EmbedCreateSpec.Builder embed=EmbedCreateSpec.builder()
 							.title("Download finished....")
 							.url(infoPacket.webpage_url)
@@ -208,6 +206,14 @@ public class DownloadMedia extends Command<Void> {
 								.title("ERROR")
 								.color(Color.RED)
 								.description("Something went wront.\n\n".concat(errorBuilder.toString()))
+								.build());
+						break;
+					case ABORTED:
+						edit.contentOrNull("");
+						edit.addEmbed(EmbedCreateSpec.builder()
+								.title("ABORTED")
+								.color(Color.MOON_YELLOW)
+								.description("Download aborted by cancelling the download.")
 								.build());
 						break;
 					default:
