@@ -12,6 +12,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
@@ -25,7 +26,7 @@ public final class DiscordBot {
 	
 	public static DiscordBot instance;
 	
-	private final GatewayDiscordClient client;
+	public final GatewayDiscordClient client;
 	public static Status status;
 	
 	static {
@@ -78,16 +79,19 @@ public final class DiscordBot {
 		        String content=message.getContent();
 		        String[]parse=content.split(" ",2);
 		        String cmd=parse[0].toLowerCase().substring(1);
+		        e.getMessage().delete().subscribe();
 
 		        return Mono.justOrEmpty(Commands.instance.build(cmd))
 		        		.flatMap(command->{
 		        			String args=parse.length==2?parse[1]:"";
-		        			return message.getChannel().flatMap(channel->command.exec(args,channel,e.getMember().get()));
+		        			return message.getChannel().flatMap(channel->command.execute(args,channel,e.getMember().get()));
 		        		});
 
 		    })
 		    .onErrorContinue((throwable,object)->ANSI.printErr(throwable.getMessage(),throwable))
 		    .subscribe();
+		
+		client.on(ButtonInteractionEvent.class,ButtonAction::process).subscribe();
 		
 		client.onDisconnect().doOnSuccess(t->{
 		    ANSI.println("[YELLOW][Connection to Discord CLOSED!][RESET]");
