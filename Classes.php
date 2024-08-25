@@ -22,13 +22,16 @@ class DatabaseTools
         $statement->bind_param("s",$uuid);
         $statement->execute();
         $result=$statement->get_result();
-        $connection->close();
         
         if($result->num_rows>0)
         {
             $array=$result->fetch_array(MYSQLI_ASSOC);
         }
+
         $result->close();
+        $statement->close();
+        $connection->close();
+
         return $array??null;
     }
 
@@ -37,7 +40,13 @@ class DatabaseTools
         $connection=DatabaseTools::getConnection();
         $statement=$connection->prepare("INSERT INTO oauth2 (state,code) VALUES (?,?)");
         $statement->bind_param("ss",$uuid,$code);
-        return $statement->execute();
+
+        $result=$statement->execute();
+        
+        $statement->close();
+        $connection->close();
+
+        return $result;
     }
 
 }
