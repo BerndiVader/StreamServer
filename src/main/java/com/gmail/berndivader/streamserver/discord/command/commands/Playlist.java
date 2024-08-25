@@ -1,22 +1,27 @@
 package com.gmail.berndivader.streamserver.discord.command.commands;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
+import com.gmail.berndivader.streamserver.discord.action.ButtonAction;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.permission.Permission;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 
+import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.MessageCreateMono;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Permission
-@DiscordCommand(name="playlist",usage="[filter] -> Search for files.")
+@DiscordCommand(name="search",usage="[filter] -> Search for files.")
 public class Playlist extends Command<List<Message>> {
 	
 	@Override
@@ -40,14 +45,25 @@ public class Playlist extends Command<List<Message>> {
 		messages.add(builder.toString());
 		
 		List<Mono<Message>>monos=new ArrayList<Mono<Message>>();
+		
 		IntStream.range(0,messages.size()).mapToObj(i->{
 			
-			return channel.createMessage(EmbedCreateSpec.builder()
+			MessageCreateMono mono=channel.createMessage(EmbedCreateSpec.builder()
 					.color(Color.CINNABAR)
-					.title(i==0?"Playlist result":"Playlist continue")
+					.title(i==0?"Search result":"Search continue")
 					.description(messages.get(i))
 					.footer(i==messages.size()-1?"Found ".concat(Integer.toString(filesSize)).concat(" matches"):"",null)
 					.build());
+			if(filesSize==1) {
+				Optional<File>opt=BroadcastRunner.getFileByName(list.get(0));
+				if(opt.isPresent()) {
+					File file=opt.get();
+					Long userId=member.getId().asLong();
+					mono=mono.withComponents(ActionRow.of(ButtonAction.Builder.schedule(file,userId),ButtonAction.Builder.play(file,userId)));
+				}
+			}
+			
+			return mono;
 			
 		}).forEach(monos::add);
 		

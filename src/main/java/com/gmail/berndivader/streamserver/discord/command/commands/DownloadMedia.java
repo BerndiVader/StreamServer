@@ -15,7 +15,7 @@ import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.config.Config;
-import com.gmail.berndivader.streamserver.discord.ButtonAction;
+import com.gmail.berndivader.streamserver.discord.action.ButtonAction;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.permission.Permission;
 import com.gmail.berndivader.streamserver.discord.permission.Permissions;
@@ -193,8 +193,13 @@ public class DownloadMedia extends Command<Void> {
 									ANSI.printErr(e.getMessage(),e);
 								}
 								optLink.ifPresentOrElse(
-									link->embed.addField(Field.of("Downloadlink",link,false)),
-									()->embed.addField(Field.of("Downloadlink","Failed to create download link.",false))
+									link->{
+										edit.addComponent(ActionRow.of(ButtonAction.Builder.link(link,"Download")));
+										embed.addField(Field.of("Downloadlink",link,false));
+									},
+									()->{
+										embed.addField(Field.of("Downloadlink","Failed to create download link.",false));
+									}
 								);
 							}
 						}
