@@ -55,7 +55,7 @@ public class AddScheduled implements Callable<Boolean> {
 			return false;
 		}
 		if(Config.DEBUG) ANSI.println(exists?"\n[MYSQL TRACK ADDED FOR SCHEDULE]":"\n[MYSQL TRACK ALREADY ON SCHEDULE]");
-		return true;
+		return !exists;
 	}
 
 }
