@@ -59,7 +59,7 @@ public class Playlist extends Command<List<Message>> {
 				if(opt.isPresent()) {
 					File file=opt.get();
 					Long userId=member.getId().asLong();
-					mono=mono.withComponents(ActionRow.of(ButtonAction.Builder.schedule(file,userId),ButtonAction.Builder.play(file,userId)));
+					mono=mono.withComponents(ActionRow.of(ButtonAction.Builder.play(file,userId),ButtonAction.Builder.schedule(file,userId)));
 				}
 			}
 			

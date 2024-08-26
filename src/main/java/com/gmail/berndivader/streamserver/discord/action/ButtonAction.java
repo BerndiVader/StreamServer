@@ -27,7 +27,6 @@ import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.ActionComponent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
-import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.spec.MessageEditMono;
 import discord4j.discordjson.json.ImmutableComponentData;
@@ -59,9 +58,12 @@ public class ButtonAction {
 						event.deferEdit().withEphemeral(true).subscribe();
 						
 						JsonObject json=JsonParser.parseString(custom.replaceFirst(ACTION_PREFIX,"")).getAsJsonObject();
-						
 						SimpleEntry<Long,Action>entry=json.has("uid")?actions.get(json.get("uid").getAsString()):null;
-						if(entry==null) return;
+						
+						if(entry==null) {
+							event.getMessage().get().edit().withContentOrNull("Button action is expired.").subscribe();
+							return;
+						}
 						
 						Action a=entry.getValue();						
 						Long userId=inter.getMember().get().getId().asLong();
@@ -77,23 +79,17 @@ public class ButtonAction {
 										List<ActionComponent>list=new ArrayList<ActionComponent>();
 										
 										row.getData().components().get().forEach(aa->{
-											if(aa.customId().isAbsent()||!aa.customId().get().contains(a.uid)) {
+											if(!aa.customId().isAbsent()&&aa.customId().get().contains(a.uid)) {
+												list.add(((Button)Button.fromData(aa)).disabled(true));
+											} else {
 												list.add((ActionComponent)ActionComponent.fromData(aa));
 											}
 										});
-
-										if(list.isEmpty()) {
-											mono.withComponentsOrNull(new ArrayList<LayoutComponent>());
-										} else {
-											mono.withComponents(ActionRow.of(list));
-										}
-
+										
+										mono.withComponents(ActionRow.of(list)).subscribe();
 									}
 								}
 							});
-							mono.withContentOrNull("Executed button action.").subscribe();
-						} else {
-							mono.withContentOrNull("Failed to process action.").subscribe();
 						}
 						
 					}
@@ -110,7 +106,6 @@ public class ButtonAction {
 		AtomicBoolean ok=new AtomicBoolean(false);
 		switch(action.action) {
 			case PLAY: {
-				ANSI.println(action.packet.getFileName());
 				BroadcastRunner.getFileByName(action.packet.getFileName()).ifPresent(file->{
 					BroadcastRunner.playFile(file);
 					ok.set(true);
@@ -118,14 +113,12 @@ public class ButtonAction {
 				break;
 			}
 			case SCHEDULE: {
-				ANSI.println(action.packet.getFileName());
 				BroadcastRunner.getFileByName(action.packet.getFileName()).ifPresent(file->{
 					try {
 						ok.set(new AddScheduled(file.getName()).future.get(30l,TimeUnit.SECONDS));
 					} catch (InterruptedException | ExecutionException | TimeoutException e) {
 						ANSI.printErr(e.getMessage(),e);
 					}
-					
 				});
 				break;
 			}
@@ -176,7 +169,7 @@ public class ButtonAction {
 					builder
 					.customId(Possible.of(action.toString()))
 					.type(MessageComponent.Type.BUTTON.getValue())
-					.style(Button.Style.PRIMARY.getValue())
+					.style(Button.Style.DANGER.getValue())
 					.label(Possible.of("PLAY"))
 					.build()
 				);
