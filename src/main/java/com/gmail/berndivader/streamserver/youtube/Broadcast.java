@@ -127,7 +127,7 @@ public final class Broadcast {
 		});
 	}
 
-	public static Future<Packet>inserttLivestream(String title,String description,String privacy) {
+	public static Future<Packet>insertLivestream(String title,String description,String privacy) {
 
 		return Helper.EXECUTOR.submit(()->{
 			if(OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
