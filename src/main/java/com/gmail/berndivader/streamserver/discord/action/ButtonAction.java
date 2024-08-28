@@ -141,6 +141,7 @@ public class ButtonAction {
 				.style(Button.Style.DANGER.getValue())
 				.customId(Possible.of(uuid.toString()))
 				.label(Possible.of("CANCEL"))
+				.url(Possible.absent())
 				.build()
 			);
 			
@@ -156,6 +157,7 @@ public class ButtonAction {
 				.type(MessageComponent.Type.BUTTON.getValue())
 				.style(Button.Style.SECONDARY.getValue())
 				.label(Possible.of("SCHEDULE"))
+				.url(Possible.absent())
 				.build()
 			);
 			
@@ -171,6 +173,7 @@ public class ButtonAction {
 					.type(MessageComponent.Type.BUTTON.getValue())
 					.style(Button.Style.DANGER.getValue())
 					.label(Possible.of("PLAY"))
+					.url(Possible.absent())
 					.build()
 				);
 			
