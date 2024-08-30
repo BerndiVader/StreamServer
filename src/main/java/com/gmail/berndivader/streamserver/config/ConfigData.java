@@ -56,6 +56,7 @@ public class ConfigData {
 	String DISCORD_TOKEN;
 	@SerializedName("DISCORD_CHANNEL")
 	String DISCORD_VOICE_CHANNEL_NAME;
+	Boolean DISCORD_MUSIC_BOT;
 	Long DISCORD_ROLE_ID;
 	
 	HashMap<Long,Guild>DISCORD_PERMITTED_GUILDS;

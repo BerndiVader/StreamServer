@@ -12,6 +12,9 @@ repositories {
   	maven {
     	url 'https://m2.dv8tion.net/releases'
   	}
+  	maven {
+  		url 'https://jitpack.io'
+  	}
 }
 
 configurations {
@@ -35,8 +38,9 @@ dependencies {
     supplied 'mysql:mysql-connector-java:+'
     supplied 'com.google.code.gson:gson:+'
     supplied 'org.slf4j:slf4j-nop:+'
-    supplied 'com.discord4j:discord4j-core:+'
+    supplied 'com.discord4j:discord4j-core:3.2.6'
     supplied 'org.apache.httpcomponents:httpclient:4.3.4'
+    supplied 'com.github.devoxin:lavaplayer:1.9.1'
 }
 
 jar {
