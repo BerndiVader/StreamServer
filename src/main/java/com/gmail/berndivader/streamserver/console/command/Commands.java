@@ -11,6 +11,7 @@ import java.util.jar.JarInputStream;
 
 import com.gmail.berndivader.streamserver.StreamServer;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
+import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
@@ -75,6 +76,9 @@ public class Commands {
 										break;
 									case DATABASE:
 										add&=DatabaseConnection.status==STATUS.OK;
+										break;
+									case DISCORDMUSIC:
+										add&=Config.DISCORD_MUSIC_BOT;
 										break;
 									default:
 										add=true;

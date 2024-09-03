@@ -4,5 +4,6 @@ public enum Requireds {
 	NONE,
 	BROADCASTRUNNER,
 	DISCORDBOT,
+	DISCORDMUSIC,
 	DATABASE
 }
