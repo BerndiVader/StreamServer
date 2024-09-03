@@ -5,6 +5,9 @@ import java.time.Duration;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.action.ButtonAction;
 import com.gmail.berndivader.streamserver.discord.command.Commands;
+import com.gmail.berndivader.streamserver.discord.musicplayer.MusicPlayer;
+import com.gmail.berndivader.streamserver.discord.musicplayer.DiscordAudioProvider;
+import com.gmail.berndivader.streamserver.discord.musicplayer.TrackScheduler;
 import com.gmail.berndivader.streamserver.discord.permission.Permissions;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
@@ -15,9 +18,9 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
 import io.netty.resolver.DefaultAddressResolverGroup;
@@ -28,6 +31,8 @@ public final class DiscordBot {
 	public static DiscordBot instance;
 	
 	public final GatewayDiscordClient client;
+	public VoiceChannel voiceChannel;
+	public DiscordAudioProvider provider;
 	public static Status status;
 	
 	static {
@@ -41,9 +46,9 @@ public final class DiscordBot {
 		
 		ReactorResources reactor=ReactorResources.builder()
 				.httpClient(ReactorResources.DEFAULT_HTTP_CLIENT.get()
-						.resolver(DefaultAddressResolverGroup.INSTANCE))
+				.resolver(DefaultAddressResolverGroup.INSTANCE))
 				.build();
-		
+
 		client=DiscordClient.builder(Config.DISCORD_TOKEN)
 			.setReactorResources(reactor)
 			.build()
@@ -63,9 +68,23 @@ public final class DiscordBot {
 		
 		if(status!=Status.CONNECTED) return;
 		
-		client.on(GuildCreateEvent.class).subscribe(event->{
-			if(!Config.DISCORD_PERMITTED_GUILDS.containsKey(event.getGuild().getId().asLong())) event.getClient().logout().subscribe();
-		});
+		client.on(GuildCreateEvent.class)
+			.filter(event->Config.DISCORD_PERMITTED_GUILDS.containsKey(event.getGuild().getId().asLong()))
+			.flatMap(event->event.getGuild().getChannels())
+			.filter(channel->Config.DISCORD_MUSIC_BOT&&channel.getType()==Channel.Type.GUILD_VOICE&&channel.getName().equals(Config.DISCORD_VOICE_CHANNEL_NAME))
+			.cast(VoiceChannel.class)
+			.flatMap(voice->{
+				
+				voiceChannel=voice;
+				provider=MusicPlayer.create();
+				return voice.join().withProvider(provider).doOnNext(vc->{
+					provider.player().addListener(new TrackScheduler());
+				}).onErrorContinue((error,o)->{
+					ANSI.printErr(error.getMessage(),error);
+				});
+				
+			})
+		.subscribe();
 		
 		client.on(MessageCreateEvent.class)
 	    	.filter(
@@ -108,9 +127,6 @@ public final class DiscordBot {
 	}
 	
 	public void close() {
-		client.getGuilds().flatMap(Guild::getChannels)
-				.filter(channel->channel.getName().equals(Config.DISCORD_VOICE_CHANNEL_NAME)).flatMap(GuildChannel::delete)
-				.blockLast(Duration.ofSeconds(20));
 		status=Status.DISCONNECTED;
 		client.logout().block(Duration.ofSeconds(20));
 	}

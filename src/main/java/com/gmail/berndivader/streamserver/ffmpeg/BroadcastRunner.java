@@ -239,7 +239,6 @@ public final class BroadcastRunner extends TimerTask {
 	}
 	
 	private static synchronized void createStream(File file) {
-		String path=file.getAbsolutePath();
 		playingPacket(FFProbePacket.build(file));
 		
 		String title="";
@@ -267,7 +266,7 @@ public final class BroadcastRunner extends TimerTask {
 		ANSI.prompt();
 				
 		ffmpeg(FFmpeg.atPath()
-				.addInput(UrlInput.fromUrl(path)
+				.addInput(UrlInput.fromUrl(file.getAbsolutePath())
 						.addArgument("-re")
 						)
 				.addOutput(UrlOutput.toUrl(Config.YOUTUBE_STREAM_URL+"/"+Config.YOUTUBE_STREAM_KEY)
