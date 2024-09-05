@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -41,16 +42,16 @@ public class Config {
 	public static Boolean YOUTUBE_USE_COOKIES=false;
 	public static File YOUTUBE_COOKIES;
 	
-	public static Boolean STREAM_BOT_START=true;
-	public static Boolean DISCORD_BOT_START=true;
+	public static Boolean STREAM_BOT_START=false;
+	public static Boolean DISCORD_BOT_START=false;
 	
 	public static String PLAYLIST_PATH="./playlist";
 	public static String PLAYLIST_PATH_CUSTOM="./custom";
 	
 	public static String DL_ROOT_PATH="./library";
-	private static String DL_MUSIC_PATH="/music";
-	private static String DL_TEMP_PATH="/temp";
-	private static String DL_MEDIA_PATH="/media";
+	public static String DL_MUSIC_PATH="/music";
+	public static String DL_TEMP_PATH="/temp";
+	public static String DL_MEDIA_PATH="/media";
 	public static String DL_WWW_THUMBNAIL_PATH="/absolute/path/to/thumbnails";
 	
 	public static Long DL_TIMEOUT_SECONDS=1800l;
@@ -64,10 +65,12 @@ public class Config {
 	public static String DATABASE_NAME="ytbot";
 	public static String DATABASE_USER="default";
 	public static String DATABASE_PWD="default";
+	public static Long DATABASE_TIMEOUT_SECONDS=10l;
 	
 	public static String DISCORD_TOKEN="default";
 	public static String DISCORD_VOICE_CHANNEL_NAME="Voice Channel Name";
 	public static Boolean DISCORD_MUSIC_BOT=false;
+	public static Boolean DISCORD_MUSIC_AUTOPLAY=false;
 	public static Long DISCORD_ROLE_ID=0l;
 	public static Long DISCORD_CHANNEL_ID=0l;
 	
@@ -119,96 +122,39 @@ public class Config {
 	}
 	
 	public static boolean saveConfig() {
-		boolean ok=true;
-		try (FileWriter writer=new FileWriter(config_file.getAbsoluteFile())) {
-			data.PLAYLIST_PATH=PLAYLIST_PATH;
-			data.PLAYLIST_PATH_CUSTOM=PLAYLIST_PATH_CUSTOM;
-			data.DL_ROOT_PATH=DL_ROOT_PATH;
-			data.DL_MUSIC_PATH=DL_MUSIC_PATH;
-			data.DL_TEMP_PATH=DL_TEMP_PATH;
-			data.DL_MEDIA_PATH=DL_MEDIA_PATH;
-			data.DL_WWW_THUMBNAIL_PATH=DL_WWW_THUMBNAIL_PATH;
-			data.DL_TIMEOUT_SECONDS=DL_TIMEOUT_SECONDS;
-			data.DL_URL=DL_URL;
-			data.DL_INTERVAL_FORMAT=DL_INTERVAL_FORMAT;
-			data.DL_INTERVAL_VALUE=DL_INTERVAL_VALUE;
-			data.YOUTUBE_STREAM_KEY=YOUTUBE_STREAM_KEY;
-			data.YOUTUBE_STREAM_URL=YOUTUBE_STREAM_URL;
-			data.BROADCAST_DEFAULT_TITLE=BROADCAST_DEFAULT_TITLE;
-			data.BROADCAST_DEFAULT_DESCRIPTION=BROADCAST_DEFAULT_DESCRIPTION;
-			data.BROADCAST_DEFAULT_PRIVACY=BROADCAST_DEFAULT_PRIVACY;
-			data.BROADCAST_REPEAT_TIMER_INTERVAL=BROADCAST_REPEAT_TIMER_INTERVAL;
-			data.YOUTUBE_API_KEY=YOUTUBE_API_KEY;
-			data.YOUTUBE_USE_COOKIES=YOUTUBE_USE_COOKIES;
-			data.YOUTUBE_CLIENT_ID=YOUTUBE_CLIENT_ID;
-			data.YOUTUBE_CLIENT_SECRET=YOUTUBE_CLIENT_SECRET;
-			data.YOUTUBE_AUTH_REDIRECT=YOUTUBE_AUTH_REDIRECT;
-			data.YOUTUBE_ACCESS_TOKEN=YOUTUBE_ACCESS_TOKEN;
-			data.YOUTUBE_REFRESH_TOKEN=YOUTUBE_REFRESH_TOKEN;
-			data.YOUTUBE_TOKEN_TIMESTAMP=YOUTUBE_TOKEN_TIMESTAMP;
-			data.STREAM_BOT_START=STREAM_BOT_START;
-			data.DATABASE_HOST=DATABASE_HOST;
-			data.DATABASE_PORT=DATABASE_PORT;
-			data.DATABASE_NAME=DATABASE_NAME;
-			data.DATABASE_USER=DATABASE_USER;
-			data.DATABASE_PWD=DATABASE_PWD;
-			data.DISCORD_TOKEN=DISCORD_TOKEN;
-			data.DISCORD_VOICE_CHANNEL_NAME=DISCORD_VOICE_CHANNEL_NAME;
-			data.DISCORD_MUSIC_BOT=DISCORD_MUSIC_BOT;
-			data.DISCORD_ROLE_ID=DISCORD_ROLE_ID;
-			data.DISCORD_BOT_START=DISCORD_BOT_START;
-			data.DISCORD_PERMITTED_GUILDS=DISCORD_PERMITTED_GUILDS;
-			data.DISCORD_PERMITTED_USERS=DISCORD_PERMITTED_USERS;
+		try(FileWriter writer=new FileWriter(config_file.getAbsoluteFile())) {
+			Field[]fields=ConfigData.class.getDeclaredFields();
+			for(Field field:fields) {
+				try {
+					Field config=Config.class.getField(field.getName());
+					field.set(data,config.get(null));
+				} catch (NoSuchFieldException | IllegalAccessException e) {
+					ANSI.printErr(e.getMessage(),e);
+				}
+			}
 	        Helper.GSON.toJson(data,writer);
 		} catch (IOException e) {
-			ok=false;
 			ANSI.printErr("Error while saving config file.",e);
-		}		
-		return ok;
+			return false;
+		}
+		return true;
 	}
-	
+
 	public static boolean loadConfig() {
-		try (FileReader reader=new FileReader(config_file.getAbsoluteFile())) {
+		try(FileReader reader=new FileReader(config_file.getAbsoluteFile())) {
 			data=Helper.GSON.fromJson(reader,ConfigData.class);
-			if(data.PLAYLIST_PATH!=null) PLAYLIST_PATH=data.PLAYLIST_PATH;
-			if(data.PLAYLIST_PATH_CUSTOM!=null) PLAYLIST_PATH_CUSTOM=data.PLAYLIST_PATH_CUSTOM;
-			if(data.DL_ROOT_PATH!=null) DL_ROOT_PATH=data.DL_ROOT_PATH;
-			if(data.DL_MUSIC_PATH!=null) DL_MUSIC_PATH=data.DL_MUSIC_PATH;
-			if(data.DL_TEMP_PATH!=null) DL_TEMP_PATH=data.DL_TEMP_PATH;
-			if(data.DL_MEDIA_PATH!=null) DL_MEDIA_PATH=data.DL_MEDIA_PATH;
-			if(data.DL_WWW_THUMBNAIL_PATH!=null) DL_WWW_THUMBNAIL_PATH=data.DL_WWW_THUMBNAIL_PATH;
-			if(data.DL_TIMEOUT_SECONDS!=null) DL_TIMEOUT_SECONDS=data.DL_TIMEOUT_SECONDS;
-			if(data.DL_URL!=null) DL_URL=data.DL_URL;
-			if(data.DL_INTERVAL_FORMAT!=null) DL_INTERVAL_FORMAT=data.DL_INTERVAL_FORMAT;
-			if(data.DL_INTERVAL_VALUE!=null) DL_INTERVAL_VALUE=data.DL_INTERVAL_VALUE;
-			if(data.YOUTUBE_STREAM_KEY!=null) YOUTUBE_STREAM_KEY=data.YOUTUBE_STREAM_KEY;
-			if(data.YOUTUBE_STREAM_URL!=null) YOUTUBE_STREAM_URL=data.YOUTUBE_STREAM_URL;
-			if(data.BROADCAST_DEFAULT_TITLE!=null) BROADCAST_DEFAULT_TITLE=data.BROADCAST_DEFAULT_TITLE;
-			if(data.BROADCAST_DEFAULT_DESCRIPTION!=null) BROADCAST_DEFAULT_DESCRIPTION=data.BROADCAST_DEFAULT_DESCRIPTION;
-			if(data.BROADCAST_DEFAULT_PRIVACY!=null) BROADCAST_DEFAULT_PRIVACY=data.BROADCAST_DEFAULT_PRIVACY;
-			if(data.BROADCAST_REPEAT_TIMER_INTERVAL!=null) BROADCAST_REPEAT_TIMER_INTERVAL=data.BROADCAST_REPEAT_TIMER_INTERVAL;
-			if(data.YOUTUBE_API_KEY!=null) YOUTUBE_API_KEY=data.YOUTUBE_API_KEY;
-			if(data.YOUTUBE_USE_COOKIES!=null) YOUTUBE_USE_COOKIES=data.YOUTUBE_USE_COOKIES;
-			if(data.YOUTUBE_CLIENT_ID!=null) YOUTUBE_CLIENT_ID=data.YOUTUBE_CLIENT_ID;
-			if(data.YOUTUBE_CLIENT_SECRET!=null) YOUTUBE_CLIENT_SECRET=data.YOUTUBE_CLIENT_SECRET;			
-			if(data.YOUTUBE_AUTH_REDIRECT!=null) YOUTUBE_AUTH_REDIRECT=data.YOUTUBE_AUTH_REDIRECT;			
-			if(data.YOUTUBE_ACCESS_TOKEN!=null) YOUTUBE_ACCESS_TOKEN=data.YOUTUBE_ACCESS_TOKEN;			
-			if(data.YOUTUBE_REFRESH_TOKEN!=null) YOUTUBE_REFRESH_TOKEN=data.YOUTUBE_REFRESH_TOKEN;			
-			if(data.YOUTUBE_TOKEN_TIMESTAMP!=null) YOUTUBE_TOKEN_TIMESTAMP=data.YOUTUBE_TOKEN_TIMESTAMP;			
-			if(data.STREAM_BOT_START!=null) STREAM_BOT_START=data.STREAM_BOT_START;
-			if(data.DATABASE_HOST!=null) DATABASE_HOST=data.DATABASE_HOST;
-			if(data.DATABASE_PORT!=null) DATABASE_PORT=data.DATABASE_PORT;
-			if(data.DATABASE_NAME!=null) DATABASE_NAME=data.DATABASE_NAME;
-			if(data.DATABASE_USER!=null) DATABASE_USER=data.DATABASE_USER;
-			if(data.DATABASE_PWD!=null) DATABASE_PWD=data.DATABASE_PWD;
-			if(data.DISCORD_TOKEN!=null) DISCORD_TOKEN=data.DISCORD_TOKEN;
-			if(data.DISCORD_VOICE_CHANNEL_NAME!=null) DISCORD_VOICE_CHANNEL_NAME=data.DISCORD_VOICE_CHANNEL_NAME;
-			if(data.DISCORD_MUSIC_BOT!=null) DISCORD_MUSIC_BOT=data.DISCORD_MUSIC_BOT;
-			if(data.DISCORD_ROLE_ID!=null) DISCORD_ROLE_ID=data.DISCORD_ROLE_ID;
-			if(data.DISCORD_BOT_START!=null) DISCORD_BOT_START=data.DISCORD_BOT_START;
-			if(data.DISCORD_PERMITTED_GUILDS!=null) DISCORD_PERMITTED_GUILDS=data.DISCORD_PERMITTED_GUILDS;
-			if(data.DISCORD_PERMITTED_USERS!=null) DISCORD_PERMITTED_USERS=data.DISCORD_PERMITTED_USERS;
-			
+			Field[]fields=ConfigData.class.getDeclaredFields();
+			for(Field field:fields) {
+				try {
+					Object value=field.get(data);
+					if(value!=null) {
+						Field staticField=Config.class.getField(field.getName());
+						staticField.set(null,value);
+					}
+				} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+					ANSI.printErr(e.getMessage(),e);
+				}
+			}
 		} catch (IOException e) {
 			ANSI.printErr("Error while loading config file.",e);
 			return false;
