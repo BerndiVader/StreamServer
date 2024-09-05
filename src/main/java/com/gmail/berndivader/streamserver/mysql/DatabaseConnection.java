@@ -7,7 +7,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
@@ -15,6 +20,7 @@ public class DatabaseConnection {
 	
 	public enum STATUS {
 		OK,
+		SERVER_NOT_FOUND,
 		SERVER_CONNECTION_FAILED,
 		DB_NOT_FOUND,
 		DB_CONNECTION_FAILED,
@@ -27,38 +33,71 @@ public class DatabaseConnection {
 	public DatabaseConnection() {
 		ANSI.print("[BLUE]Test connection to mysql server...");
 		
-		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			ANSI.println("[GREEN]OK[/GREEN]");
-			status=STATUS.OK;
-		} catch (ClassNotFoundException e) {
-			ANSI.println("[RED]FAILED[/RED][BR][YELLOW]Database functions disabled.[/YELLOW]");
-			ANSI.printErr("Missing jdbc driver.",e);
-			status=STATUS.SERVER_CONNECTION_FAILED;
-		}
-		
-		if(status==STATUS.OK) {
-			try (Connection connection=getNewConnection()) {
-				try(PreparedStatement statement=connection.prepareStatement("SELECT infotext FROM ytbot.info LIMIT 1",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
-					try(ResultSet result=statement.executeQuery()) {
-						if(result.first()) {
-							if(result.getString("infotext").equals("YouTube Broadcast Bot Database")) {
-								ANSI.println("[BR][GREEN]Database found.[/GREEN]");
+		Future<STATUS>future=Helper.EXECUTOR.submit(()->{
+			try {
+				Class.forName("com.mysql.cj.jdbc.Driver");
+				try (Connection connection=getNewConnection()) {
+					try(PreparedStatement statement=connection.prepareStatement("SELECT infotext FROM ytbot.info LIMIT 1",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
+						try(ResultSet result=statement.executeQuery()) {
+							if(result.first()) {
+								if(result.getString("infotext").equals("YouTube Broadcast Bot Database")) {
+									status=STATUS.OK;
+								} else {
+									status=STATUS.DB_NOT_FOUND;
+								}
 							} else {
-								ANSI.printWarn("Not able to identify the database!");
 								status=STATUS.DB_NOT_FOUND;
 							}
-						} else {
-							ANSI.printWarn("Not able to identify the database!");
-							status=STATUS.DB_NOT_FOUND;
 						}
 					}
+				} catch (SQLException e) {
+					ANSI.printErr("Connection to database failed!",e);
+					status=STATUS.DB_CONNECTION_FAILED;
 				}
-			} catch (SQLException e) {
-				ANSI.printErr("Connection to database failed!",e);
-				status=STATUS.DB_CONNECTION_FAILED;
+			} catch (ClassNotFoundException e) {
+				ANSI.printErr(e.getMessage(),e);
+				status=STATUS.SERVER_CONNECTION_FAILED;
 			}
+			return status;
+		});
+		
+		try {
+			status=future.get(Config.DATABASE_TIMEOUT_SECONDS,TimeUnit.SECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			status=STATUS.SERVER_NOT_FOUND;
+			future.cancel(true);
 		}
+		
+		String response="[RED]FAILED![RESET]";
+		response=response.concat("[BR][YELLOW]MYSQL CONNECTION FAILED BECAUSE OF UNKNOWN REASON.[RESET]");
+		
+		switch(status) {
+			case OK:
+				response="[GREEN]OK![RESET]";
+				break;
+			case SERVER_NOT_FOUND:
+				response="[RED]FAILED![RESET]";
+				response=response.concat("[BR][YELLOW]MYSQL SERVER NOT FOUND![RESET]");
+				break;
+			case SERVER_CONNECTION_FAILED:
+				response="[RED]FAILED![RESET]";
+				response=response.concat("[BR][YELLOW]UNABLE TO LOG INTO MYSQL SERVER.[RESET]");
+				break;
+			case DB_NOT_FOUND:
+				response="[RED]FAILED![RESET]";
+				response=response.concat("[BR][YELLOW]MYSQL DATABASE NOT FOUND ON SERVER.[RESET]");
+				break;
+			case DB_CONNECTION_FAILED:
+				response="[RED]FAILED![RESET]";
+				response=response.concat("[BR][YELLOW]UNABLE TO IDENTIFY DATABASE.[RESET]");
+				break;
+			case UNKNOWN:
+				response="[RED]FAILED![RESET]";
+				response=response.concat("[BR][YELLOW]MYSQL CONNECTION FAILED BECAUSE OF UNKNOWN REASON.[RESET]");
+				break;
+		}
+		ANSI.println(response);
+		
 	}
 	
 	public static Connection getNewConnection() throws SQLException {
