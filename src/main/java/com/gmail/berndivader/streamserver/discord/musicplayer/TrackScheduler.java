@@ -57,6 +57,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	@Override
 	public void onTrackStart(AudioPlayer player,AudioTrack track) {
+		DiscordBot.instance.voiceChannel.createMessage(Paths.get(track.getIdentifier()).getFileName().toString()).subscribe();
 	}
 
 	@Override
@@ -66,8 +67,10 @@ public class TrackScheduler extends AudioEventAdapter {
 		if(next==null) next=DiscordBot.instance.provider.scheduledTracks.poll();
 		if(next!=null) {
 			player.playTrack(next);
-			DiscordBot.instance.voiceChannel.edit().withReason(Paths.get(next.getIdentifier()).getFileName().toString()).subscribe();
+		} else if(Config.DISCORD_MUSIC_AUTOPLAY) {
+			MusicPlayer.playRandomMusic();
 		}
+		
 	}
 
 	@Override

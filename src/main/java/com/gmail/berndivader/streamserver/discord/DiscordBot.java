@@ -79,6 +79,7 @@ public final class DiscordBot {
 				provider=MusicPlayer.create();
 				return voice.join().withProvider(provider).doOnNext(vc->{
 					provider.player().addListener(new TrackScheduler());
+					if(Config.DISCORD_MUSIC_AUTOPLAY) MusicPlayer.playRandomMusic();
 				}).onErrorContinue((error,o)->{
 					ANSI.printErr(error.getMessage(),error);
 				});

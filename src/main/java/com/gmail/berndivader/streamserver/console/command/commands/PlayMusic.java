@@ -46,7 +46,7 @@ public class PlayMusic extends Command {
 			
 			optFile.ifPresent(path->{
 				if(path.toLowerCase().endsWith(".mp3")) {
-					MusicPlayer.manager().loadItem(path,new AudioLoadResultHandler() {
+					MusicPlayer.manager.loadItem(path,new AudioLoadResultHandler() {
 						
 						@Override
 						public void trackLoaded(AudioTrack track) {
