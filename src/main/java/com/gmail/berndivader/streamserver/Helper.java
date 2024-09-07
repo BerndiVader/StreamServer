@@ -94,6 +94,7 @@ public final class Helper {
 		boolean temp=false;
 		
 		builder.command("yt-dlp"
+				,"--ignore-errors"
 				,"--progress-delta","2"
 				,"--restrict-filenames"
 				,"--embed-metadata"
@@ -127,12 +128,11 @@ public final class Helper {
 						downloadable=temp=true;
 						break;
 					case("music"):
-						builder.command().addAll(Arrays.asList("--ignore-errors"
-								,"--extract-audio"
+						builder.command().addAll(Arrays.asList(
+								"--extract-audio"
 								,"--format","bestaudio"
 								,"--audio-format","mp3"
 								,"--audio-quality","160K"
-								,"--output","%(title).64s.%(ext)s"
 						));
 						getOrCreateMediaDir(Config.musicPath()).ifPresent(dir->builder.directory(dir));;
 						break;

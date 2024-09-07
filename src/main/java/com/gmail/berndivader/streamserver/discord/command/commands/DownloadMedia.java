@@ -156,7 +156,9 @@ public class DownloadMedia extends Command<Void> {
 							}
 						}
 						
-						error.lines().filter(line->!line.startsWith("WARNING")).forEach(line->errorBuilder.append(line));
+						if(error!=null&&error.ready()) {							
+							error.lines().filter(line->!line.startsWith("WARNING")).forEach(line->errorBuilder.append(line));
+						}
 						if(errorBuilder.length()>0) status=Status.ERROR;
 						
 					}
