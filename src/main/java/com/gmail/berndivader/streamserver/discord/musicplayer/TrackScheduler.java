@@ -22,6 +22,8 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
+import discord4j.core.object.entity.channel.VoiceChannel;
+
 public class TrackScheduler extends AudioEventAdapter {
 	
 	private final Map<Class<? extends AudioEvent>,Consumer<AudioEvent>>handlers=new HashMap<Class<? extends AudioEvent>,Consumer<AudioEvent>>();
@@ -49,15 +51,18 @@ public class TrackScheduler extends AudioEventAdapter {
 		
 	@Override
 	public void onPlayerPause(AudioPlayer player) {
+		if(Config.DEBUG) ANSI.println("Audioplayer paused!");
 	}
 	
 	@Override
 	public void onPlayerResume(AudioPlayer player) {
+		if(Config.DEBUG) ANSI.println("Audioplayer resumed!");
 	}
 
 	@Override
 	public void onTrackStart(AudioPlayer player,AudioTrack track) {
-		DiscordBot.instance.voiceChannel.createMessage(Paths.get(track.getIdentifier()).getFileName().toString()).subscribe();
+		VoiceChannel voiceChannel=DiscordBot.instance.voiceChannel;
+		if(voiceChannel!=null) voiceChannel.createMessage(Paths.get(track.getIdentifier()).getFileName().toString()).subscribe();
 	}
 
 	@Override
@@ -75,6 +80,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	@Override
 	public void onTrackException(AudioPlayer player,AudioTrack track,FriendlyException exception) {
+		if(Config.DEBUG) ANSI.printErr(exception.getMessage(),exception);
 	}
 
 	@Override
@@ -84,6 +90,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	@Override
 	public void onTrackStuck(AudioPlayer player,AudioTrack track,long thresholdMs) {
+		if(Config.DEBUG) ANSI.printErr("AudioTrack stuck: "+track.getIdentifier(),null);
 	}
 
 	@Override
