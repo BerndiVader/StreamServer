@@ -1,5 +1,6 @@
 package com.gmail.berndivader.streamserver.config;
 
+import java.awt.Point;
 import java.util.HashMap;
 
 import com.gmail.berndivader.streamserver.discord.permission.Guild;
@@ -40,6 +41,7 @@ public class ConfigData {
 	public String DL_TEMP_PATH;
 	public String DL_MEDIA_PATH;
 	public String DL_WWW_THUMBNAIL_PATH;
+	public Point DL_THUMBNAIL_SIZE;
 	
 	public Long DL_TIMEOUT_SECONDS;
 	public String DL_URL;

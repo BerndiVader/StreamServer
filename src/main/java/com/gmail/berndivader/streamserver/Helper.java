@@ -189,11 +189,11 @@ public final class Helper {
 				int w,h;
 				if(bimage.getWidth()>bimage.getHeight()) {
 					double ratio=(double)bimage.getHeight()/bimage.getWidth();
-					w=640;
+					w=Config.DL_THUMBNAIL_SIZE.x;
 					h=(int)(w*ratio);
 				} else {
 					double ratio=(double)bimage.getWidth()/bimage.getHeight();
-					h=460;
+					h=Config.DL_THUMBNAIL_SIZE.y;
 					w=(int)(h*ratio);
 				}
 				

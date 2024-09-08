@@ -1,5 +1,6 @@
 package com.gmail.berndivader.streamserver.config;
 
+import java.awt.Point;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -53,6 +54,7 @@ public class Config {
 	public static String DL_TEMP_PATH="/temp";
 	public static String DL_MEDIA_PATH="/media";
 	public static String DL_WWW_THUMBNAIL_PATH="/absolute/path/to/thumbnails";
+	public static Point DL_THUMBNAIL_SIZE=new Point(640,480);
 	
 	public static Long DL_TIMEOUT_SECONDS=1800l;
 	public static String DL_URL="https://path.to.php";
