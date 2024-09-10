@@ -10,6 +10,7 @@ import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -24,6 +25,8 @@ public final class MusicPlayer {
 	
 	static {
 		manager=new DefaultAudioPlayerManager();
+		manager.getConfiguration().setOutputFormat(StandardAudioDataFormats.DISCORD_OPUS);
+		manager.getConfiguration().setOpusEncodingQuality(5);
 		AudioSourceManagers.registerLocalSource(manager);
 	}
 	

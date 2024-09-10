@@ -26,9 +26,12 @@ import discord4j.core.object.entity.channel.VoiceChannel;
 
 public class TrackScheduler extends AudioEventAdapter {
 	
+	private final VoiceChannel voiceChannel;
+	
 	private final Map<Class<? extends AudioEvent>,Consumer<AudioEvent>>handlers=new HashMap<Class<? extends AudioEvent>,Consumer<AudioEvent>>();
 	
-	public TrackScheduler() {
+	public TrackScheduler(VoiceChannel voice) {
+		this.voiceChannel=voice;
 		handlers.put(PlayerPauseEvent.class,event->onPlayerPause(event.player));
 		handlers.put(PlayerResumeEvent.class,event->onPlayerResume(event.player));
 		handlers.put(TrackStartEvent.class,event->{
@@ -61,8 +64,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	@Override
 	public void onTrackStart(AudioPlayer player,AudioTrack track) {
-		VoiceChannel voiceChannel=DiscordBot.instance.voiceChannel;
-		if(voiceChannel!=null) voiceChannel.createMessage(Paths.get(track.getIdentifier()).getFileName().toString()).subscribe();
+		voiceChannel.createMessage(Paths.get(track.getIdentifier()).getFileName().toString()).subscribe();
 	}
 
 	@Override

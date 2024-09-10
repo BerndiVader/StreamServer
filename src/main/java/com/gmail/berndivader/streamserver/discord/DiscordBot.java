@@ -19,11 +19,14 @@ import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
+import discord4j.rest.util.Permission;
+import discord4j.rest.util.PermissionSet;
 import io.netty.resolver.DefaultAddressResolverGroup;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
@@ -33,7 +36,6 @@ public final class DiscordBot {
 	public static DiscordBot instance;
 	
 	public final GatewayDiscordClient client;
-	public VoiceChannel voiceChannel;
 	public DiscordAudioProvider provider;
 	public static Status status;
 	
@@ -77,48 +79,41 @@ public final class DiscordBot {
 			.cast(VoiceChannel.class)
 			.flatMap(voice->{
 				
-				voiceChannel=voice;
 				provider=MusicPlayer.create();
 				
-				return voice.join().withProvider(provider).doOnNext(vc->{
-					provider.player().addListener(new TrackScheduler());
+				return voice.join().withProvider(provider).doOnSuccess(vc->{
+					
+					provider.player().addListener(new TrackScheduler(voice));
 					if(Config.DISCORD_MUSIC_AUTOPLAY) MusicPlayer.playRandomMusic();
 					
 				}).retryWhen(Retry.backoff(5l,Duration.ofSeconds(1)).maxBackoff(Duration.ofSeconds(10)))
 				.onErrorContinue((error,o)->{
+					
 					voice.getVoiceConnection().subscribe(vc->vc.reconnect().subscribe());
 					ANSI.printErr(error.getMessage(),error);
+					
 			    });
 
 			}).subscribe();
 		
+			
 		client.on(VoiceStateUpdateEvent.class)
-		.doOnNext(event->{
-			
-			if(event.getCurrent().getUserId().equals(client.getSelfId())) {
+			.filter(event->(event.isJoinEvent()||event.isMoveEvent())&&!event.getCurrent().getUserId().equals(client.getSelfId()))
+			.flatMap(event->{
 				
-			} else {
+				return event.getCurrent().getMember().doOnSuccess(member->{
+					member.getVoiceState().flatMap(voiceState->voiceState.getChannel()).subscribe(channel -> {
+						
+						if(channel.getName().equals(Config.DISCORD_VOICE_CHANNEL_NAME)) {
+							PermissionOverwrite overrite=PermissionOverwrite.forMember(member.getId(),PermissionSet.none(),PermissionSet.of(Permission.SPEAK,Permission.STREAM));
+							channel.addMemberOverwrite(member.getId(),overrite).subscribe();
+						}
+						
+					});
+				});
 				
-				if(event.isJoinEvent()||event.isMoveEvent()||event.isLeaveEvent()) {
-					event.getCurrent().getMember().doOnSuccess(member->{
-						member.getVoiceState().flatMap(voiceState->voiceState.getChannel()).subscribe(channel -> {
-							if(event.isLeaveEvent()) {
-								member.edit().withMute(false).subscribe();
-							} else {
-								if(channel.getName().equals(Config.DISCORD_VOICE_CHANNEL_NAME)) {
-									member.edit().withMute(true).subscribe();
-								} else {
-									member.edit().withMute(false).subscribe();
-								}
-							}
-						});
-					}).subscribe();
-				}
-				
-			}
-			
-
-		}).subscribe();
+			}).subscribe();
+		
 		
 		client.on(MessageCreateEvent.class)
 	    	.filter(
