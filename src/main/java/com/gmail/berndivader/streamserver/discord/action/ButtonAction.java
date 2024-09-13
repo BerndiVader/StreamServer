@@ -46,7 +46,7 @@ public class ButtonAction {
 		return Mono.fromRunnable(()->{
 			
 			Interaction inter=event.getInteraction();
-			if(inter.getApplicationId().asLong()!=DiscordBot.instance.client.getSelfId().asLong()||!inter.getMember().isPresent()) return;
+			if(inter.getApplicationId().asLong()!=DiscordBot.client.getSelfId().asLong()||!inter.getMember().isPresent()) return;
 			
 			if(inter.getCommandInteraction().isPresent()) {
 				ApplicationCommandInteraction action=inter.getCommandInteraction().get();

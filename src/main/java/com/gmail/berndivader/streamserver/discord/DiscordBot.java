@@ -34,10 +34,10 @@ import reactor.util.retry.Retry;
 public final class DiscordBot {
 	
 	public static DiscordBot instance;
-	
-	public final GatewayDiscordClient client;
-	public DiscordAudioProvider provider;
+	public static GatewayDiscordClient client;
 	public static Status status;
+	
+	public DiscordAudioProvider provider;
 	
 	static {
 		status=Status.DISCONNECTED;
@@ -45,6 +45,7 @@ public final class DiscordBot {
 	
 	public DiscordBot() {
 		DiscordBot.status=Status.DISCONNECTED;
+		if(Config.DISCORD_MUSIC_BOT) provider=MusicPlayer.create();
 		
 		Commands.instance=new Commands();
 		
@@ -71,16 +72,14 @@ public final class DiscordBot {
 		    }).block();
 		
 		if(status!=Status.CONNECTED) return;
-
+		
 		client.on(GuildCreateEvent.class)
 			.filter(event->Config.DISCORD_PERMITTED_GUILDS.containsKey(event.getGuild().getId().asLong()))
 			.flatMap(event->event.getGuild().getChannels())
 			.filter(channel->Config.DISCORD_MUSIC_BOT&&channel.getType()==Channel.Type.GUILD_VOICE&&channel.getName().equals(Config.DISCORD_VOICE_CHANNEL_NAME))
 			.cast(VoiceChannel.class)
 			.flatMap(voice->{
-				
-				provider=MusicPlayer.create();
-				
+								
 				return voice.join().withProvider(provider).doOnSuccess(vc->{
 					
 					provider.player().addListener(new TrackScheduler(voice));
@@ -96,7 +95,6 @@ public final class DiscordBot {
 
 			}).subscribe();
 		
-			
 		client.on(VoiceStateUpdateEvent.class)
 			.filter(event->(event.isJoinEvent()||event.isMoveEvent())&&!event.getCurrent().getUserId().equals(client.getSelfId()))
 			.flatMap(event->{
@@ -113,7 +111,6 @@ public final class DiscordBot {
 				});
 				
 			}).subscribe();
-		
 		
 		client.on(MessageCreateEvent.class)
 	    	.filter(

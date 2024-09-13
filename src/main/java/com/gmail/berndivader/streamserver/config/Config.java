@@ -108,7 +108,7 @@ public class Config {
 	}
 	
 	public Config() {
-		ANSI.println("[WHITE]Load or create config...");
+		ANSI.println("[WHITE]Load config...");
 		if(loadConfig()) {
 			ANSI.println("[GREEN]DONE![/GREEN]");
 			saveConfig();
