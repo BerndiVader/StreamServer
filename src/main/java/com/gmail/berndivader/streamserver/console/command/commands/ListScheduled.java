@@ -22,7 +22,7 @@ public class ListScheduled extends Command {
 		try {
 			files = scheduled.future.get(20, TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr("Error while waiting for get all scheduled future.",e);
+			ANSI.error("Error while waiting for get all scheduled future.",e);
 		}
 		if(files!=null&&!files.isEmpty()) {
 			StringBuilder builder=new StringBuilder();

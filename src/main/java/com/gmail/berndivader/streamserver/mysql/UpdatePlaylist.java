@@ -31,7 +31,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 			if(future.get(20,TimeUnit.MINUTES)) {
 				ANSI.println("[BR][SUCESSFUL MYSQL PLAYLIST UPDATE]");
 			} else {
-				ANSI.printWarn("[BR][FAILED MYSQL PLAYLIST UPDATE]");
+				ANSI.warn("[BR][FAILED MYSQL PLAYLIST UPDATE]");
 			}
 		}
 	}
@@ -84,7 +84,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 				throw e;
 			}
 		} catch (Exception e) {
-			ANSI.printErr("Update playlist failed.",e);
+			ANSI.error("Update playlist failed.",e);
 			return false;
 		}
 		return true;

@@ -17,7 +17,7 @@ public class RefreshPlaylist extends Command {
 		try {
 			new UpdatePlaylist(true);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr("Failed to update mysql playlist table.",e);
+			ANSI.error("Failed to update mysql playlist table.",e);
 		}
 		return true;
 	}

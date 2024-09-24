@@ -117,7 +117,7 @@ public class ButtonAction {
 					try {
 						ok.set(new AddScheduled(file.getName()).future.get(30l,TimeUnit.SECONDS));
 					} catch (InterruptedException | ExecutionException | TimeoutException e) {
-						ANSI.printErr(e.getMessage(),e);
+						ANSI.error(e.getMessage(),e);
 					}
 				});
 				break;

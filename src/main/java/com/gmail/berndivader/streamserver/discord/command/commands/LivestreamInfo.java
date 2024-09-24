@@ -37,7 +37,7 @@ public class LivestreamInfo extends Command<Message> {
 		try {
 			packet=future.get(15l,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr(e.getMessage(),e);
+			ANSI.error(e.getMessage(),e);
 		}
 				
 		EmbedCreateSpec.Builder builder=EmbedCreateSpec.builder();

@@ -28,15 +28,15 @@ public class UserPermissions extends Command {
 					ANSI.println("[GREEN]User permissions successfully added/updated.[PROMPT]");
 					return true;
 				} catch (NumberFormatException e) {
-					ANSI.printWarn("Illegal member id. Please enter a valid Long value.");
+					ANSI.warn("Illegal member id. Please enter a valid Long value.");
 				} catch (IllegalArgumentException e) {
-					ANSI.printWarn("Illegal Rank value found. Use GUEST,MEMBER,MOD or ADMIN");
+					ANSI.warn("Illegal Rank value found. Use GUEST,MEMBER,MOD or ADMIN");
 				}
 				
 			} else {
-				ANSI.printWarn("Not enough parameters present.");
+				ANSI.warn("Not enough parameters present.");
 			}
-			ANSI.printErr("Failed to add user permissions.",new RuntimeException());
+			ANSI.error("Failed to add user permissions.",new RuntimeException());
 			
 		} else if(line.startsWith("del")) {
 			String del=line.replaceFirst("del","").trim();
@@ -47,13 +47,13 @@ public class UserPermissions extends Command {
 						Config.DISCORD_PERMITTED_USERS.remove(id);
 						ANSI.println("[GREEN]Removed user from permission list.");
 					} else {
-						ANSI.printWarn("No user with given id found.");
+						ANSI.warn("No user with given id found.");
 					}
 				} catch(NumberFormatException e) {
-					ANSI.printWarn("Failed to parse member id. Please ensure its a valid number.");
+					ANSI.warn("Failed to parse member id. Please ensure its a valid number.");
 				}
 			} else {
-				ANSI.printWarn("Missing member id.");
+				ANSI.warn("Missing member id.");
 			}
 		} else {
 			ANSI.println("[MAGENTA]Permitted members:");

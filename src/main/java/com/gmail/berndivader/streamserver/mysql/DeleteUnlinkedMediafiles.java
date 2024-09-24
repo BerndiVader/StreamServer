@@ -49,13 +49,13 @@ public class DeleteUnlinkedMediafiles implements Callable<Boolean>{
 					try {
 						path=new File(path).getCanonicalPath();
 					} catch (IOException e) {
-						ANSI.printErr(e.getMessage(),e);
+						ANSI.error(e.getMessage(),e);
 					}
 					media.put(result.getString(1),path);
 				}
 			}
 		} catch (SQLException e) {
-			ANSI.printErr("Failed to collect downloadables from database.",e);
+			ANSI.error("Failed to collect downloadables from database.",e);
 			return false;
 		}
 		
@@ -68,7 +68,7 @@ public class DeleteUnlinkedMediafiles implements Callable<Boolean>{
 			try {
 				return !media.containsValue(file.getCanonicalPath());
 			} catch (IOException e) {
-				ANSI.printErr(e.getMessage(),e);
+				ANSI.error(e.getMessage(),e);
 				return !media.containsValue(file.getAbsolutePath());
 			}
 		}).toArray(File[]::new);
@@ -82,7 +82,7 @@ public class DeleteUnlinkedMediafiles implements Callable<Boolean>{
 					result=statement.executeUpdate();
 				}
 			} catch (SQLException e) {
-				ANSI.printErr("Failed to delete dead entries from downloadables table.",e);
+				ANSI.error("Failed to delete dead entries from downloadables table.",e);
 			}
 		}
 		ANSI.println("[YELLOW]Removed "+result+" entries from downloadables table.");

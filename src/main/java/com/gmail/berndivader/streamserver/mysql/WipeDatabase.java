@@ -37,7 +37,7 @@ public class WipeDatabase implements Callable<Boolean> {
 				throw e;
 			}
 		} catch (SQLException e) {
-			ANSI.printErr("Reset database failed.",e);
+			ANSI.error("Reset database failed.",e);
 			return false;
 		}
 		return true;

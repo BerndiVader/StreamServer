@@ -30,13 +30,13 @@ public class ErrorPacket extends Packet {
 	}
 	
 	public void printSimple() {
-		ANSI.printWarn("Youtube error code: "+code+", Message: "+message);
+		ANSI.warn("Youtube error code: "+code+", Message: "+message);
 		if(Config.DEBUG) ANSI.println(source.toString());
 	}
 	
 	public void printDetails() {
 		printSimple();
-		errors.forEach(e->ANSI.printWarn(e.reason+" - "+e.domain+" - "+e.message));
+		errors.forEach(e->ANSI.warn(e.reason+" - "+e.domain+" - "+e.message));
 	}
 	
 	public static ErrorPacket buildError(String message,String reason,String status) {

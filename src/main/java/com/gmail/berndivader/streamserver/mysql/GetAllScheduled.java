@@ -33,7 +33,7 @@ public class GetAllScheduled implements Callable<ArrayList<String>> {
 				}
 			}
 		} catch (SQLException e) {
-			ANSI.printErr("Get all scheduled files failed.",e);
+			ANSI.error("Get all scheduled files failed.",e);
 			return null;
 		}
 		

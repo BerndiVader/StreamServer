@@ -106,8 +106,8 @@ public class DownloadMedia extends Command<Void> {
 					msgBuilder.addComponent(ActionRow.of(ButtonAction.Builder.cancel(uuid)))
 					.contentOrNull("```css\n.Starting download...```")
 					.addEmbed(embedBuilder.build());
-					message.edit(msgBuilder.build()).doOnCancel(()->ANSI.printRaw("[BR]CANCELLED[BR]"))
-					.doOnError(e->ANSI.printErr(e.getMessage(),e.getCause())).subscribe();
+					message.edit(msgBuilder.build()).doOnCancel(()->ANSI.raw("[BR]CANCELLED[BR]"))
+					.doOnError(e->ANSI.error(e.getMessage(),e.getCause())).subscribe();
 					
 					Disposable listener=message.getClient().on(ButtonInteractionEvent.class,event->{
 						
@@ -192,7 +192,7 @@ public class DownloadMedia extends Command<Void> {
 								try {
 									optLink=downloadable.future.get(2,TimeUnit.MINUTES);
 								} catch (InterruptedException | ExecutionException | TimeoutException e) {
-									ANSI.printErr(e.getMessage(),e);
+									ANSI.error(e.getMessage(),e);
 								}
 								optLink.ifPresentOrElse(
 									link->{
@@ -241,7 +241,7 @@ public class DownloadMedia extends Command<Void> {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			}).doOnError(error->ANSI.printErr("Error while downloading media in discord command.",error))
+			}).doOnError(error->ANSI.error("Error while downloading media in discord command.",error))
 			.subscribe();
 		}
 	}

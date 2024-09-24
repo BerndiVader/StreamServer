@@ -31,7 +31,7 @@ public class PlayMusic extends Command {
 		Path filePath=musicPath.resolve(name).normalize();
 		
 		if(!filePath.startsWith(musicPath)) {
-			ANSI.printWarn("Invalid file path! The file must be inside the music library directory.");
+			ANSI.warn("Invalid file path! The file must be inside the music library directory.");
 			return false;
 		}
 		
@@ -41,7 +41,7 @@ public class PlayMusic extends Command {
 			try {
 				optFile=Optional.of(file.getCanonicalPath());
 			} catch (IOException e) {
-				ANSI.printErr(e.getMessage(),e);
+				ANSI.error(e.getMessage(),e);
 			}
 			
 			optFile.ifPresent(path->{
@@ -62,22 +62,22 @@ public class PlayMusic extends Command {
 						
 						@Override
 						public void noMatches() {
-							ANSI.printWarn("No matches!");
+							ANSI.warn("No matches!");
 						}
 						
 						@Override
 						public void loadFailed(FriendlyException exception) {
-							ANSI.printErr(exception.getMessage(),exception);
+							ANSI.error(exception.getMessage(),exception);
 						}
 						
 					});
 				} else {
-					ANSI.printWarn("Wrong file format. Only mp3 format allowed.");
+					ANSI.warn("Wrong file format. Only mp3 format allowed.");
 				}
 			});
 			
 		} else {
-			ANSI.printWarn("File not found!");
+			ANSI.warn("File not found!");
 		}
 
 		return true;

@@ -37,7 +37,7 @@ public class Commands {
 						StreamServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
 						StandardCharsets.ISO_8859_1.toString());
 			} catch (UnsupportedEncodingException e1) {
-				ANSI.printErr("Error, there is no UTF-8 nor a ISO-8859 encoding avaible.",e1);
+				ANSI.error("Error, there is no UTF-8 nor a ISO-8859 encoding avaible.",e1);
 			}
 		}
 	}
@@ -47,7 +47,7 @@ public class Commands {
 		try {
 			loadCommandClasses();
 		} catch (IOException | ClassNotFoundException e) {
-			ANSI.printErr("Failed to instantiate console commands.",e);
+			ANSI.error("Failed to instantiate console commands.",e);
 		}
 	}
 	
@@ -80,6 +80,12 @@ public class Commands {
 									case DISCORDMUSIC:
 										add&=Config.DISCORD_MUSIC_BOT;
 										break;
+									case FFMPEG:
+										add&=Config.FFMPEG_AVAIL;
+										break;
+									case YTDLP:
+										add&=Config.YTDLP_AVAIL;
+										break;
 									default:
 										add=true;
 										break;
@@ -100,7 +106,7 @@ public class Commands {
 			try {
 				return clazz.getDeclaredConstructor().newInstance();
 			} catch (Exception e) {
-				ANSI.printErr("Error getting console command class.",e);
+				ANSI.error("Error getting console command class.",e);
 			}
 		}
 		return null;

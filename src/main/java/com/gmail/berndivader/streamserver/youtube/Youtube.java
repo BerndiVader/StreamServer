@@ -20,7 +20,7 @@ public final class Youtube {
 			try {
 				HTTP_CLIENT.close();
 			} catch (IOException e) {
-				ANSI.printErr(e.getMessage(),e);
+				ANSI.error(e.getMessage(),e);
 			}
 		}
 	}

@@ -37,7 +37,7 @@ public class GetNextScheduled implements Callable<String> {
 				}
 			}
 		} catch (SQLException e) {
-			ANSI.printErr("Get next scheduled file failed.",e);
+			ANSI.error("Get next scheduled file failed.",e);
 			return null;
 		}
 		

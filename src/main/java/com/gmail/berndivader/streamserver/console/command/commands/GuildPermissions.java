@@ -30,10 +30,10 @@ public class GuildPermissions extends Command {
 					Config.DISCORD_PERMITTED_GUILDS.merge(guildId,guild,(oldGuild,newGuild)->newGuild);
 					ANSI.println("[GREEN]Guild permissions added or updated.[PROMPT]");
 				} catch (NumberFormatException e) {
-					ANSI.printWarn("Failed to parse guild or channel id. Please ensure they are valid numbers.");
+					ANSI.warn("Failed to parse guild or channel id. Please ensure they are valid numbers.");
 				}
 			} else {
-				ANSI.printWarn("Not enough parameters present.");
+				ANSI.warn("Not enough parameters present.");
 			}
 		} else if(line.startsWith("del")) {
 			String del=line.replaceFirst("del","").trim();
@@ -44,13 +44,13 @@ public class GuildPermissions extends Command {
 						Config.DISCORD_PERMITTED_GUILDS.remove(id);
 						ANSI.println("[GREEN]Removed guild from permission list.");
 					} else {
-						ANSI.printWarn("No guild with given id found.");
+						ANSI.warn("No guild with given id found.");
 					}
 				} catch(NumberFormatException e) {
-					ANSI.printWarn("Failed to parse guild id. Please ensure its a valid number.");
+					ANSI.warn("Failed to parse guild id. Please ensure its a valid number.");
 				}
 			} else {
-				ANSI.printWarn("Missing guild id.");
+				ANSI.warn("Missing guild id.");
 			}
 		} else {
 			ANSI.println("[MAGENTA]Permitted guilds:");

@@ -32,7 +32,7 @@ public class CleanUpDownloadables implements Callable<Boolean>{
 				if(result.first()) {
 					do {
 						File file=new File(result.getString("path"));
-						if(file.exists()) if(!file.delete()&&Config.DEBUG) ANSI.printWarn("Failed to delete temp download file: "+file.getName());
+						if(file.exists()) if(!file.delete()&&Config.DEBUG) ANSI.warn("Failed to delete temp download file: "+file.getName());
 						count++;
 					} while(result.next());
 				}
@@ -47,7 +47,7 @@ public class CleanUpDownloadables implements Callable<Boolean>{
 				throw e;
 			}
 		} catch (SQLException e) {
-			ANSI.printErr("Failed to cleanup downloadable database and files",e);
+			ANSI.error("Failed to cleanup downloadable database and files",e);
 			return false;
 		}
 		return true;

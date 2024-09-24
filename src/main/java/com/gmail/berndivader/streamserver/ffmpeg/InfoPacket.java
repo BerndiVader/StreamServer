@@ -60,7 +60,7 @@ public class InfoPacket {
 					info=Helper.LGSON.fromJson(out,InfoPacket.class);
 				}
 			} catch (Exception e) {
-				ANSI.printErr("getinfoPacket method failed.",e);
+				ANSI.error("getinfoPacket method failed.",e);
 			}
 			
 			if(!info.isSet(info.webpage_url)) info.webpage_url=url;

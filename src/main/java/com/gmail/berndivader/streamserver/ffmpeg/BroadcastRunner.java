@@ -137,7 +137,7 @@ public final class BroadcastRunner extends TimerTask {
     		if(result!=null) {
 				ANSI.print("[GREEN]DONE!]...[RESET]");
     		} else {
-				ANSI.printWarn("Problem occured while stopping the BroadcastRunner.");
+				ANSI.warn("Problem occured while stopping the BroadcastRunner.");
     		}
     		
     	}
@@ -195,11 +195,11 @@ public final class BroadcastRunner extends TimerTask {
 					error.printSimple();
 				} else if(packet instanceof EmptyPacket) {
 					ANSI.println("[RED]FAILED!");
-					ANSI.printWarn("Received EmptyPacket!");
+					ANSI.warn("Received EmptyPacket!");
 					if(Config.DEBUG) ANSI.println(packet.source().toString());
 				} else if(packet instanceof UnknownPacket){
 					ANSI.println("[RED]FAILED!");
-					ANSI.printWarn("Unknown packet received!");
+					ANSI.warn("Unknown packet received!");
 					if(Config.DEBUG) ANSI.println(packet.source().toString());
 				}
 				
@@ -212,7 +212,7 @@ public final class BroadcastRunner extends TimerTask {
 				if(Config.DEBUG) ANSI.println(broadcast.source().toString());
 			}
 		} catch(Exception e) {
-			ANSI.printErr("Failed to restart live broadcast on Youtube.",e);
+			ANSI.error("Failed to restart live broadcast on Youtube.",e);
 		}
 	}
 		
@@ -226,7 +226,7 @@ public final class BroadcastRunner extends TimerTask {
 				return;
 			}
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr("Get next scheduled file failed.",e);
+			ANSI.error("Get next scheduled file failed.",e);
 		}
 		
 		File[]files=getFiles();
@@ -332,7 +332,7 @@ public final class BroadcastRunner extends TimerTask {
 			try {
 				return ffmpeg().get(20l,TimeUnit.SECONDS);
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				ANSI.printErr("Failed to stop broadcast task.",e);
+				ANSI.error("Failed to stop broadcast task.",e);
 			}
 		}
 		return null;
@@ -385,7 +385,7 @@ public final class BroadcastRunner extends TimerTask {
 	            try {
 	                return name.toLowerCase().matches(regex);
 	            } catch(Exception e) {
-	                if(Config.DEBUG) ANSI.printErr("getFilelistAsList method failed.",e);
+	                if(Config.DEBUG) ANSI.error("getFilelistAsList method failed.",e);
 	            }
 	            return false;
 	            
@@ -405,7 +405,7 @@ public final class BroadcastRunner extends TimerTask {
 				try {
 					return name.toLowerCase().matches(regex);
 				} catch (Exception e) {
-					if(Config.DEBUG) ANSI.printErr("getFilelistAsString method failed.",e);
+					if(Config.DEBUG) ANSI.error("getFilelistAsString method failed.",e);
 				}
 				return false;
 	    		

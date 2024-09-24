@@ -60,7 +60,7 @@ public final class OAuth2 {
 				if(json.has("access_token")) accessToken=json.get("access_token").getAsString();
 				if(json.has("error")) {
 					ANSI.println("[RED]failed!");
-					ANSI.printErr(json.get("error").getAsString()+" Reason: "+json.get("error_description").getAsString(),new RuntimeException("OAuth2 registration failed."));
+					ANSI.error(json.get("error").getAsString()+" Reason: "+json.get("error_description").getAsString(),new RuntimeException("OAuth2 registration failed."));
 				}
 				ANSI.println(json.toString());
 				return new AbstractMap.SimpleEntry<String,String>(accessToken,refreshToken);
@@ -78,7 +78,7 @@ public final class OAuth2 {
 			Config.saveConfig();
 
 		} catch (Exception e) {
-			ANSI.printErr(e.getMessage(),e);
+			ANSI.error(e.getMessage(),e);
 			return false;
 		}
 		return true;
@@ -103,7 +103,7 @@ public final class OAuth2 {
 				if(json.has("access_token")) {
 					return json.get("access_token").getAsString();
 				} else {
-					throw new RuntimeException("Failed to refresh access token.");
+					return "";
 				}
 
 			});
@@ -119,7 +119,7 @@ public final class OAuth2 {
 
 		} catch (Exception e) {
 			ANSI.println("[RED]failed![RESET]");
-			ANSI.printErr(e.getMessage(),e);
+			ANSI.error(e.getMessage(),e);
 			return false;
 		}
 

@@ -42,7 +42,7 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 		try {
 			path=file.getCanonicalPath();
 		} catch (IOException e) {
-			ANSI.printErr(e.getMessage(),e);
+			ANSI.error(e.getMessage(),e);
 		}
 		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
@@ -70,7 +70,7 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 				}
 			}
 		} catch (SQLException e) {
-			ANSI.printErr("Failed to create or update downloadable media file.",e);
+			ANSI.error("Failed to create or update downloadable media file.",e);
 			return Optional.ofNullable(null);
 		}
 		File thumbnail=new File(Config.DL_WWW_THUMBNAIL_PATH);

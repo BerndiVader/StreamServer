@@ -45,7 +45,7 @@ public class Current extends Command<Message> {
 					.description("Something went wrong while gathering media info.")
 					.build()
 			).subscribe();
-			ANSI.printErr(error.getMessage(),error);
+			ANSI.error(error.getMessage(),error);
 		});
 	}
 

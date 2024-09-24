@@ -30,7 +30,7 @@ public class LivestreamsById extends Command{
 		try {
 			p=Broadcast.getLiveBroadcastWithTries(BroadcastStatus.active,2);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr(e.getMessage(),e);
+			ANSI.error(e.getMessage(),e);
 			p=ErrorPacket.buildError(e.getMessage(),"Failed to execute livestatus command.","CUSTOM");
 		}
 		
@@ -77,7 +77,7 @@ public class LivestreamsById extends Command{
 						ANSI.println(packet.source().toString());
 					}
 				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					ANSI.printErr(e.getMessage(),e);
+					ANSI.error(e.getMessage(),e);
 				}
 				
 			}

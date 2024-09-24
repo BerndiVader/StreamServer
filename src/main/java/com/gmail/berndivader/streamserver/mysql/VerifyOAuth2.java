@@ -44,7 +44,7 @@ public class VerifyOAuth2 implements Callable<Boolean>{
 				throw e;
 			}
 		} catch (SQLException e) {
-			ANSI.printErr("OAuth2 verification failed.",e);
+			ANSI.error("OAuth2 verification failed.",e);
 			return false;
 		}
 		return state.equals(uuid);

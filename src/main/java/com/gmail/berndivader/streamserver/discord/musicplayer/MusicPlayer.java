@@ -77,7 +77,7 @@ public final class MusicPlayer {
 			        
 				}
 			} catch (IOException e) {
-				ANSI.printErr(e.getMessage(),e);
+				ANSI.error(e.getMessage(),e);
 			}
 			
 		});

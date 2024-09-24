@@ -50,7 +50,7 @@ public class UpdateCurrent implements Callable<Boolean>{
 				throw e;
 			}
 		} catch (SQLException e) {
-			ANSI.printErr("Update now playing entry failed.",e);
+			ANSI.error("Update now playing entry failed.",e);
 			return false;
 		}
 		if(Config.DEBUG) ANSI.println("\n[SUCSESSFUL MYSQL CURRENT UPDATE]");

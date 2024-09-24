@@ -36,7 +36,7 @@ public final class Commands {
 						StreamServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
 						StandardCharsets.ISO_8859_1.toString());
 			} catch (UnsupportedEncodingException e1) {
-				ANSI.printErr("Error, there is no UTF-8 nor a ISO-8859 encoding avaible.",e1);
+				ANSI.error("Error, there is no UTF-8 nor a ISO-8859 encoding avaible.",e1);
 			}
 		}
 	}
@@ -46,7 +46,7 @@ public final class Commands {
 		try {
 			loadCommandClasses();
 		} catch (Exception e) {
-			ANSI.printErr("Failed to instantiate console commands.",e);
+			ANSI.error("Failed to instantiate console commands.",e);
 		}
 	}
 	
@@ -95,7 +95,7 @@ public final class Commands {
 			try {
 				return Optional.of(command.getDeclaredConstructor().newInstance());
 			} catch (Exception e) {
-				ANSI.printErr("Error while collect discord commands.",e);
+				ANSI.error("Error while collect discord commands.",e);
 			}
 		}
 		return Optional.empty();

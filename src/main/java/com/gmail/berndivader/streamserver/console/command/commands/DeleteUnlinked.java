@@ -19,7 +19,7 @@ public class DeleteUnlinked extends Command {
 		try {
 			task.future.get(20l,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr(e.getMessage(),e);
+			ANSI.error(e.getMessage(),e);
 			return false;
 		}
 		

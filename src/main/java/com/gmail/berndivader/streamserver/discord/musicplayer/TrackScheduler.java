@@ -82,7 +82,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	@Override
 	public void onTrackException(AudioPlayer player,AudioTrack track,FriendlyException exception) {
-		if(Config.DEBUG) ANSI.printErr(exception.getMessage(),exception);
+		if(Config.DEBUG) ANSI.error(exception.getMessage(),exception);
 	}
 
 	@Override
@@ -92,14 +92,14 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	@Override
 	public void onTrackStuck(AudioPlayer player,AudioTrack track,long thresholdMs) {
-		if(Config.DEBUG) ANSI.printErr("AudioTrack stuck: "+track.getIdentifier(),null);
+		if(Config.DEBUG) ANSI.error("AudioTrack stuck: "+track.getIdentifier(),null);
 	}
 
 	@Override
 	public void onEvent(AudioEvent event) {
 		
 		Optional.ofNullable(handlers.get(event.getClass())).ifPresentOrElse(handler->handler.accept(event),()->{
-			if(Config.DEBUG) ANSI.printWarn(String.format("Unhandled AudioEvent occured: [GREEN]%s[RESET]",event.getClass().getSimpleName()));
+			if(Config.DEBUG) ANSI.warn(String.format("Unhandled AudioEvent occured: [GREEN]%s[RESET]",event.getClass().getSimpleName()));
 		});
 
 	}

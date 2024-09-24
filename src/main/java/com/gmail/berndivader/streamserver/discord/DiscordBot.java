@@ -68,7 +68,7 @@ public final class DiscordBot {
 		    })
 		    .doOnError(err->{
 		        status=Status.FAILED;
-		        ANSI.printErr("Connection to Discord failed.",err);
+		        ANSI.error("Connection to Discord failed.",err);
 		    }).block();
 		
 		if(status!=Status.CONNECTED) return;
@@ -89,7 +89,7 @@ public final class DiscordBot {
 				.onErrorContinue((error,o)->{
 					
 					voice.getVoiceConnection().subscribe(vc->vc.reconnect().subscribe());
-					ANSI.printErr(error.getMessage(),error);
+					ANSI.error(error.getMessage(),error);
 					
 			    });
 
@@ -134,7 +134,7 @@ public final class DiscordBot {
 		        		});
 
 		    })
-		    .onErrorContinue((throwable,object)->ANSI.printErr(throwable.getMessage(),throwable))
+		    .onErrorContinue((throwable,object)->ANSI.error(throwable.getMessage(),throwable))
 		    .subscribe();
 		
 		client.on(ButtonInteractionEvent.class,ButtonAction::process).subscribe();
@@ -152,7 +152,7 @@ public final class DiscordBot {
 	public void updateStatus(String comment) {
 		if(Config.DEBUG) ANSI.println("Set status to: "+comment);
 	    client.updatePresence(ClientPresence.of(discord4j.core.object.presence.Status.ONLINE,ClientActivity.custom(comment)))
-	    	.onErrorContinue((throwable,object)->ANSI.printErr("Failed to update discord status",throwable))
+	    	.onErrorContinue((throwable,object)->ANSI.error("Failed to update discord status",throwable))
 	    	.subscribe();
 	}
 	

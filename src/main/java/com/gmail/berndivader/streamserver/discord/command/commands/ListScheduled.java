@@ -29,7 +29,7 @@ public class ListScheduled extends Command<Message>{
 		try {
 			files=scheduled.future.get(20,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr("Error while waiting for get all scheduled future.",e);
+			ANSI.error("Error while waiting for get all scheduled future.",e);
 		}
 
 		EmbedCreateSpec.Builder embed=EmbedCreateSpec.builder()

@@ -81,7 +81,7 @@ public class FFProbePacket {
 			try {
 				path=file.getCanonicalPath();
 			} catch (IOException e) {
-				ANSI.printErr(e.getMessage(),e);
+				ANSI.error(e.getMessage(),e);
 			}
 			builder.command("ffprobe","-v","quiet","-print_format","json","-show_format",path);
 			try {
@@ -95,7 +95,7 @@ public class FFProbePacket {
 					}
 				}
 			} catch (Exception e) {
-				ANSI.printErr("getProbePacket method failed.", e);
+				ANSI.error("getProbePacket method failed.", e);
 			}
 			packet.file=file.getName();
 			if(!packet.isSet(packet.tags.title)) {
@@ -115,7 +115,7 @@ public class FFProbePacket {
 				Object value=field.get(parsed);
 				if(value!=null) field.set(def,value);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
+				if(Config.DEBUG) ANSI.error(e.getMessage(),e);
 			}
 		});
 		
