@@ -16,6 +16,9 @@ import com.gmail.berndivader.streamserver.config.Config;
 
 public enum ANSI {
 
+	STORE("\033[?47h"),
+	RESTORE("\033[?47l"),
+	CLR("\033[H\033[0J"),
 	BR("\012"),
 	CR("\015"),
 	DL("\033[2K"),
@@ -79,8 +82,12 @@ public enum ANSI {
 		while(matcher.find()) {
 			String token=matcher.group(1);
 			if(token.charAt(0)=='/') token=token.substring(1).concat("OFF");
-			if(contains(token)) {
-				string=string.replace("[".concat(matcher.group(1).concat("]")),ANSI.valueOf(token).str());
+			try {
+				if(contains(token)) {
+					string=string.replace("[".concat(matcher.group(1).concat("]")),ANSI.valueOf(token).str());
+				}
+			} catch(Exception e) {
+				//
 			}
 		}
 		return string;
@@ -101,29 +108,40 @@ public enum ANSI {
 		return out.toString();
 	}
 	
-	public static void printRaw(String string) {
+	public static void raw(String string) {
 		console.print(parse(string));
 	}
 	
-	public static void printWarn(String string) {
+	public static void info(String string) {
+		if(!string.isBlank()) {
+			console.printf("\033[36m[INFO]%s",parse(string));
+		} else {
+			console.print(parse(string));
+		}
+		console.print("\n");
+		if(Config.DEBUG) log(string,null);
+	}
+	
+	public static void warn(String string) {
 		if(!string.isBlank()) {
 			console.printf("%s%s",ANSI.WARNING.str(),parse(string));
 		} else {
 			console.print(parse(string));
 		}
-		console.print(ANSI.PROMPT.str());
+		console.print("\n");
 		
 		if(Config.DEBUG) log(string,null);
 	}
 	
-	public static void printErr(String string, Throwable error) {
+	public static void error(String string, Throwable error) {
 		if(error==null) error=new Throwable("Unknown");
-		console.printf("%s%s%s%n%s",ANSI.ERROR.str(),parse(string),ANSI.BOLDOFF.str(),error.getMessage());
+		console.printf("%s%s%s",ANSI.ERROR.str(),parse(string),ANSI.BOLDOFF.str());
 		if(Config.DEBUG) {
+			console.println();
 			error.printStackTrace();
 			log(string,error);
 		}
-		console.print(ANSI.PROMPT.str());
+		console.print("\n");
 	}
 		
 	public static void println(String string) {
