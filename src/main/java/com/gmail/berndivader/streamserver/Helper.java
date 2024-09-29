@@ -5,6 +5,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.FileSystems;
@@ -82,7 +83,7 @@ public final class Helper {
 			while(input.available()!=0) if((read=input.read(bytes))!=-1) out.append(new String(bytes,0,read));
 			
 			if(error.available()>0) err.append(new String(error.readAllBytes()));
-			if(!err.isEmpty()) ANSI.printErr(err.toString(),null);
+			if(!err.isEmpty()) ANSI.error(err.toString(),null);
 			return out.toString();
 		}
 	}
@@ -151,6 +152,20 @@ public final class Helper {
 							builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
 						}
 						break;
+					case("yt"):
+						temp=downloadable=false;
+						builder.command().addAll(Arrays.asList(
+								"--format","bestvideo[ext=mp4][vcodec=avc1]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+						));
+						getOrCreateMediaDir(Config.PLAYLIST_PATH).ifPresent(dir->builder.directory(dir));;
+						break;
+					case("ytc"):
+						temp=downloadable=false;
+						builder.command().addAll(Arrays.asList(
+								"--f","bestvideo[ext=mp4][vcodec=avc1]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+						));
+						getOrCreateMediaDir(Config.PLAYLIST_PATH_CUSTOM).ifPresent(dir->builder.directory(dir));;
+						break;
 					default:
 						if(!parse[0].isEmpty()) builder.command().add("--"+parse[0]);
 						if(parse.length==2&&!parse[1].isEmpty()) builder.command().add(parse[1]);
@@ -210,7 +225,7 @@ public final class Helper {
 			}
 
 		} catch (Exception e) {
-			ANSI.printErr(e.getMessage(),e);
+			ANSI.error(e.getMessage(),e);
 		}
 		
 		if(process!=null&&process.isAlive()) waitForProcess(process,10l);
@@ -223,17 +238,48 @@ public final class Helper {
 				process.waitFor(timeout,TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-				ANSI.printErr(e.getMessage(),e);
+				ANSI.error(e.getMessage(),e);
 				process.destroy();
 			}				
 		});
 	}
 	
+	public static boolean ytdlpAvail() {
+
+		if(!ffmpegAvail()) return false;
+		ProcessBuilder builder=new ProcessBuilder("yt-dlp","--version");
+		try {
+			Process process=builder.start();
+			waitForProcess(process,10l);
+		} catch (Exception e) {
+			ANSI.warn("YT-DLP not present from systempath.");
+			return false;
+		}
+		return true;
+	}
+	
+	public static boolean ffmpegAvail() {
+		
+		ProcessBuilder builder=new ProcessBuilder("ffmpeg","-version");
+		try {
+			Process process=builder.start();
+			waitForProcess(process,10l);
+		} catch (Exception e) {
+			ANSI.warn("FFMPEG not present from systempath.");
+			return false;
+		}
+		return true;
+	}
+	
 	public static Optional<File> getOrCreateMediaDir(String name) {
-		File dir=new File(name);
-		if(!dir.exists()) dir.mkdir();
-		if(dir.isDirectory()) return Optional.of(dir);
-		if(Config.DEBUG) ANSI.printWarn("Failed to create directory: "+name);
+		try {
+			File dir=new File(name).getCanonicalFile();
+			if(!dir.exists()) dir.mkdir();
+			if(dir.isDirectory()) return Optional.of(dir);
+			if(Config.DEBUG) ANSI.warn("Failed to create directory: "+dir.getCanonicalPath());
+		} catch(IOException e) {
+			if(Config.DEBUG) ANSI.warn("Failed to get canonical path for directory: "+name);
+		}
 		return Optional.empty();
 	}
 		
@@ -243,7 +289,7 @@ public final class Helper {
 		try {
 			duration=Float.parseFloat(time);
 		} catch (Exception e) {
-			ANSI.printErr(e.getMessage(),e);
+			ANSI.error(e.getMessage(),e);
 		}
 	    int h=(int)(duration/3600);
 	    int m=(int)((duration%3600)/60);
