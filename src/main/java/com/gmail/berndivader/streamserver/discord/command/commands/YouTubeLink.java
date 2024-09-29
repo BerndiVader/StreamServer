@@ -1,6 +1,7 @@
 package com.gmail.berndivader.streamserver.discord.command.commands;
 
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.permission.Permission;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
@@ -12,7 +13,7 @@ import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 @Permission
-@DiscordCommand(name="link",usage="Display youtube stream url.")
+@DiscordCommand(name="link",usage="Display youtube stream url.",requireds={Requireds.BROADCASTRUNNER})
 public class YouTubeLink extends Command<Message> {
 
 	@Override

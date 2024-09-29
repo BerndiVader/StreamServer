@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.discord.action.ButtonAction;
 import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.permission.Permission;
@@ -21,7 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Permission
-@DiscordCommand(name="search",usage="[filter] -> Search for files.")
+@DiscordCommand(name="search",usage="[filter] -> Search for files.",requireds={Requireds.BROADCASTRUNNER})
 public class Playlist extends Command<List<Message>> {
 	
 	@Override

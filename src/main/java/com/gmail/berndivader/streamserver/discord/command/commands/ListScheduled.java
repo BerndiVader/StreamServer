@@ -18,7 +18,7 @@ import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 @Permission
-@DiscordCommand(name="allscheduled",usage="List all scheduled files.",requireds={Requireds.DATABASE})
+@DiscordCommand(name="allscheduled",usage="List all scheduled files.",requireds={Requireds.DATABASE,Requireds.BROADCASTRUNNER})
 public class ListScheduled extends Command<Message>{
 
 	@Override
