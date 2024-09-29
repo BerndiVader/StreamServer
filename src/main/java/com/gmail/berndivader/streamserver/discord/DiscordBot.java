@@ -114,10 +114,10 @@ public final class DiscordBot {
 		
 		client.on(MessageCreateEvent.class)
 	    	.filter(
-	    			e->e.getMessage().getContent().startsWith(".")
+	    			e->e.getMessage().getContent().startsWith(Config.DISCORD_CMD_PREFIX)
 	    			&&e.getMember().isPresent()
 	    			&&e.getGuildId().isPresent()
-	    			&&e.getMember().get().getRoleIds().contains(Snowflake.of(Config.DISCORD_ROLE_ID))
+	    			&&(Config.DISCORD_ROLE_ID==0l||e.getMember().get().getRoleIds().contains(Snowflake.of(Config.DISCORD_ROLE_ID)))
 	    			&&Permissions.Guilds.permitted(e.getGuildId().get().asLong(),e.getMessage().getChannelId().asLong())
 	    		)
 		    .flatMap(e->{

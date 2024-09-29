@@ -152,7 +152,6 @@ public final class BroadcastRunner extends TimerTask {
 			expiredCounter+=2l;
     		if(ffmpeg()==null||ffmpeg().isCancelled()||ffmpeg().isDone()) startStream();
 			if(expiredCounter>Config.YOUTUBE_TOKEN_EXPIRE_TIME) {
-				
 				checkOrReInitiateLiveBroadcast(Config.BROADCAST_DEFAULT_TITLE,Config.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
 				expiredCounter=0l;
 			}
@@ -165,7 +164,7 @@ public final class BroadcastRunner extends TimerTask {
 		try {
 			Packet packet=liveBroadcast=Broadcast.getLiveBroadcastWithTries(BroadcastStatus.active,2);
 			if(packet instanceof EmptyPacket) {
-				ANSI.println("[ORANGE]Try to reinstall livebroadcast on Youtube...");
+				ANSI.println("[YELLOW]Try to reinstall livebroadcast on Youtube...");
 				
 				packet=liveStream=Broadcast.getDefaultLiveStream().get(15l,TimeUnit.SECONDS);
 				if(packet instanceof LiveStreamPacket) {
@@ -253,17 +252,18 @@ public final class BroadcastRunner extends TimerTask {
 			}
 		}
 				
-		String info=playingPacket().tags.artist+":"+Helper.stringFloatToTime(playingPacket().duration)+":"+playingPacket().tags.description;
-		new UpdateCurrent(title, info);
+		new UpdateCurrent(title,playingPacket().toString());
 		
 		if(Config.DISCORD_BOT_START&&DiscordBot.instance!=null) DiscordBot.instance.updateStatus(title);
 		
-		ANSI.println("[BLUE]Now playing: "
-			+playingPacket().tags.title
-			+":"+playingPacket().tags.artist
-			+":"+playingPacket().tags.date
-			+":"+playingPacket().tags.comment+"[RESET]");
-		ANSI.prompt();
+		if(Config.DEBUG) {
+			ANSI.println("[BLUE]Now playing: "
+					+playingPacket().tags.title
+					+":"+playingPacket().tags.artist
+					+":"+playingPacket().tags.date
+					+":"+playingPacket().tags.comment+"[RESET]");
+			ANSI.prompt();
+		}
 				
 		ffmpeg(FFmpeg.atPath()
 				.addInput(UrlInput.fromUrl(file.getAbsolutePath())
@@ -271,7 +271,6 @@ public final class BroadcastRunner extends TimerTask {
 						)
 				.addOutput(UrlOutput.toUrl(Config.YOUTUBE_STREAM_URL+"/"+Config.YOUTUBE_STREAM_KEY)
 						.setCodec(StreamType.VIDEO,"copy")
-						.addArguments("-b:v","2M")
 						.setCodec(StreamType.AUDIO,"copy")
 						.addArguments("-strict","-2")
 						.addArguments("-flags","+global_header")

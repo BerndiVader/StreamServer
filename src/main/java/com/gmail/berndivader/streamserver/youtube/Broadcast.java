@@ -34,7 +34,7 @@ public final class Broadcast {
 		Packet packet=null;
 		do {
 			packet=getLiveBroadcast(status).get(15l,TimeUnit.SECONDS);
-		} while(!(packet instanceof LiveBroadcastPacket)&&tries-->0);
+		} while(!(packet instanceof LiveBroadcastPacket)&&--tries>0);
 		return packet;
 	}
 	
@@ -66,7 +66,7 @@ public final class Broadcast {
 					}
 				});
 			} catch (Exception e) {
-				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
+				if(Config.DEBUG) ANSI.error(e.getMessage(),e);
 				return ErrorPacket.buildError("Request liveBroadcast status failed.",e.getMessage(),"CUSTOM");
 			}
 
@@ -121,7 +121,7 @@ public final class Broadcast {
 					}
 				});
 			} catch(Exception e) {
-				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
+				if(Config.DEBUG) ANSI.error(e.getMessage(),e);
 				return ErrorPacket.buildError("Request to insert liveBroadcast failed.",e.getMessage(),"CUSTOM");
 			}
 		});
@@ -177,7 +177,7 @@ public final class Broadcast {
 					}
 				});
 			} catch (IOException e) {
-				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
+				if(Config.DEBUG) ANSI.error(e.getMessage(),e);
 				return ErrorPacket.buildError("Request to insert a new liveStream failed.", e.getMessage(),"CUSTOM");
 			}
 		});		
@@ -207,7 +207,7 @@ public final class Broadcast {
 					}
 				});
 			} catch (Exception e) {
-				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
+				if(Config.DEBUG) ANSI.error(e.getMessage(),e);
 				return ErrorPacket.buildError("Request to bind liveBroadcast to liveStream failed.", e.getMessage(),"CUSTOM");
 			}
 		});
@@ -237,7 +237,7 @@ public final class Broadcast {
 					}
 				});
 			} catch(Exception e) {
-				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
+				if(Config.DEBUG) ANSI.error(e.getMessage(),e);
 				return ErrorPacket.buildError("Request to transition liveBroadcast status failed.",e.getMessage(),"CUSTOM");
 			}
 		});
@@ -275,7 +275,7 @@ public final class Broadcast {
 				});
 				
 			} catch(Exception e) {
-				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
+				if(Config.DEBUG) ANSI.error(e.getMessage(),e);
 				return ErrorPacket.buildError("Request to get livestream resource by id failed.",e.getMessage(),"CUSTOM");
 			}
 
@@ -312,7 +312,7 @@ public final class Broadcast {
 					}
 				});
 			} catch(Exception e) {
-				if(Config.DEBUG) ANSI.printErr(e.getMessage(),e);
+				if(Config.DEBUG) ANSI.error(e.getMessage(),e);
 				return ErrorPacket.buildError("Request to get default livestream resource failed.",e.getMessage(),"CUSTOM");
 			}
 		});		

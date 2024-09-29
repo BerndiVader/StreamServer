@@ -21,7 +21,7 @@ import com.gmail.berndivader.streamserver.mysql.CleanUpDownloadables;
 import com.gmail.berndivader.streamserver.mysql.MakeDownloadable;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
-@ConsoleCommand(name="dl",usage="Download media: .dl [--music][--temp][--link][--click] <valid_url>",requireds={Requireds.DATABASE})
+@ConsoleCommand(name="dl",usage="Download media: .dl [--music][--temp][--link][--click] <valid_url>",requireds = {Requireds.YTDLP})
 public class DownloadMedia extends Command {
 		
 	private class InterruptHandler implements Callable<Boolean> {
@@ -50,11 +50,13 @@ public class DownloadMedia extends Command {
 	@Override
 	public boolean execute(String[] args) {
 		
-		CleanUpDownloadables cleanUp=new CleanUpDownloadables();
-		try {
-			cleanUp.future.get(20l,TimeUnit.SECONDS);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			ANSI.printErr("Failed to run cleanup process.",e);
+		if(Config.DATABASE_USE) {
+			CleanUpDownloadables cleanUp=new CleanUpDownloadables();
+			try {
+				cleanUp.future.get(20l,TimeUnit.SECONDS);
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				ANSI.error("Failed to run cleanup process.",e);
+			}
 		}
 
 		Optional<File>opt=Helper.getOrCreateMediaDir(Config.DL_ROOT_PATH);
@@ -84,25 +86,25 @@ public class DownloadMedia extends Command {
 							String[]temp=line.split("\"");
 							if(temp.length>0) infoPacket.local_filename=temp[1];						
 						}
-						ANSI.printRaw("[CR][DL]"+line);
+						ANSI.raw("[CR][DL]"+line);
 					}
 					if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
-						ANSI.printRaw("[BR]");
-						ANSI.printWarn("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
+						ANSI.raw("[BR]");
+						ANSI.raw("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
 						process.destroy();
 					}
 				}
 				
 				if(error!=null&&error.ready()) {
-					ANSI.printRaw("[BR]");
-					error.lines().forEach(line->ANSI.printWarn(line));
+					ANSI.raw("[BR]");
+					error.lines().forEach(line->ANSI.warn(line));
 				}
 			}
 						
 			if(process.isAlive()) process.destroy();
-			ANSI.printRaw("[BR]");
+			ANSI.raw("[BR]");
 			
-			if(infoPacket.downloadable) {
+			if(infoPacket.downloadable&&Config.DATABASE_USE) {
 				File file=new File(builder.directory().getAbsolutePath()+"/"+infoPacket.local_filename);
 				if(file.exists()&&file.isFile()&&file.canRead()) {
 					MakeDownloadable downloadable= new MakeDownloadable(file,infoPacket.temp);
@@ -110,13 +112,13 @@ public class DownloadMedia extends Command {
 					optLink.ifPresentOrElse(link->{
 						ANSI.println("[BR][BOLD][GREEN]"+link+"[RESET]");
 					},()->{
-						ANSI.printWarn("[BR]Failed to create download link.");
+						ANSI.warn("[BR]Failed to create download link.");
 					});
 				}
 			}
 		} catch (Exception e) {
-			ANSI.printRaw("[BR]");
-			ANSI.printErr("Error while looping yt-dlp process.",e);
+			ANSI.raw("[BR]");
+			ANSI.error("Error while looping yt-dlp process.",e);
 		}
 		return true;
 	}

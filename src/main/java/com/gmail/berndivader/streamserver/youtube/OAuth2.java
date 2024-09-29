@@ -20,7 +20,8 @@ import com.google.gson.JsonParser;
 public final class OAuth2 {
 	
 	private static final String OAUTH_URL="https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=https://www.googleapis.com/auth/youtube&state=%s&access_type=offline&prompt=consent";
-	
+	private static final String OAUTH_API="https://oauth2.googleapis.com/token";
+
 	private OAuth2() {}
 
 	public static boolean build() {
@@ -42,7 +43,7 @@ public final class OAuth2 {
 				throw new Exception("Failed to verify OAuth2 request.",e);
 			}
 
-			HttpPost post=new HttpPost("https://oauth2.googleapis.com/token");
+			HttpPost post=new HttpPost(OAUTH_API);
 			StringEntity parameter=new StringEntity(String.format("code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=authorization_code",
 					code,
 					Config.YOUTUBE_CLIENT_ID,
@@ -86,7 +87,7 @@ public final class OAuth2 {
 
 	public static boolean refresh() {
 		ANSI.print("[WHITE]Try to refresh access token...");
-		HttpPost post=new HttpPost("https://oauth2.googleapis.com/token");
+		HttpPost post=new HttpPost(OAUTH_API);
 		try {
 			StringEntity parameter=new StringEntity(String.format("grant_type=refresh_token&client_id=%s&client_secret=%s&refresh_token=%s",
 					Config.YOUTUBE_CLIENT_ID,

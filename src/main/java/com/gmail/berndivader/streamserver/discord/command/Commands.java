@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import com.gmail.berndivader.streamserver.StreamServer;
+import com.gmail.berndivader.streamserver.YAMPB;
 import com.gmail.berndivader.streamserver.annotation.DiscordCommand;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
@@ -28,12 +28,12 @@ public final class Commands {
 	static {
 		try {
 			fileName=URLDecoder.decode(
-					StreamServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
+					YAMPB.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
 					StandardCharsets.UTF_8.toString());
 		} catch (UnsupportedEncodingException e) {
 			try {
 				fileName=URLDecoder.decode(
-						StreamServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
+						YAMPB.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
 						StandardCharsets.ISO_8859_1.toString());
 			} catch (UnsupportedEncodingException e1) {
 				ANSI.error("Error, there is no UTF-8 nor a ISO-8859 encoding avaible.",e1);
