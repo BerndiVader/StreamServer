@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 import com.gmail.berndivader.streamserver.Helper;
-import com.gmail.berndivader.streamserver.StreamServer;
+import com.gmail.berndivader.streamserver.YAMPB;
 import com.gmail.berndivader.streamserver.discord.permission.Guild;
 import com.gmail.berndivader.streamserver.discord.permission.User;
 import com.gmail.berndivader.streamserver.term.ANSI;
@@ -31,20 +31,21 @@ public class Config {
 	public static String YOUTUBE_STREAM_KEY="xxxx-xxxx-xxxx-xxxx-xxxx";
 	public static String YOUTUBE_STREAM_URL="rtmp://a.rtmp.youtube.com/live2";
 	
-	public static String YOUTUBE_API_KEY="yt-api-key";
-	public static String YOUTUBE_CLIENT_ID="yt-client-id";
-	public static String YOUTUBE_CLIENT_SECRET="yt-client-secret";
-	public static String YOUTUBE_AUTH_REDIRECT="https://your.redirect.page";
-	public static String YOUTUBE_ACCESS_TOKEN="";
-	public static String YOUTUBE_REFRESH_TOKEN="";
+	public static String YOUTUBE_API_KEY="YT-API-KEY";
+	public static String YOUTUBE_CLIENT_ID="YT-CLIENT-ID";
+	public static String YOUTUBE_CLIENT_SECRET="YT-CLIENT-SECRET";
+	public static String YOUTUBE_AUTH_REDIRECT="https://YOUR.OAUTH2-REDIRECT.PAGE";
+	public static String YOUTUBE_ACCESS_TOKEN="YT-OAUTH2-ACCESS-TOKEN";
+	public static String YOUTUBE_REFRESH_TOKEN="YT-OUATH2-REFRESH-TOKEN";
 	public static Long YOUTUBE_TOKEN_TIMESTAMP=0l;
 	public static final Long YOUTUBE_TOKEN_EXPIRE_TIME=3599l;
 	
 	public static Boolean YOUTUBE_USE_COOKIES=false;
 	public static File YOUTUBE_COOKIES;
 	
-	public static Boolean STREAM_BOT_START=false;
 	public static Boolean DISCORD_BOT_START=false;
+	public static Boolean STREAM_BOT_START=false;
+	public static Boolean DISCORD_MUSIC_BOT=false;
 	
 	public static String PLAYLIST_PATH="./playlist";
 	public static String PLAYLIST_PATH_CUSTOM="./custom";
@@ -53,90 +54,102 @@ public class Config {
 	public static String DL_MUSIC_PATH="/music";
 	public static String DL_TEMP_PATH="/temp";
 	public static String DL_MEDIA_PATH="/media";
-	public static String DL_WWW_THUMBNAIL_PATH="/absolute/path/to/thumbnails";
+	public static String DL_WWW_THUMBNAIL_PATH="/ABSOLUTE/PATH/TO/THUMBNAILS";
 	public static Point DL_THUMBNAIL_SIZE=new Point(640,480);
 	
 	public static Long DL_TIMEOUT_SECONDS=1800l;
-	public static String DL_URL="https://path.to.php";
+	public static String DL_URL="https://PATH.TO.PHP";
 	public static String DL_INTERVAL_FORMAT="DAY";
 	public static Integer DL_INTERVAL_VALUE=14;
 	
+	public static Boolean DATABASE_USE=false;
 	public static String DATABASE_PREFIX="jdbc:mysql://";
-	public static String DATABASE_HOST="x.x.xxx.xxx";
+	public static String DATABASE_HOST="MYSQL.HOST.NAME";
 	public static String DATABASE_PORT="3306";
-	public static String DATABASE_NAME="ytbot";
-	public static String DATABASE_USER="default";
-	public static String DATABASE_PWD="default";
+	public static String DATABASE_NAME="yampb";
+	public static String DATABASE_USER="MYSQL-USER-NAME";
+	public static String DATABASE_PWD="MYSQL-PASSWORD";
 	public static Long DATABASE_TIMEOUT_SECONDS=10l;
 	
-	public static String DISCORD_TOKEN="default";
-	public static String DISCORD_VOICE_CHANNEL_NAME="Voice Channel Name";
-	public static Boolean DISCORD_MUSIC_BOT=false;
+	public static String DISCORD_CMD_PREFIX=".";
+	public static String DISCORD_TOKEN="BOT-TOKEN";
+	public static String DISCORD_VOICE_CHANNEL_NAME="VOICE-CHANNEL-NAME";
 	public static Boolean DISCORD_MUSIC_AUTOPLAY=false;
 	public static Long DISCORD_ROLE_ID=0l;
-	public static Long DISCORD_CHANNEL_ID=0l;
 	
 	public static String HELP_TEXT;
 	public static String DISCORD_HELP_TEXT;
+	public static String YAMPB_ANSI;
 	
 	public static Boolean DEBUG=false;
 	
 	public static String working_dir;
 	public static File config_dir,config_file;
-	public static ConfigData data;
+	public static Data data;
 	
 	public static Config instance;
+	public static boolean FRESH_INSTALL=false;
+	
+	public static boolean YTDLP_AVAIL;
+	public static boolean FFMPEG_AVAIL;
 	
 	static {
+		
+		YTDLP_AVAIL=Helper.ytdlpAvail();
+		FFMPEG_AVAIL=Helper.ffmpegAvail();
+				
         try {
-   			HELP_TEXT=inputstreamToString(StreamServer.class.getResourceAsStream("/help.txt"));
-   			DISCORD_HELP_TEXT=inputstreamToString(StreamServer.class.getResourceAsStream("/discord_help.txt"));
-            working_dir=new File(StreamServer.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
+   			HELP_TEXT=inputstreamToString(YAMPB.class.getResourceAsStream("/help.txt"));
+   			DISCORD_HELP_TEXT=inputstreamToString(YAMPB.class.getResourceAsStream("/discord_help.txt"));
+   			YAMPB_ANSI=inputstreamToString(YAMPB.class.getResourceAsStream("/yampb.ansi"));
+            working_dir=new File(YAMPB.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
         } catch (URISyntaxException ex) {
-        	ANSI.printErr("URISyntaxException",ex);
+        	ANSI.error("URISyntaxException",ex);
         }
 		config_dir=new File(working_dir,"config");
 		config_file=new File(config_dir,"config.json");
 		if(!config_dir.exists()) {
+			FRESH_INSTALL=true;
 			config_dir.mkdir();
 			createDefault();
 		}
 		if(!config_file.exists()) {
+			FRESH_INSTALL=true;
 			createDefault();
 		}
 		YOUTUBE_COOKIES=new File(config_dir,"cookies.txt");
 	}
 	
 	public Config() {
-		ANSI.println("[WHITE]Load config...");
+		ANSI.println("[CYAN]Loading config...");
 		if(loadConfig()) {
 			ANSI.println("[GREEN]DONE![/GREEN]");
 			saveConfig();
 		} else {
-			ANSI.printWarn("Failed loading or creating config file. Using default values.");
+			ANSI.warn("Failed loading or creating config file. Using default values.");
 		}
 	}
 	
 	private static void createDefault() {
 		config_dir.mkdir();
-		data=new ConfigData();
+		data=new Data();
 		saveConfig();
 	}
 	
 	public static boolean saveConfig() {
 		try(FileWriter writer=new FileWriter(config_file.getAbsoluteFile())) {
-			Field[]fields=ConfigData.class.getDeclaredFields();
+			Field[]fields=Data.class.getDeclaredFields();
 			for(Field field:fields) {
 				try {
 					Field config=Config.class.getField(field.getName());
 					field.set(data,config.get(null));
 				} catch (NoSuchFieldException | IllegalAccessException e) {
-					ANSI.printErr(e.getMessage(),e);
+					ANSI.error(e.getMessage(),e);
 				}
 			}
 	        Helper.GSON.toJson(data,writer);
 		} catch (IOException e) {
-			ANSI.printErr("Error while saving config file.",e);
+			ANSI.error("Error while saving config file.",e);
 			return false;
 		}
 		return true;
@@ -144,8 +157,8 @@ public class Config {
 
 	public static boolean loadConfig() {
 		try(FileReader reader=new FileReader(config_file.getAbsoluteFile())) {
-			data=Helper.GSON.fromJson(reader,ConfigData.class);
-			Field[]fields=ConfigData.class.getDeclaredFields();
+			data=Helper.GSON.fromJson(reader,Data.class);
+			Field[]fields=Data.class.getDeclaredFields();
 			for(Field field:fields) {
 				try {
 					Object value=field.get(data);
@@ -154,11 +167,11 @@ public class Config {
 						staticField.set(null,value);
 					}
 				} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-					ANSI.printErr(e.getMessage(),e);
+					ANSI.error(e.getMessage(),e);
 				}
 			}
 		} catch (IOException e) {
-			ANSI.printErr("Error while loading config file.",e);
+			ANSI.error("Error while loading config file.",e);
 			return false;
 		}
 		return true;
@@ -193,7 +206,7 @@ public class Config {
 			try {
 				is.close();
 			} catch (IOException e1) {
-				ANSI.printErr("Error while reading from an InputStream",e1);
+				ANSI.error("Error while reading from an InputStream",e1);
 			}
 		};
 		return output;
