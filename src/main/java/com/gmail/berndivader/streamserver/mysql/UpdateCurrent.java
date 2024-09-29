@@ -13,15 +13,15 @@ import com.gmail.berndivader.streamserver.config.Config;
 
 public class UpdateCurrent implements Callable<Boolean>{
 	
-	String sql="INSERT INTO `current` (`title`, `info`) VALUES(?, ?);";
-	String title,info;
+	String sql="INSERT INTO `current` (`title`, `ffprobe`) VALUES(?, ?);";
+	String title,ffprobe;
 	
 	public Future<Boolean>future;
 	
-	public UpdateCurrent(String title, String info) {
+	public UpdateCurrent(String title, String ffprobe) {
 		
 		this.title=title;
-		this.info=info;
+		this.ffprobe=ffprobe;
 		
 		future=Helper.EXECUTOR.submit(this);
 	}
@@ -39,7 +39,7 @@ public class UpdateCurrent implements Callable<Boolean>{
 				statement.addBatch("DELETE FROM `current`;");
 				
 				statement.setString(1,title);
-				statement.setString(2,info);
+				statement.setString(2,ffprobe);
 				statement.addBatch();
 				
 				statement.addBatch("COMMIT;");

@@ -20,7 +20,7 @@ import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 
 public class UpdatePlaylist implements Callable<Boolean> {
 	
-	static final String SQL="INSERT INTO `playlist` (`title`, `filepath`, `info`) VALUES(?, ?, ?);";
+	static final String SQL="INSERT INTO `playlist` (`title`, `filepath`, `ffprobe`) VALUES(?, ?, ?);";
     static final String[]SPINNER=new String[] {"\u0008/", "\u0008-", "\u0008\\", "\u0008|"};
     final boolean IS_COMMAND;
 	
