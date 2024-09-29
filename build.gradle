@@ -4,7 +4,7 @@ plugins {
 }
 
 application {
-	mainClass.set("com.gmail.berndivader.streamserver.StreamServer")
+	mainClass.set("com.gmail.berndivader.streamserver.YAMPB")
 }
 
 repositories {
