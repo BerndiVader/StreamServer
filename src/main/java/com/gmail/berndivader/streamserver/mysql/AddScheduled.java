@@ -54,7 +54,7 @@ public class AddScheduled implements Callable<Boolean> {
 			ANSI.error("Failed to add a file to the scheduled playlist",e);
 			return false;
 		}
-		if(Config.DEBUG) ANSI.println(exists?"\n[MYSQL TRACK ADDED FOR SCHEDULE]":"\n[MYSQL TRACK ALREADY ON SCHEDULE]");
+		if(Config.DEBUG) ANSI.info(!exists?"[MYSQL TRACK ADDED FOR SCHEDULE]":"\n[MYSQL TRACK ALREADY ON SCHEDULE]");
 		return !exists;
 	}
 

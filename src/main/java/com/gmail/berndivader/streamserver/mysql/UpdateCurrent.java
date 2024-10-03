@@ -33,7 +33,7 @@ public class UpdateCurrent implements Callable<Boolean>{
 			connection.setAutoCommit(false);
 			try(PreparedStatement statement=connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				
-				if(Config.DEBUG) ANSI.println("[BEGIN MYSQL CURRENT UPDATE]");
+				if(Config.DEBUG) ANSI.info("[BEGIN MYSQL CURRENT UPDATE]");
 				
 				statement.addBatch("START TRANSACTION;");
 				statement.addBatch("DELETE FROM `current`;");
@@ -53,7 +53,7 @@ public class UpdateCurrent implements Callable<Boolean>{
 			ANSI.error("Update now playing entry failed.",e);
 			return false;
 		}
-		if(Config.DEBUG) ANSI.println("\n[SUCSESSFUL MYSQL CURRENT UPDATE]");
+		if(Config.DEBUG) ANSI.info("[SUCSESSFUL MYSQL CURRENT UPDATE]");
 		return true;
 		
 	}

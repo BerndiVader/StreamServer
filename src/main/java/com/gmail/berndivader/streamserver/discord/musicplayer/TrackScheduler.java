@@ -54,12 +54,12 @@ public class TrackScheduler extends AudioEventAdapter {
 		
 	@Override
 	public void onPlayerPause(AudioPlayer player) {
-		if(Config.DEBUG) ANSI.println("Audioplayer paused!");
+		if(Config.DEBUG) ANSI.info("Audioplayer paused!");
 	}
 	
 	@Override
 	public void onPlayerResume(AudioPlayer player) {
-		if(Config.DEBUG) ANSI.println("Audioplayer resumed!");
+		if(Config.DEBUG) ANSI.info("Audioplayer resumed!");
 	}
 
 	@Override

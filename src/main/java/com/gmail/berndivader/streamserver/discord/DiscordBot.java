@@ -150,7 +150,7 @@ public final class DiscordBot {
 	}
 	
 	public void updateStatus(String comment) {
-		if(Config.DEBUG) ANSI.println("Set status to: "+comment);
+		if(Config.DEBUG) ANSI.info("Set status to: "+comment);
 	    client.updatePresence(ClientPresence.of(discord4j.core.object.presence.Status.ONLINE,ClientActivity.custom(comment)))
 	    	.onErrorContinue((throwable,object)->ANSI.error("Failed to update discord status",throwable))
 	    	.subscribe();

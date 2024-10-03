@@ -37,7 +37,7 @@ public class GetAllScheduled implements Callable<ArrayList<String>> {
 			return null;
 		}
 		
-		if(Config.DEBUG) ANSI.println("\n[MYSQL GET SCHEDULED LIST SUCCSEED]");
+		if(Config.DEBUG) ANSI.info("[MYSQL GET SCHEDULED LIST SUCCSEED]");
 		return files;
 	}
 

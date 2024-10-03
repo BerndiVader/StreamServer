@@ -31,7 +31,7 @@ public class ErrorPacket extends Packet {
 	
 	public void printSimple() {
 		ANSI.warn("Youtube error code: "+code+", Message: "+message);
-		if(Config.DEBUG) ANSI.println(source.toString());
+		if(Config.DEBUG) ANSI.info(source.toString());
 	}
 	
 	public void printDetails() {

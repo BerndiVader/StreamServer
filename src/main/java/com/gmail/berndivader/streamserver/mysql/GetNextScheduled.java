@@ -41,7 +41,7 @@ public class GetNextScheduled implements Callable<String> {
 			return null;
 		}
 		
-		if(Config.DEBUG) ANSI.println("\n[MYSQL GET NEXT SCHEDULED SUCCSEED]");
+		if(Config.DEBUG) ANSI.info("[MYSQL GET NEXT SCHEDULED SUCCSEED]");
 		return filename;
 	}
 
