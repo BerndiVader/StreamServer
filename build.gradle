@@ -1,3 +1,5 @@
+import java.beans.PropertyChangeSupport
+
 plugins {
 	id 'java'
 	id 'application'
@@ -25,13 +27,6 @@ java {
 	toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
-if(hasProperty('buildScan')) {
-	buildScan {
-		termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-		termsOfServiceAgree = 'yes'
-	}
-}
-
 dependencies {
 	supplied 'com.github.kokorin.jaffree:jaffree:+'
 	supplied 'org.slf4j:slf4j-api:+'
@@ -41,6 +36,13 @@ dependencies {
     supplied 'com.discord4j:discord4j-core:3.2.6'
     supplied 'org.apache.httpcomponents:httpclient:4.3.4'
     supplied 'com.github.devoxin:lavaplayer:1.9.1'
+}
+
+if(hasProperty('buildScan')) {
+	buildScan {
+		termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+		termsOfServiceAgree = 'yes'
+	}
 }
 
 jar {
@@ -56,3 +58,21 @@ jar {
     }
 }
 
+task debug(type:DefaultTask,group:'Build') {
+	dependsOn 'build'
+	doLast {
+		File file=file('debug.properties')
+		Properties props=new Properties()
+		file.withInputStream{props.load(it)}
+		
+		long build=Long.parseLong(props.getProperty('build'))
+		build++
+		
+		props.setProperty('build',Long.toString(build))
+		file.withOutputStream{props.store(it,null)}
+		
+		File jf=jar.archiveFile.get().getAsFile()
+		String name=jf.getName().replace(".jar","-debug-build"+props.getProperty('build')+".jar")
+		jf.renameTo(new File(jf.getParent(),name));
+	}
+}
