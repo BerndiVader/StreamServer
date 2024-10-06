@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -30,6 +31,7 @@ import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.mysql.GetNextScheduled;
 import com.gmail.berndivader.streamserver.mysql.UpdateCurrent;
+import com.gmail.berndivader.streamserver.mysql.UpdatePlaylist;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.youtube.Broadcast;
 import com.gmail.berndivader.streamserver.youtube.BroadcastStatus;
@@ -43,13 +45,13 @@ import com.gmail.berndivader.streamserver.youtube.packets.UnknownPacket;
 
 public final class BroadcastRunner extends TimerTask {
 	
-	boolean stop;
-	public static boolean hold;
+	private static AtomicBoolean stop;
+	public static AtomicBoolean hold;
 	
-	private static FFmpegProgress progress;
-	private static FFProbePacket playingPacket;
-	private static String message;
-	private static File playing;
+	private static volatile FFmpegProgress progress;
+	private static volatile FFProbePacket playingPacket;
+	private static volatile String message;
+	private static volatile File playing;
 	private static FFmpegResultFuture ffmpeg;
 	public static AtomicInteger index=new AtomicInteger();
 	public static Packet liveBroadcast=Packet.emtpy();
@@ -57,14 +59,18 @@ public final class BroadcastRunner extends TimerTask {
 	
 	private static long expiredCounter;
 	
-	private static CopyOnWriteArrayList<File>files;
-	private static CopyOnWriteArrayList<File>customs;
+	private static volatile CopyOnWriteArrayList<File>files;
+	private static volatile CopyOnWriteArrayList<File>customs;
 	
 	public static BroadcastRunner instance;
+	
+	private long period=2l;
 	
 	static {
 		files=new CopyOnWriteArrayList<File>();
 		customs=new CopyOnWriteArrayList<File>();
+		stop=new AtomicBoolean();
+		hold=new AtomicBoolean();
 	}
 	
 	public static synchronized FFmpegProgress progress() {
@@ -110,8 +116,8 @@ public final class BroadcastRunner extends TimerTask {
 	public BroadcastRunner() {
 		ANSI.print("[YELLOW]Starting BroadcastRunner...");
 
-		stop=false;
-		hold=false;
+		stop.set(false);
+		hold.set(false);
 		
 		refreshFilelist();
 		shuffleFilelist();
@@ -122,14 +128,14 @@ public final class BroadcastRunner extends TimerTask {
 		expiredCounter=0l;
 		startStream();
 		
-		Helper.SCHEDULED_EXECUTOR.scheduleAtFixedRate(this,0l,2l,TimeUnit.SECONDS);
+		Helper.SCHEDULED_EXECUTOR.scheduleAtFixedRate(this,0l,period,TimeUnit.SECONDS);
 		ANSI.println("[GREEN]DONE![RESET]");
 	}
 	
 	public void stop() throws InterruptedException {
 		ANSI.print("[YELLOW]Stopping BroadcastRunner...");
 		
-		stop=true;
+		stop.set(true);
     	if(ffmpeg()!=null&&(!ffmpeg().isCancelled()||!ffmpeg().isDone())) {
     		ANSI.print("[YELLOW][Stop broadcasting...");
     		
@@ -147,20 +153,38 @@ public final class BroadcastRunner extends TimerTask {
 	
 	@Override
 	public void run() {
-
-		if(!stop&&!hold) {
-			expiredCounter+=2l;
-    		if(ffmpeg()==null||ffmpeg().isCancelled()||ffmpeg().isDone()) startStream();
-			if(expiredCounter>Config.YOUTUBE_TOKEN_EXPIRE_TIME) {
-				checkOrReInitiateLiveBroadcast(Config.BROADCAST_DEFAULT_TITLE,Config.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
-				expiredCounter=0l;
+		
+		long refreshTimer=0l;
+		
+		if(!stop.get()) {
+			refreshTimer+=period;
+			expiredCounter+=period;
+			if(!hold.get()) {
+	    		if(ffmpeg()==null||ffmpeg().isCancelled()||ffmpeg().isDone()) startStream();
+				if(expiredCounter>Config.YOUTUBE_TOKEN_EXPIRE_TIME) {
+					checkOrReInitiateLiveBroadcast(Config.BROADCAST_DEFAULT_TITLE,Config.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
+					expiredCounter=0l;
+				}
+			} else {
+				if(refreshTimer>Config.BROADCAST_PLAYLIST_REFRESH_INTERVAL) {
+					refreshFilelist();
+					shuffleFilelist();
+					try {
+						new UpdatePlaylist(false);
+						hold.set(files.size()>0);
+					} catch (InterruptedException | ExecutionException | TimeoutException e) {
+						ANSI.error("Failed to update playlist.",e);
+					}
+					
+				}
 			}
+			
 		}
 		
 	}
 	
 	public static synchronized void checkOrReInitiateLiveBroadcast(String title,String description,PrivacyStatus privacy) {
-		if(Config.DEBUG) ANSI.println("[BLUE]Test if broadcast is still live on Youtube...[RESET]");
+		if(Config.DEBUG) ANSI.info("[BLUE]Test if broadcast is still live on Youtube...[RESET]");
 		try {
 			Packet packet=liveBroadcast=Broadcast.getLiveBroadcastWithTries(BroadcastStatus.active,2);
 			if(packet instanceof EmptyPacket) {
@@ -181,7 +205,7 @@ public final class BroadcastRunner extends TimerTask {
 							ANSI.println("[GREEN]Merged the default livestream with the new livebroadcast together...");
 							
 							broadcast=(LiveBroadcastPacket)packet;
-							if(Config.DEBUG) ANSI.println(broadcast.source().toString());
+							if(Config.DEBUG) ANSI.info(broadcast.source().toString());
 							
 							ANSI.println("[BLUE]The new livestream should go live in a few seconds.[PROMPT]");
 						}
@@ -195,11 +219,11 @@ public final class BroadcastRunner extends TimerTask {
 				} else if(packet instanceof EmptyPacket) {
 					ANSI.println("[RED]FAILED!");
 					ANSI.warn("Received EmptyPacket!");
-					if(Config.DEBUG) ANSI.println(packet.source().toString());
+					if(Config.DEBUG) ANSI.info(packet.source().toString());
 				} else if(packet instanceof UnknownPacket){
 					ANSI.println("[RED]FAILED!");
 					ANSI.warn("Unknown packet received!");
-					if(Config.DEBUG) ANSI.println(packet.source().toString());
+					if(Config.DEBUG) ANSI.info(packet.source().toString());
 				}
 				
 			} else if(packet instanceof ErrorPacket) {
@@ -208,7 +232,7 @@ public final class BroadcastRunner extends TimerTask {
 			} else if(packet instanceof LiveBroadcastPacket) {
 				LiveBroadcastPacket broadcast=(LiveBroadcastPacket)packet;
 				ANSI.println("Broadcast is live on Youtube.");
-				if(Config.DEBUG) ANSI.println(broadcast.source().toString());
+				if(Config.DEBUG) ANSI.info(broadcast.source().toString());
 			}
 		} catch(Exception e) {
 			ANSI.error("Failed to restart live broadcast on Youtube.",e);
@@ -233,7 +257,8 @@ public final class BroadcastRunner extends TimerTask {
 			createStream(getFiles()[index.get()]);
 			index.set((index.get()+1)%getFiles().length);
 		} else {
-			BroadcastRunner.hold=true;
+			ANSI.info("Broadcasting is on hold because there are no mediafiles inside playlist dirctory.");
+			BroadcastRunner.hold.set(true);
 		}
 	}
 	
@@ -257,7 +282,7 @@ public final class BroadcastRunner extends TimerTask {
 		if(Config.DISCORD_BOT_START&&DiscordBot.instance!=null) DiscordBot.instance.updateStatus(title);
 		
 		if(Config.DEBUG) {
-			ANSI.println("[BLUE]Now playing: "
+			ANSI.info("[BLUE]Now playing: "
 					+playingPacket().tags.title
 					+":"+playingPacket().tags.artist
 					+":"+playingPacket().tags.date
@@ -343,18 +368,26 @@ public final class BroadcastRunner extends TimerTask {
 	
 	public static Optional<File> getFileByName(String name) {
 		File file=null;
+		
 		int pos=getFilePosition(name);
 		if(pos!=-1) {
 			file=files.get(pos);
-		} else {
-			pos=getCustomFilePosition(name);
-			if(pos!=-1) file=customs.get(pos);
+			if(file.exists()&&file.isFile()&&file.canRead()) {	
+				return Optional.of(file);
+			}
 		}
-		if(file!=null&&file.exists()&&file.isFile()&&file.canRead()) return Optional.of(file);
+		
+		pos=getCustomFilePosition(name);
+		if(pos!=-1) {
+			file=customs.get(pos);
+			if(file.exists()&&file.isFile()&&file.canRead()) {	
+				return Optional.of(file);
+			}
+		}
 		return Optional.empty();
-	}	
+	}
 	
-	public static int getFilePosition(String name) {
+	private static int getFilePosition(String name) {
 		if(!name.isEmpty()) {
 			int size=files.size();
 		    for(int i=0;i<size;i++) {
@@ -364,7 +397,7 @@ public final class BroadcastRunner extends TimerTask {
 		return -1;
 	}
 	
-	public static int getCustomFilePosition(String name) {
+	private static int getCustomFilePosition(String name) {
 		if(!name.isEmpty()) {
 			int size=customs.size();
 			for(int i=0;i<size;i++) {
@@ -447,11 +480,15 @@ public final class BroadcastRunner extends TimerTask {
     	File customDir=new File(Config.working_dir,Config.PLAYLIST_PATH_CUSTOM);
     	
     	FileFilter filter=pathName->pathName.getAbsolutePath().toLowerCase().endsWith(".mp4");
+    	List<File>newFiles=Arrays.asList(getFiles(playlistDir,filter));
     	synchronized(files) {
-        	files=new CopyOnWriteArrayList<File>(Arrays.asList(getFiles(playlistDir,filter)));
+    		files.clear();
+    		files.addAll(newFiles);
 		}
-    	synchronized(customDir) {
-        	customs=new CopyOnWriteArrayList<File>(Arrays.asList(getFiles(customDir,filter)));
+    	newFiles=Arrays.asList(getFiles(customDir,filter));
+    	synchronized(customs) {
+    		customs.clear();
+    		customs.addAll(newFiles);
 		}
     	
 	}

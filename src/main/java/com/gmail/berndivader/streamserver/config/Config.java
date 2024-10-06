@@ -39,6 +39,7 @@ public class Config {
 	public static String YOUTUBE_REFRESH_TOKEN="YT-OUATH2-REFRESH-TOKEN";
 	public static Long YOUTUBE_TOKEN_TIMESTAMP=0l;
 	public static final Long YOUTUBE_TOKEN_EXPIRE_TIME=3599l;
+	public static final long BROADCAST_PLAYLIST_REFRESH_INTERVAL=60l;
 	
 	public static Boolean YOUTUBE_USE_COOKIES=false;
 	public static File YOUTUBE_COOKIES;
