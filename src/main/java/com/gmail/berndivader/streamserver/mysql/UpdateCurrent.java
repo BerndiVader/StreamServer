@@ -35,15 +35,14 @@ public class UpdateCurrent implements Callable<Boolean>{
 				
 				if(Config.DEBUG) ANSI.info("[BEGIN MYSQL CURRENT UPDATE]");
 				
-				statement.addBatch("START TRANSACTION;");
 				statement.addBatch("DELETE FROM `current`;");
 				
 				statement.setString(1,title);
 				statement.setString(2,ffprobe);
 				statement.addBatch();
 				
-				statement.addBatch("COMMIT;");
 				statement.executeBatch();
+				connection.commit();
 
 			} catch(SQLException e) {
 				connection.rollback();

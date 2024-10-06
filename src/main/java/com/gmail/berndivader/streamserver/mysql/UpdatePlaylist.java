@@ -29,9 +29,9 @@ public class UpdatePlaylist implements Callable<Boolean> {
 		
 		if(IS_COMMAND=fromConsole) {
 			if(future.get(20,TimeUnit.MINUTES)) {
-				ANSI.println("[BR][SUCESSFUL MYSQL PLAYLIST UPDATE]");
+				ANSI.info("[SUCESSFUL MYSQL PLAYLIST UPDATE]");
 			} else {
-				ANSI.warn("[BR][FAILED MYSQL PLAYLIST UPDATE]");
+				ANSI.warn("[FAILED MYSQL PLAYLIST UPDATE]");
 			}
 		}
 	}
@@ -55,8 +55,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 				ANSI.println("[BEGIN MYSQL PLAYLIST UPDATE]");
 				if(IS_COMMAND) ANSI.print("[GREEN]|");
 				
-				statement.addBatch("START TRANSACTION;");
-				statement.addBatch("TRUNCATE TABLE playlist;");
+				statement.addBatch("DELETE FROM playlist;");
 				
 				for(int i1=0;i1<files.length;i1++) {
 					
@@ -75,9 +74,8 @@ public class UpdatePlaylist implements Callable<Boolean> {
 					statement.addBatch();
 					
 				}
-				
-				statement.addBatch("COMMIT;");
 				statement.executeBatch();
+				connection.commit();
 				
 			} catch(SQLException e) {
 				connection.rollback();

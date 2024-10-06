@@ -25,13 +25,12 @@ public class WipeDatabase implements Callable<Boolean> {
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			connection.setAutoCommit(false);
 			try(Statement wipe=connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
-				wipe.addBatch("START TRANSACTION;");
-				wipe.addBatch("TRUNCATE TABLE `current`;");
-				wipe.addBatch("TRUNCATE TABLE `playlist`;");
-				wipe.addBatch("TRUNCATE TABLE `scheduled`;");
-				wipe.addBatch("TRUNCATE TABLE `downloadables`;");
-				wipe.addBatch("COMMIT;");
+				wipe.addBatch("DELETE FROM `current`;");
+				wipe.addBatch("DELETE FROM `playlist`;");
+				wipe.addBatch("DELETE FROM `scheduled`;");
+				wipe.addBatch("DELETE FROM `downloadables`;");
 				wipe.executeBatch();
+				connection.commit();
 			} catch(SQLException e) {
 				connection.rollback();
 				throw e;
