@@ -13,7 +13,7 @@ public class Schedule extends Command {
 	@Override
 	public boolean execute(String[] args) {
 		if(args.length>0) {
-			final String filename=args[0].endsWith(".mp4")?args[0]+".mp4":args[0];
+			final String filename=args[0].strip().endsWith(".mp4")?args[0]:args[0]+".mp4";
 			BroadcastRunner.getFileByName(filename)
 				.ifPresentOrElse(file->new AddScheduled(file.getName()),
 				()->ANSI.error("No file found for "+filename,new Throwable("File not found.")));
