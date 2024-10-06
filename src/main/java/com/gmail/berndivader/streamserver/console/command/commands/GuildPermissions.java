@@ -55,7 +55,11 @@ public class GuildPermissions extends Command {
 		} else {
 			ANSI.println("[MAGENTA]Permitted guilds:");
 			Config.DISCORD_PERMITTED_GUILDS.forEach((id,guild)->{
-				ANSI.println("[YELLOW]Name:[BLUE]"+guild.name+" [YELLOW]Id:[BLUE]"+id);
+				String output="[YELLOW]Name:[BLUE]"+guild.name+" [YELLOW]Id:[BLUE]"+id+" [YELLOW]Channels:[BLUE]";
+				for(long channel:guild.channelId) {
+					output+=channel+(" ");
+				}
+				ANSI.println(output);
 			});
 		}
 		Config.saveConfig();
