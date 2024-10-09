@@ -52,6 +52,7 @@ public class Data {
 	
 	public Boolean DISCORD_BOT_START;
 	public String DISCORD_TOKEN;
+	public Boolean DISCORD_DELETE_CMD_MESSAGE;
 	public HashMap<Long,Guild>DISCORD_PERMITTED_GUILDS;
 	public HashMap<Long,User>DISCORD_PERMITTED_USERS;
 	public Long DISCORD_ROLE_ID;

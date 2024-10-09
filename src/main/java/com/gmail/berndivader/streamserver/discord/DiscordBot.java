@@ -1,9 +1,11 @@
 package com.gmail.berndivader.streamserver.discord;
 
 import java.time.Duration;
+import java.util.Optional;
 
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.action.ButtonAction;
+import com.gmail.berndivader.streamserver.discord.command.Command;
 import com.gmail.berndivader.streamserver.discord.command.Commands;
 import com.gmail.berndivader.streamserver.discord.musicplayer.MusicPlayer;
 import com.gmail.berndivader.streamserver.discord.musicplayer.DiscordAudioProvider;
@@ -125,9 +127,10 @@ public final class DiscordBot {
 		        String content=message.getContent();
 		        String[]parse=content.split(" ",2);
 		        String cmd=parse[0].toLowerCase().substring(1);
-		        e.getMessage().delete().subscribe();
 
-		        return Mono.justOrEmpty(Commands.instance.build(cmd))
+		        Optional<Command<?>>opt=Commands.instance.build(cmd);
+		        if(Config.DISCORD_DELETE_CMD_MESSAGE&&opt.isPresent()) message.delete().subscribe();
+		        return Mono.justOrEmpty(opt)
 		        		.flatMap(command->{
 		        			String args=parse.length==2?parse[1]:"";
 		        			return message.getChannel().flatMap(channel->command.execute(args,channel,e.getMember().get()));
@@ -142,10 +145,6 @@ public final class DiscordBot {
 		client.onDisconnect().doOnSuccess(t->{
 		    ANSI.println("[YELLOW][Connection to Discord CLOSED!][RESET]");
 		}).subscribe();
-		
-	}
-	
-	public void connectToVoiceChannel(VoiceChannel voice,DiscordAudioProvider provider) {
 		
 	}
 	

@@ -53,7 +53,7 @@ public class Help extends Command<Message> {
 		
 		return channel.createMessage(MessageCreateSpec.builder()
 				.addEmbed(EmbedCreateSpec.builder()
-					.title("StreamServer discord help")
+					.title(Config.DISCORD_HELP_TEXT_TITLE)
 					.color(Color.GREEN)
 					.description(builder.toString())
 					.build())				

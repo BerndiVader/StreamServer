@@ -74,12 +74,14 @@ public class Config {
 	
 	public static String DISCORD_CMD_PREFIX=".";
 	public static String DISCORD_TOKEN="BOT-TOKEN";
+	public static Boolean DISCORD_DELETE_CMD_MESSAGE=false;
 	public static String DISCORD_VOICE_CHANNEL_NAME="VOICE-CHANNEL-NAME";
 	public static Boolean DISCORD_MUSIC_AUTOPLAY=false;
 	public static Long DISCORD_ROLE_ID=0l;
 	
 	public static String HELP_TEXT;
 	public static String DISCORD_HELP_TEXT;
+	public static String DISCORD_HELP_TEXT_TITLE="YAMPB Discord help";
 	public static String YAMPB_ANSI;
 	
 	public static Boolean DEBUG=false;

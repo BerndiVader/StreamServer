@@ -1,1 +1,1 @@
-[YELLOW]StreamServer console help[/YELLOW][BR][WHITE]=========================[/WHITE][BR]
+[YELLOW]YAMP help[/YELLOW][BR][WHITE]=========[/WHITE][BR]
