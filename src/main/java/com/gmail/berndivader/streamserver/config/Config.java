@@ -42,7 +42,6 @@ public class Config {
 	public static final long BROADCAST_PLAYLIST_REFRESH_INTERVAL=60l;
 	
 	public static Boolean YOUTUBE_USE_COOKIES=false;
-	public static File YOUTUBE_COOKIES;
 	
 	public static Boolean DISCORD_BOT_START=false;
 	public static Boolean STREAM_BOT_START=false;
@@ -120,7 +119,6 @@ public class Config {
 			FRESH_INSTALL=true;
 			createDefault();
 		}
-		YOUTUBE_COOKIES=new File(config_dir,"cookies.txt");
 	}
 	
 	public Config() {
@@ -215,5 +213,12 @@ public class Config {
 		return output;
 	}
 	
+	public static boolean cookiesExists() {
+		return getCookies().exists();
+	}
+	
+	public static File getCookies() {
+		return new File(config_dir,"cookies.txt");
+	}
 	
 }

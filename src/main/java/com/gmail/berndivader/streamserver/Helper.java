@@ -104,9 +104,9 @@ public final class Helper {
 				,"--output","%(title).64s.%(ext)s"
 		);
 		
-		if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
+		if(Config.YOUTUBE_USE_COOKIES&&Config.cookiesExists()) {
 			builder.command().add("--cookies");
-			builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
+			builder.command().add(Config.getCookies().getAbsolutePath());
 		}
 		
 		String url="";
@@ -147,9 +147,9 @@ public final class Helper {
 						}
 						break;
 					case("cookies"):
-						if(!Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
+						if(!Config.YOUTUBE_USE_COOKIES&&Config.cookiesExists()) {
 							builder.command().add("--cookies");
-							builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
+							builder.command().add(Config.getCookies().getAbsolutePath());
 						}
 						break;
 					case("yt"):
