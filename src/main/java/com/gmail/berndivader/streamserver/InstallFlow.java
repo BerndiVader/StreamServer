@@ -130,9 +130,9 @@ public class InstallFlow {
 		return answer;
 	}
 	
-	private static String askPwd(String question,String defauld) {
+	private static String askPwd(String question,String current) {
 		Console console=System.console();
-		if(console==null) return defauld;
+		if(console==null) return current;
 		ANSI.print(String.format("[YELLOW]%s [WHITE]",question));
 	    char[]chars=console.readPassword();
 	    String pwd=new String(chars);

@@ -81,17 +81,18 @@ public final class DiscordBot {
 			.filter(channel->Config.DISCORD_MUSIC_BOT&&channel.getType()==Channel.Type.GUILD_VOICE&&channel.getName().equals(Config.DISCORD_VOICE_CHANNEL_NAME))
 			.cast(VoiceChannel.class)
 			.flatMap(voice->{
-								
+
 				return voice.join().withProvider(provider).doOnSuccess(vc->{
 					
+					ANSI.println("Create musicplayer....");
 					provider.player().addListener(new TrackScheduler(voice));
 					if(Config.DISCORD_MUSIC_AUTOPLAY) MusicPlayer.playRandomMusic();
 					
-				}).retryWhen(Retry.backoff(5l,Duration.ofSeconds(1)).maxBackoff(Duration.ofSeconds(10)))
+				}).retryWhen(Retry.backoff(1024l,Duration.ofSeconds(1)).maxBackoff(Duration.ofSeconds(10)))
 				.onErrorContinue((error,o)->{
 					
 					voice.getVoiceConnection().subscribe(vc->vc.reconnect().subscribe());
-					ANSI.error(error.getMessage(),error);
+					ANSI.error("Error occured while voicechannel join.",error);
 					
 			    });
 
@@ -104,8 +105,8 @@ public final class DiscordBot {
 				return event.getCurrent().getMember().doOnSuccess(member->{
 					member.getVoiceState().flatMap(voiceState->voiceState.getChannel()).subscribe(channel -> {
 						
-						if(channel.getName().equals(Config.DISCORD_VOICE_CHANNEL_NAME)) {
-							PermissionOverwrite overrite=PermissionOverwrite.forMember(member.getId(),PermissionSet.none(),PermissionSet.of(Permission.SPEAK,Permission.STREAM));
+						if(channel.getName().equalsIgnoreCase(Config.DISCORD_VOICE_CHANNEL_NAME)) {
+							PermissionOverwrite overrite=PermissionOverwrite.forMember(member.getId(),null,PermissionSet.of(Permission.SPEAK,Permission.STREAM));
 							channel.addMemberOverwrite(member.getId(),overrite).subscribe();
 						}
 						
@@ -137,7 +138,7 @@ public final class DiscordBot {
 		        		});
 
 		    })
-		    .onErrorContinue((throwable,object)->ANSI.error(throwable.getMessage(),throwable))
+		    .onErrorContinue((throwable,object)->ANSI.error("There was an issue within message create event.",throwable))
 		    .subscribe();
 		
 		client.on(ButtonInteractionEvent.class,ButtonAction::process).subscribe();
