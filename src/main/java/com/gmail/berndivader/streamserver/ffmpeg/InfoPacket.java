@@ -45,9 +45,9 @@ public class InfoPacket {
 				,"--dump-json"
 				,"--no-playlist"
 			);
-			if(Config.YOUTUBE_USE_COOKIES&&Config.YOUTUBE_COOKIES.exists()) {
+			if(Config.YOUTUBE_USE_COOKIES&&Config.cookiesExists()) {
 				builder.command().add("--cookies");
-				builder.command().add(Config.YOUTUBE_COOKIES.getAbsolutePath());
+				builder.command().add(Config.getCookies().getAbsolutePath());
 			}
 			builder.command().add(url);
 			
