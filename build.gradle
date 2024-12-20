@@ -16,7 +16,7 @@ repositories {
   	}
   	maven {
   		url 'https://jitpack.io'
-  	}
+  	}  	
 }
 
 configurations {
@@ -28,10 +28,10 @@ java {
 }
 
 dependencies {
-	supplied 'com.github.kokorin.jaffree:jaffree:+'
+	supplied 'com.github.kokorin.jaffree:jaffree:2024.08.29'
 	supplied 'org.slf4j:slf4j-api:+'
-    supplied 'mysql:mysql-connector-java:+'
-    supplied 'com.google.code.gson:gson:+'
+    supplied 'mysql:mysql-connector-java:8.0.33'
+    supplied 'com.google.code.gson:gson:2.11.0'
     supplied 'org.slf4j:slf4j-nop:+'
     supplied 'com.discord4j:discord4j-core:3.2.6'
     supplied 'org.apache.httpcomponents:httpclient:4.3.4'
