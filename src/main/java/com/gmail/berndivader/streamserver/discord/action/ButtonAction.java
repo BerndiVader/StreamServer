@@ -122,6 +122,9 @@ public class ButtonAction {
 				});
 				break;
 			}
+			case PLAYMUSIC: {
+				break;
+			}
 			default: {
 				break;
 			}
