@@ -49,7 +49,6 @@ public class LivestreamInfo extends Command<Message> {
 				.url("https://www.youtube.com/watch?v="+live.id)
 				.description(live.snippet.description)
 				.footer("Broadcastcontent: "+live.kind,live.snippet.thumbnails.get("default").url)
-				.thumbnail(live.snippet.thumbnails.get("default").url)
 				.title(live.snippet.title);
 		}else if(packet instanceof ErrorPacket) {
 			ErrorPacket error=(ErrorPacket)packet;
