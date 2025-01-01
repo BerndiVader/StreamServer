@@ -25,7 +25,7 @@ public class InfoPacket {
 		public Integer filesize_approx=-1;
 		public Boolean downloadable=false;
 		public Boolean temp=false;
-		
+				
 		private InfoPacket() {}
 		
 		@Override
@@ -37,7 +37,15 @@ public class InfoPacket {
 			return field!=null&&!field.equals(UNKNOWN)&&!field.equals(EMTPY);
 		}
 		
+		public static InfoPacket empty() {
+			return new InfoPacket();
+		}
+		
 		public static InfoPacket build(String url) {
+			
+			InfoPacket packet=new InfoPacket();
+			if(url==null||url.isEmpty()) return packet;
+			
 			ProcessBuilder builder=new ProcessBuilder();
 			builder.command("yt-dlp"
 				,"--quiet"
@@ -51,20 +59,19 @@ public class InfoPacket {
 			}
 			builder.command().add(url);
 			
-			InfoPacket info=new InfoPacket();
 			try {
 				String out=Helper.startAndWaitForProcess(builder,20l);
 				if(!out.isEmpty()) {
 					int index=out.indexOf('{');
 					if(index!=-1) out=out.substring(index);
-					info=Helper.LGSON.fromJson(out,InfoPacket.class);
+					packet=Helper.LGSON.fromJson(out,InfoPacket.class);
 				}
 			} catch (Exception e) {
-				ANSI.error("getinfoPacket method failed.",e);
+				ANSI.error("Failed to build InfoPacket out of recieved Json string.",e);
 			}
 			
-			if(!info.isSet(info.webpage_url)) info.webpage_url=url;
-			return info;
+			if(!packet.isSet(packet.webpage_url)) packet.webpage_url=url;
+			return packet;
 		}
 
 	}
