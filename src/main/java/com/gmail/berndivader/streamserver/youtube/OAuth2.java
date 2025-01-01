@@ -63,7 +63,6 @@ public final class OAuth2 {
 					ANSI.println("[RED]failed!");
 					ANSI.error(json.get("error").getAsString()+" Reason: "+json.get("error_description").getAsString(),new RuntimeException("OAuth2 registration failed."));
 				}
-				ANSI.println(json.toString());
 				return new AbstractMap.SimpleEntry<String,String>(accessToken,refreshToken);
 			});
 
@@ -72,12 +71,12 @@ public final class OAuth2 {
 
 			if(token.isEmpty()) throw(new Exception("Failed to receive token."));
 			if(refreshToken.isEmpty()) throw(new Exception("Failed to receive refresh token."));
-			ANSI.println("[GREEN]done!");
+						
 			Config.YOUTUBE_ACCESS_TOKEN=token;
 			Config.YOUTUBE_REFRESH_TOKEN=refreshToken;
 			Config.YOUTUBE_TOKEN_TIMESTAMP=System.currentTimeMillis()/1000;
 			Config.saveConfig();
-
+			
 		} catch (Exception e) {
 			ANSI.error(e.getMessage(),e);
 			return false;
@@ -115,7 +114,7 @@ public final class OAuth2 {
 			Config.YOUTUBE_TOKEN_TIMESTAMP=System.currentTimeMillis()/1000l;
 			Config.saveConfig();
 
-			ANSI.println("[GREEN]done![PROMPT]");
+			ANSI.println("[GREEN]done![/GREEN] Renewed the refresh token for YouTube.[PROMPT]");
 			return true;
 
 		} catch (Exception e) {
