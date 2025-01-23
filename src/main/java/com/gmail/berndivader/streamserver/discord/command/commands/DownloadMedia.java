@@ -94,6 +94,7 @@ public class DownloadMedia extends Command<Void> {
 				status=Status.RUNNING;
 				
 				try {
+					if(infoPacket.title.length()>255) infoPacket.title=infoPacket.title.substring(0,255);
 					EmbedCreateSpec.Builder embedBuilder=EmbedCreateSpec.builder()
 						.title(infoPacket.title)
 						.url(infoPacket.webpage_url)
