@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +54,7 @@ public final class Helper {
 		LGSON=new GsonBuilder().setPrettyPrinting().setFieldNamingStrategy(s->s.getName().toLowerCase()).disableHtmlEscaping().create();
 	}
 	
-	public static String startAndWaitForProcess(ProcessBuilder builder,long timeout) throws Exception {
+	public static SimpleEntry<String,String> startAndWaitForProcess(ProcessBuilder builder,long timeout) throws Exception {
 		long start=System.currentTimeMillis();
 		timeout*=1000l;
 		Process process=builder.start();
@@ -83,8 +84,7 @@ public final class Helper {
 			while(input.available()!=0) if((read=input.read(bytes))!=-1) out.append(new String(bytes,0,read));
 			
 			if(error.available()>0) err.append(new String(error.readAllBytes()));
-			if(!err.isEmpty()) ANSI.error(err.toString(),null);
-			return out.toString();
+			return new SimpleEntry<String,String>(out.toString(),err.toString());
 		}
 	}
 		
@@ -245,7 +245,6 @@ public final class Helper {
 	}
 	
 	public static boolean ytdlpAvail() {
-
 		if(!ffmpegAvail()) return false;
 		ProcessBuilder builder=new ProcessBuilder("yt-dlp","--version");
 		try {
@@ -259,13 +258,27 @@ public final class Helper {
 	}
 	
 	public static boolean ffmpegAvail() {
-		
 		ProcessBuilder builder=new ProcessBuilder("ffmpeg","-version");
 		try {
 			Process process=builder.start();
 			waitForProcess(process,10l);
 		} catch (Exception e) {
 			ANSI.warn("FFMPEG not present from systempath.");
+			return false;
+		}
+		return true;
+	}
+	
+	public static boolean updateYTDLP() {
+		ProcessBuilder builder=new ProcessBuilder("yt-dlp","--update");
+		try {
+			SimpleEntry<String,String>output=startAndWaitForProcess(builder,10l);
+			String out=output.getKey();
+			String err=output.getValue();
+			if(!err.isEmpty()) ANSI.warn(err);
+			if(!out.isEmpty()) ANSI.info(out);
+		} catch (Exception e) {
+			ANSI.error("YT-DLP update went wrong!",e);
 			return false;
 		}
 		return true;
