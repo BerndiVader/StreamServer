@@ -3,6 +3,7 @@ package com.gmail.berndivader.streamserver.ffmpeg;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.stream.Stream;
 
 import com.gmail.berndivader.streamserver.Helper;
@@ -85,9 +86,12 @@ public class FFProbePacket {
 			}
 			builder.command("ffprobe","-v","quiet","-print_format","json","-show_format",path);
 			try {
-				String out=Helper.startAndWaitForProcess(builder,10l);
+				SimpleEntry<String,String>output=Helper.startAndWaitForProcess(builder,10l);
+				String out=output.getKey();
+				String err=output.getValue();
+				if(!err.isEmpty()) ANSI.error(err,null);
 				if(!out.isEmpty()) {
-					JsonObject o=JsonParser.parseString(out.toString()).getAsJsonObject();
+					JsonObject o=JsonParser.parseString(out).getAsJsonObject();
 					if(o.has("format")) {
 						Tags tags=packet.tags;
 						packet=Helper.LGSON.fromJson(o.get("format"),FFProbePacket.class);

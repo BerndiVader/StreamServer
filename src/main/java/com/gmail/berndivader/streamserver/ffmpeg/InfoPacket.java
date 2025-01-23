@@ -1,5 +1,7 @@
 package com.gmail.berndivader.streamserver.ffmpeg;
 
+import java.util.AbstractMap.SimpleEntry;
+
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.term.ANSI;
@@ -60,7 +62,10 @@ public class InfoPacket {
 			builder.command().add(url);
 			
 			try {
-				String out=Helper.startAndWaitForProcess(builder,20l);
+				SimpleEntry<String,String>output=Helper.startAndWaitForProcess(builder,20l);
+				String out=output.getKey();
+				String err=output.getValue();
+				if(!err.isEmpty()) ANSI.error(err,null);
 				if(!out.isEmpty()) {
 					int index=out.indexOf('{');
 					if(index!=-1) out=out.substring(index);
