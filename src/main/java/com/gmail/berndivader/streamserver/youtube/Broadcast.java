@@ -110,7 +110,7 @@ public final class Broadcast {
 			try {
 				return Youtube.HTTP_CLIENT.execute(post,response->{
 					JsonObject json=JsonParser.parseString(EntityUtils.toString(response.getEntity())).getAsJsonObject();
-					if(json==null||json.isJsonNull()) {
+					if(json.isJsonNull()) {
 						return ErrorPacket.buildError("Request to insert liveBroadcast failed.","Nulljson was returned.","CUSTOM");
 					} else if(json.has("error")) {
 						return Packet.build(json,ErrorPacket.class);

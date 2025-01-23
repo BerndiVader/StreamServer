@@ -76,6 +76,7 @@ public final class OAuth2 {
 			Config.YOUTUBE_REFRESH_TOKEN=refreshToken;
 			Config.YOUTUBE_TOKEN_TIMESTAMP=System.currentTimeMillis()/1000;
 			Config.saveConfig();
+			ANSI.println("[GREEN]done![RESET]");
 			
 		} catch (Exception e) {
 			ANSI.error(e.getMessage(),e);
