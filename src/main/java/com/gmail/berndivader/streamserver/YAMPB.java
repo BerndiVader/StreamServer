@@ -18,7 +18,10 @@ public final class YAMPB {
 		Config.instance=new Config();
 		
 		if(Config.FFMPEG_AVAIL) ANSI.info("FFMPEG found!");
-		if(Config.YTDLP_AVAIL) ANSI.info("YT-DLP found!");
+		if(Config.YTDLP_AVAIL) {
+			ANSI.info("YT-DLP found!");
+			Helper.updateYTDLP();
+		}
 		
 		if(Config.FRESH_INSTALL&&!install()) {
 			ANSI.warn("Failed to complete the install flow.[BR]You can configure it manual by editing the config/config.json or you can delete the config dir and try it again.");
