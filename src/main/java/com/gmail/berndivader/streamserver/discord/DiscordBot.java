@@ -98,7 +98,8 @@ public final class DiscordBot {
 
 			}).subscribe();
 		
-		client.on(VoiceStateUpdateEvent.class)
+		if(Config.DISCORD_MUSIC_BOT) {
+			client.on(VoiceStateUpdateEvent.class)
 			.filter(event->(event.isJoinEvent()||event.isMoveEvent())&&!event.getCurrent().getUserId().equals(client.getSelfId()))
 			.flatMap(event->{
 				
@@ -113,7 +114,8 @@ public final class DiscordBot {
 					});
 				});
 				
-			}).subscribe();
+			}).subscribe();		
+		}
 		
 		client.on(MessageCreateEvent.class)
 	    	.filter(
