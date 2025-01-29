@@ -3,6 +3,7 @@ package com.gmail.berndivader.streamserver.console.command;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -24,7 +25,7 @@ public class Commands {
 	
 	final static String PACKAGE_NAME="com/gmail/berndivader/streamserver/console/command/commands";
 	static String fileName;
-	public HashMap<String,Class<Command>>commands;
+	public HashMap<String,String>cmds;
 	
 	static {
 		try {
@@ -43,7 +44,7 @@ public class Commands {
 	}
 	
 	public Commands() {
-		commands=new HashMap<>();
+		cmds=new HashMap<>();
 		try {
 			loadCommandClasses();
 		} catch (IOException | ClassNotFoundException e) {
@@ -51,7 +52,6 @@ public class Commands {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	void loadCommandClasses() throws IOException, ClassNotFoundException {
 		
 		try(JarInputStream jarStream=new JarInputStream(new FileInputStream(fileName))) {
@@ -91,7 +91,7 @@ public class Commands {
 										break;
 								}
 							}
-							if(add) commands.put(anno.name(),(Class<Command>)clazz);
+							if(add) cmds.put(anno.name(),clazzName);
 						}
 					}
 				}
@@ -101,11 +101,14 @@ public class Commands {
 	}
 	
 	public Command getCommand(String name) {
-		Class<Command>clazz=commands.get(name);
-		if(clazz!=null) {
+		if(cmds.containsKey(name)) {
+			String clazzName=cmds.get(name);
 			try {
-				return clazz.getDeclaredConstructor().newInstance();
-			} catch (Exception e) {
+				Class<?>clazz=Class.forName(clazzName);
+				if(clazz!=null) {
+					return (Command)clazz.getDeclaredConstructor().newInstance();
+				}
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				ANSI.error("Error getting console command class.",e);
 			}
 		}

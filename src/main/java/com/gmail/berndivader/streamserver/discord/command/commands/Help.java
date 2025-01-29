@@ -7,6 +7,7 @@ import com.gmail.berndivader.streamserver.discord.command.Commands;
 import com.gmail.berndivader.streamserver.discord.permission.Permission;
 import com.gmail.berndivader.streamserver.discord.permission.Permissions;
 import com.gmail.berndivader.streamserver.discord.permission.User.Rank;
+import com.gmail.berndivader.streamserver.term.ANSI;
 
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
@@ -42,12 +43,19 @@ public class Help extends Command<Message> {
 	private Mono<Message>execute(String string,MessageChannel channel,Rank rank) {
 		
 		StringBuilder builder=new StringBuilder().append(Config.DISCORD_HELP_TEXT);
-		Commands.instance.commands.forEach((name,clazz)->{
+		Commands.instance.cmds.forEach((name,clazzName)->{
 			
-			DiscordCommand a=clazz.getDeclaredAnnotation(DiscordCommand.class);
-			Permission perm=clazz.getDeclaredAnnotation(Permission.class);
-			Rank required=perm!=null?perm.required():Rank.GUEST;
-			if(a!=null&&rank.ordinal()>=required.ordinal()) builder.append(a.name().concat(" - ").concat(a.usage()).concat("\n"));
+			try {
+				Class<?>clazz=Class.forName(clazzName);
+				if(clazz!=null) {
+					DiscordCommand a=clazz.getDeclaredAnnotation(DiscordCommand.class);
+					Permission perm=clazz.getDeclaredAnnotation(Permission.class);
+					Rank required=perm!=null?perm.required():Rank.GUEST;
+					if(a!=null&&rank.ordinal()>=required.ordinal()) builder.append(a.name().concat(" - ").concat(a.usage()).concat("\n"));
+				}
+			} catch (ClassNotFoundException e) {
+				ANSI.error("Error while processing help command.",e);
+			}
 			
 		});
 		

@@ -13,9 +13,16 @@ public class Help extends Command {
 	public boolean execute(String[] args) {
 		
 		ANSI.raw(Config.HELP_TEXT);
-		Commands.instance.commands.forEach((name,clazz)->{
-			ConsoleCommand annotation=clazz.getAnnotation(ConsoleCommand.class);
-			if(annotation!=null) ANSI.raw("[BOLD][RED]"+annotation.name().concat("[/RED][/BOLD] [BLUE]-[/BLUE] [GREEN]".concat(annotation.usage()).concat("[/GREEN][BR]")));
+		Commands.instance.cmds.forEach((name,clazzName)->{
+			try {
+				Class<?>clazz=Class.forName(clazzName);
+				if(clazz!=null) {
+					ConsoleCommand annotation=clazz.getAnnotation(ConsoleCommand.class);
+					if(annotation!=null) ANSI.raw("[BOLD][RED]"+annotation.name().concat("[/RED][/BOLD] [BLUE]-[/BLUE] [GREEN]".concat(annotation.usage()).concat("[/GREEN][BR]")));
+				}
+			} catch (ClassNotFoundException e) {
+				ANSI.error("Error while processing help.",e);
+			}
 		});
 		return true;
 	}

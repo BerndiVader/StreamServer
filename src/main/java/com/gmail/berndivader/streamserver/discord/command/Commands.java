@@ -23,7 +23,7 @@ public final class Commands {
 	public static Commands instance;
 	private final static String PACKAGE_NAME="com/gmail/berndivader/streamserver/discord/command/commands";
 	private static String fileName;
-	public HashMap<String,Class<Command<?>>>commands;
+	public HashMap<String,String>cmds;
 
 	static {
 		try {
@@ -42,7 +42,7 @@ public final class Commands {
 	}
 	
 	public Commands() {
-		commands=new HashMap<>();
+		cmds=new HashMap<>();
 		try {
 			loadCommandClasses();
 		} catch (Exception e) {
@@ -50,7 +50,6 @@ public final class Commands {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void loadCommandClasses() throws IOException, ClassNotFoundException {
 		try(JarInputStream jarStream=new JarInputStream(new FileInputStream(fileName))) {
 			JarEntry entry;
@@ -80,7 +79,7 @@ public final class Commands {
 										break;
 								}
 							}
-							if(add) commands.put(anno.name(),(Class<Command<?>>)clazz);
+							if(add) cmds.put(anno.name(),clazzName);
 						}
 					}
 				}
@@ -90,10 +89,13 @@ public final class Commands {
 	
 	public Optional<Command<?>> build(String name) {
 		if(name.isEmpty()) name="help";
-		Class<Command<?>>command=commands.get(name);
-		if(command!=null) {
+		if(cmds.containsKey(name)) {
+			String clazzName=cmds.get(name);
 			try {
-				return Optional.of(command.getDeclaredConstructor().newInstance());
+				Class<?>clazz=Class.forName(clazzName);
+				if(clazz!=null) {
+					return Optional.of((Command<?>)clazz.getDeclaredConstructor().newInstance());
+				}
 			} catch (Exception e) {
 				ANSI.error("Error while collect discord commands.",e);
 			}
