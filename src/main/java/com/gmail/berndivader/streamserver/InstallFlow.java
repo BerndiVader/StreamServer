@@ -112,21 +112,25 @@ public class InstallFlow {
 	private boolean installDC() {
 		boolean use=true;
 		
-		ANSI.println("[BLUE]To get/create token visit: https://discord.com/developers/applications");
+		ANSI.println("[BLUE]To get/create token for your bot visit: https://discord.com/developers/applications");
 		Config.DISCORD_TOKEN=ask(String.format("Discord bot token? [CYAN][%s]",Config.DISCORD_TOKEN),Config.DISCORD_TOKEN);
-
+		
 		if(Config.DISCORD_MUSIC_BOT=ask("Use music bot? [CYAN][yes/NO]","no").equalsIgnoreCase("yes")) {
 			Config.DISCORD_VOICE_CHANNEL_NAME=ask(String.format("Voice channel by name? [CYAN][%s]",Config.DISCORD_VOICE_CHANNEL_NAME),Config.DISCORD_VOICE_CHANNEL_NAME);
 			Config.DISCORD_MUSIC_AUTOPLAY=ask("Use music bot? [CYAN][yes/NO]","no").equalsIgnoreCase("yes");
 		}
-
+		
+		if(ask("Setup a default guild permission? [CYAN][YES/no]","yes").equalsIgnoreCase("yes")) {
+			
+		}
+		
 		return Config.DISCORD_BOT_START=use;
 	}
 	
-	private static String ask(String question,String defauld) {
+	private static String ask(String question,String preset) {
 		ANSI.print(String.format("[YELLOW]%s [WHITE]",question));
 		String answer=ANSI.keyboard.nextLine();
-		if(answer.isEmpty()||answer.equals(defauld)) return defauld;
+		if(answer.isEmpty()||answer.equals(preset)) return preset;
 		return answer;
 	}
 	
