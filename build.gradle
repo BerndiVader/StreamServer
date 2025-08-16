@@ -20,35 +20,39 @@ repositories {
 }
 
 configurations {
+    supplied
     compileClasspath.extendsFrom(supplied)
 }
 
+
 java {
-	toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 dependencies {
-	supplied 'com.github.kokorin.jaffree:jaffree:2024.08.29'
-	supplied 'org.slf4j:slf4j-api:+'
+    supplied 'com.github.kokorin.jaffree:jaffree:2024.08.29'
+    supplied 'org.slf4j:slf4j-api:+'
     supplied 'mysql:mysql-connector-java:8.0.33'
     supplied 'com.google.code.gson:gson:2.11.0'
     supplied 'org.slf4j:slf4j-nop:+'
     supplied 'com.discord4j:discord4j-core:3.2.6'
     supplied 'org.apache.httpcomponents:httpclient:4.3.4'
-    supplied 'com.github.devoxin:lavaplayer:1.9.1'
+    supplied 'com.sedmelluq:lavaplayer:1.3.77'
+    supplied 'org.glassfish.tyrus:tyrus-server:2.1.5'
+    supplied 'org.glassfish.tyrus:tyrus-container-grizzly-server:2.1.5'
 }
 
 if(hasProperty('buildScan')) {
-	buildScan {
-		termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-		termsOfServiceAgree = 'yes'
-	}
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
 }
 
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     rootSpec.exclude('**/META-INF/*.SF','**/META-INF/*.RSA')
-    
+
     manifest {
         attributes 'Main-Class': application.mainClass
     }
@@ -58,21 +62,38 @@ jar {
     }
 }
 
-task debug(type:DefaultTask,group:'Build') {
-	dependsOn 'build'
-	doLast {
-		File file=file('debug.properties')
-		Properties props=new Properties()
-		file.withInputStream{props.load(it)}
-		
-		long build=Long.parseLong(props.getProperty('build'))
-		build++
-		
-		props.setProperty('build',Long.toString(build))
-		file.withOutputStream{props.store(it,null)}
-		
-		File jf=jar.archiveFile.get().getAsFile()
-		String name=jf.getName().replace(".jar","-debug-build"+props.getProperty('build')+".jar")
-		jf.renameTo(new File(jf.getParent(),name));
-	}
+task debug(type: DefaultTask, group: 'Build') {
+    dependsOn 'build'
+    doLast {
+        File file = file('debug.properties')
+        Properties props = new Properties()
+        file.withInputStream { props.load(it) }
+
+        long build = Long.parseLong(props.getProperty('build'))
+        build++
+
+        props.setProperty('build', Long.toString(build))
+        file.withOutputStream { props.store(it, null) }
+
+        File jf = jar.archiveFile.get().asFile
+        String name = jf.getName().replace(".jar", "-debug-build${props.getProperty('build')}.jar")
+        jf.renameTo(new File(jf.getParent(), name));
+    }
 }
+
+task thinJar(type: Jar,group:'Build') {
+    archiveBaseName.set('yampb-thin')
+    from sourceSets.main.output
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': application.mainClass
+    }
+}
+
+task copySuppliedJars(type: Copy) {
+    from configurations.supplied
+    into "${buildDir}/libs/libs"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+thinJar.dependsOn copySuppliedJars
