@@ -56,8 +56,6 @@ public final class MusicPlayer {
 							AudioPlayer player=DiscordBot.instance.provider.player();
 							if(player.getPlayingTrack()==null) {
 								player.playTrack(track);
-							} else {
-								player.scheduleTrack(track);
 							}
 						}
 						

@@ -70,8 +70,8 @@ public class TrackScheduler extends AudioEventAdapter {
 	@Override
 	public void onTrackEnd(AudioPlayer player,AudioTrack track,AudioTrackEndReason endReason) {
 		
-		AudioTrack next=player.getScheduledTrack();
-		if(next==null) next=DiscordBot.instance.provider.scheduledTracks.poll();
+		
+		AudioTrack next=DiscordBot.instance.provider.scheduledTracks.poll();
 		if(next!=null) {
 			player.playTrack(next);
 		} else if(Config.DISCORD_MUSIC_AUTOPLAY) {
