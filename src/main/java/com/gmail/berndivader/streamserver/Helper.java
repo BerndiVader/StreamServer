@@ -126,7 +126,7 @@ public final class Helper {
 				switch(parse[0]) {
 					case("temp"):
 						getOrCreateMediaDir(Config.tempPath()).ifPresent(dir->builder.directory(dir));
-						downloadable=temp=true;
+						temp=true;
 						break;
 					case("music"):
 						builder.command().addAll(Arrays.asList(
@@ -139,7 +139,6 @@ public final class Helper {
 						break;
 					case("link"):
 						downloadable=true;
-						temp=false;
 						break;
 					case("url"):
 						if(parse.length==2&&!parse[1].isBlank()) {
