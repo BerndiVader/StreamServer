@@ -27,6 +27,7 @@ public class InfoPacket {
 		public Integer filesize_approx=-1;
 		public Boolean downloadable=false;
 		public Boolean temp=false;
+		public String error=UNKNOWN;
 				
 		private InfoPacket() {}
 		
@@ -49,7 +50,7 @@ public class InfoPacket {
 			if(url==null||url.isEmpty()) return packet;
 			
 			ProcessBuilder builder=new ProcessBuilder();
-			builder.command("yt-dlp"
+			builder.command(Config.DL_YTDLP_PATH
 				,"--quiet"
 				,"--no-warnings"
 				,"--dump-json"
@@ -65,16 +66,18 @@ public class InfoPacket {
 				SimpleEntry<String,String>output=Helper.startAndWaitForProcess(builder,20l);
 				String out=output.getKey();
 				String err=output.getValue();
-				if(!err.isEmpty()) ANSI.error(err,null);
 				if(!out.isEmpty()) {
 					int index=out.indexOf('{');
 					if(index!=-1) out=out.substring(index);
 					packet=Helper.LGSON.fromJson(out,InfoPacket.class);
 				}
+				if(!err.isEmpty()) {
+					ANSI.error(err,null);
+					packet.error=err;
+				}
 			} catch (Exception e) {
 				ANSI.error("Failed to build InfoPacket out of recieved Json string.",e);
 			}
-			
 			if(!packet.isSet(packet.webpage_url)) packet.webpage_url=url;
 			return packet;
 		}

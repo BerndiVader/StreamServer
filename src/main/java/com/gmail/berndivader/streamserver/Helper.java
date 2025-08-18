@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
@@ -94,7 +95,7 @@ public final class Helper {
 		boolean downloadable=false;
 		boolean temp=false;
 		
-		builder.command("yt-dlp"
+		builder.command(Config.DL_YTDLP_PATH
 				,"--ignore-errors"
 				,"--progress-delta","2"
 				,"--restrict-filenames"
@@ -245,7 +246,7 @@ public final class Helper {
 	
 	public static boolean ytdlpAvail() {
 		if(!ffmpegAvail()) return false;
-		ProcessBuilder builder=new ProcessBuilder("yt-dlp","--version");
+		ProcessBuilder builder=new ProcessBuilder(Config.DL_YTDLP_PATH,"--version");
 		try {
 			Process process=builder.start();
 			waitForProcess(process,10l);
@@ -335,6 +336,16 @@ public final class Helper {
 		    }
 		}
 
+	}
+	
+	public static boolean isUrl(String url) {
+		try {
+			URI uri=URI.create(url);
+			String scheme=uri.getScheme();
+			return scheme!=null&&(scheme.equalsIgnoreCase("http")||scheme.equalsIgnoreCase("https"));
+		} catch(Exception e) {
+			return false;
+		}
 	}
 	
 	public static void close() {

@@ -50,6 +50,9 @@ public class Config {
 	public static String PLAYLIST_PATH="./playlist";
 	public static String PLAYLIST_PATH_CUSTOM="./custom";
 	
+	public static String DL_YTDLP_PATH="yt-dlp";
+	public static String DL_FFMPEG_PATH="ffmpeg";
+	public static String DL_FFPROBE_PATH="ffprobe";
 	public static String DL_ROOT_PATH="./library";
 	public static String DL_MUSIC_PATH="/music";
 	public static String DL_TEMP_PATH="/temp";
@@ -82,6 +85,8 @@ public class Config {
 	public static String DISCORD_HELP_TEXT;
 	public static String DISCORD_HELP_TEXT_TITLE="YAMPB Discord help";
 	public static String YAMPB_ANSI;
+	
+	public static WebSocket WEBSOCKET=new WebSocket();
 	
 	public static Boolean DEBUG=false;
 	

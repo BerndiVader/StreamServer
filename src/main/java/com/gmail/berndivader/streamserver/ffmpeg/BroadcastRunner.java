@@ -2,6 +2,8 @@ package com.gmail.berndivader.streamserver.ffmpeg;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -289,8 +291,9 @@ public final class BroadcastRunner extends TimerTask {
 					+":"+playingPacket().tags.comment+"[RESET]");
 			ANSI.prompt();
 		}
-				
-		ffmpeg(FFmpeg.atPath()
+		
+		Path path=Paths.get(Config.DL_FFMPEG_PATH);
+		ffmpeg(FFmpeg.atPath(path.getParent())
 				.addInput(UrlInput.fromUrl(file.getAbsolutePath())
 						.addArgument("-re")
 						)

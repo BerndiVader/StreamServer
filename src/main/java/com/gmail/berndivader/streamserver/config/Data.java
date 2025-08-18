@@ -30,6 +30,9 @@ public class Data {
 	public String PLAYLIST_PATH;
 	public String PLAYLIST_PATH_CUSTOM;
 	
+	public String DL_YTDLP_PATH;
+	public String DL_FFMPEG_PATH;
+	public String DL_FFPROBE_PATH;
 	public String DL_ROOT_PATH;
 	public String DL_MUSIC_PATH;
 	public String DL_TEMP_PATH;
@@ -61,5 +64,7 @@ public class Data {
 	@SerializedName("DISCORD_CHANNEL")
 	public String DISCORD_VOICE_CHANNEL_NAME;
 	public Boolean DISCORD_MUSIC_AUTOPLAY;
+	
+	public WebSocket WEBSOCKET;
 	
 }
