@@ -1,0 +1,189 @@
+package com.gmail.berndivader.streamserver.websocket;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.Optional;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+
+import com.gmail.berndivader.streamserver.Helper;
+import com.gmail.berndivader.streamserver.config.Config;
+import com.gmail.berndivader.streamserver.ffmpeg.InfoPacket;
+import com.gmail.berndivader.streamserver.mysql.MakeDownloadable;
+import com.gmail.berndivader.streamserver.term.ANSI;
+
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import jakarta.websocket.server.ServerEndpoint;
+
+@ServerEndpoint(value="/dl")
+public class EndPoint {
+	
+	private enum STATUS {
+		
+		ACCEPT("{ACP}"),
+		INFO("{INF}"),
+		READY("{RDY}"),
+		ERROR("{ERR}");
+		
+		public final String value;
+		
+		STATUS(String string) {
+			this.value=string;
+		}
+		
+	}
+	
+	private Session session;
+	private boolean flowRunning=false;
+	
+	public EndPoint() {}
+	
+	@OnOpen
+	public void onOpen(Session session) {
+		this.session=session;
+		ANSI.info("WS-CLIENT connected.");
+		ANSI.prompt();
+		Helper.EXECUTOR.submit(new PingRunner());
+	}
+	
+	@OnMessage
+	public void onMessage(String content) throws IOException {
+		if(flowRunning) return;
+		
+		if(Helper.isUrl(content)) {
+			flowRunning=true;
+			session.getBasicRemote().sendText(STATUS.ACCEPT.value);
+			download(content);
+		}
+		session.close();
+	}
+	
+	@OnError
+	public void onError(Throwable throwable) throws IOException {
+		ANSI.error("WebSocket created an error: ",throwable);
+		ANSI.prompt();
+		session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR,"WebSocket Error."));
+	}
+	
+	@OnClose
+	public void onClose(CloseReason reson) {
+		ANSI.info("WS-CLIENT connection closed. "+
+				"Code: "+reson.getCloseCode().getCode()+
+				", Reason: "+reson.getReasonPhrase());
+		ANSI.prompt();
+	}
+	
+	private void download(String content) throws IOException {
+		try {
+			Entry<ProcessBuilder,InfoPacket>entry=getDownloader(content);
+			ProcessBuilder builder=entry.getKey();
+			InfoPacket info=entry.getValue();
+			
+			if(info.isSet(info.error)) {
+				session.getBasicRemote().sendText(STATUS.ERROR.value+info.error);
+			} else {
+				Process process=builder.start();
+				try(InputStream input=process.getInputStream();
+					BufferedReader error=process.errorReader()) {
+					long time=System.currentTimeMillis();
+					
+					while(process.isAlive()) {
+						if(session==null||!session.isOpen()) {
+							ANSI.raw("[BR]");
+							ANSI.raw("Download process terminated because it appears, ws-client is gone.");
+							process.destroy();
+						} else {
+							int avail=input.available();
+							if(avail>0) {
+								time=System.currentTimeMillis();
+								String line=new String(input.readNBytes(avail));
+								if(line.contains("[Metadata]")) {
+									String[]temp=line.split("\"");
+									if(temp.length>0) info.local_filename=temp[1];						
+								}
+								session.getAsyncRemote().sendText(STATUS.INFO.value+line);
+							}
+							if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
+								ANSI.raw("[BR]");
+								ANSI.raw("Download process terminated because it appears, process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
+								process.destroy();
+							}
+						}
+					}
+					
+					if(error!=null&&error.ready()) {
+						ANSI.raw("[BR]");
+						error.lines().forEach(line->ANSI.warn(line));
+					}
+				}
+				
+				if(process.isAlive()) process.destroy();
+				ANSI.raw("[BR]");
+				
+				if(info.downloadable&&Config.DATABASE_USE) {
+					File file=new File(builder.directory().getAbsolutePath()+"/"+info.local_filename);
+					if(file.exists()&&file.isFile()&&file.canRead()) {
+						MakeDownloadable downloadable=new MakeDownloadable(file,info.temp);
+						Optional<String>optLink=downloadable.future.get(2,TimeUnit.MINUTES);
+						optLink.ifPresentOrElse(link->{
+							if(session!=null&&session.isOpen()) session.getAsyncRemote().sendText(STATUS.READY.value+link);
+						},()->{
+							if(session!=null&&session.isOpen()) session.getAsyncRemote().sendText(STATUS.ERROR.value+"Failed to create downloadable file.");
+						});
+					}
+				}
+				
+			}
+		} catch (Exception e) {
+			if(session!=null&&session.isOpen()) session.getBasicRemote().sendText(STATUS.ERROR.value+"Download failed.");
+			ANSI.raw("[BR]");
+			ANSI.error("Error while looping yt-dlp process.",e);
+		}
+		if(session!=null) session.close();
+	}
+	
+	private static Entry<ProcessBuilder,InfoPacket> getDownloader(String url) {
+		Optional<File>opt=Helper.getOrCreateMediaDir(Config.DL_ROOT_PATH);
+		if(opt.isEmpty()) return null;
+		File directory=opt.get();
+		return Helper.createDownloadBuilder(directory,String.format("--link --temp %s",url));
+	}
+	
+	public class PingRunner implements Runnable {
+		
+		long interval=30000l;
+
+		@Override
+		public void run() {
+			while(session.isOpen()) {
+				try {
+					session.getBasicRemote().sendPing(ByteBuffer.allocate(0));
+				} catch (IllegalArgumentException | IOException e) {
+					try {
+						session.close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY,"Ping failed."));
+					} catch (IOException e1) {
+						ANSI.error("Ping fail: Close session failed.",e);
+						ANSI.prompt();
+					}
+					break;
+				}
+			    try {
+					Thread.sleep(interval);
+				} catch (InterruptedException e) {
+					ANSI.error("Ping fail: Thread interrupted.",e);
+					ANSI.prompt();
+				}
+			}
+		}
+		
+	}
+	
+}

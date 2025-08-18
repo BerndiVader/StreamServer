@@ -6,6 +6,7 @@ import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.gmail.berndivader.streamserver.websocket.WebSocket;
 import com.gmail.berndivader.streamserver.youtube.Youtube;
 
 public final class YAMPB {
@@ -31,6 +32,7 @@ public final class YAMPB {
 		if(Config.DATABASE_USE) DatabaseConnection.instance=new DatabaseConnection();		
 		if(Config.STREAM_BOT_START&&Config.FFMPEG_AVAIL) BroadcastRunner.instance=new BroadcastRunner();
 		if(Config.DISCORD_BOT_START) DiscordBot.instance=new DiscordBot();
+		if(Config.WEBSOCKET.USE&&Config.YTDLP_AVAIL) WebSocket.start();
 
 		ConsoleRunner.instance=new ConsoleRunner();
 
@@ -41,6 +43,7 @@ public final class YAMPB {
 			ANSI.error("Exception while shutting down.", e);
 		}
 		
+		WebSocket.close();
 		Helper.close();
 		Youtube.close();
 		
