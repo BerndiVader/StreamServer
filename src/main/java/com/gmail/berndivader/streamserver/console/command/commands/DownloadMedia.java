@@ -114,6 +114,8 @@ public class DownloadMedia extends Command {
 					},()->{
 						ANSI.warn("[BR]Failed to create download link.");
 					});
+				} else {
+					ANSI.warn("[BR]Downloaded file not found or not readable.");
 				}
 			}
 		} catch (Exception e) {

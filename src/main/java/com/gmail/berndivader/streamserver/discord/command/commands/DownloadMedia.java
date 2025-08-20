@@ -204,6 +204,8 @@ public class DownloadMedia extends Command<Void> {
 										embed.addField(Field.of("Downloadlink","Failed to create download link.",false));
 									}
 								);
+							} else {
+								embed.addField(Field.of("Downloadfile","Not found or not readable.",false));
 							}
 						}
 						edit.addEmbed(embed.build());
