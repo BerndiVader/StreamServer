@@ -26,16 +26,17 @@ import jakarta.websocket.server.ServerEndpoint;
 @ServerEndpoint(value="/dl")
 public class EndPoint {
 	
-	private enum STATUS {
+	private enum PACKET {
 		
-		ACCEPT("{ACP}"),
-		INFO("{INF}"),
-		READY("{RDY}"),
-		ERROR("{ERR}");
+		ACCEPT("{%ACPT%}"),
+		INFO("{%INF%}"),
+		INFOPACKET("{%INFPKT%}"),
+		READY("{%RDY%}"),
+		ERROR("{%ERR%}");
 		
 		public final String value;
 		
-		STATUS(String string) {
+		PACKET(String string) {
 			this.value=string;
 		}
 		
@@ -49,7 +50,14 @@ public class EndPoint {
 	@OnOpen
 	public void onOpen(Session session) {
 		this.session=session;
-		ANSI.info("WS-CLIENT connected.");
+		ANSI.info(session.getRequestURI().toASCIIString());
+		session.getRequestParameterMap().forEach((name,list)->{
+			ANSI.info("hihi:"+name);
+			list.forEach(entry->{
+				ANSI.info("hoho:"+entry);
+			});
+		});
+		ANSI.info("WebSocket client connected.");
 		ANSI.prompt();
 		Helper.EXECUTOR.submit(new PingRunner());
 	}
@@ -60,7 +68,7 @@ public class EndPoint {
 		
 		if(Helper.isUrl(content)) {
 			flowRunning=true;
-			session.getBasicRemote().sendText(STATUS.ACCEPT.value);
+			session.getBasicRemote().sendText(PACKET.ACCEPT.value);
 			download(content);
 		}
 		session.close();
@@ -88,33 +96,42 @@ public class EndPoint {
 			InfoPacket info=entry.getValue();
 			
 			if(info.isSet(info.error)) {
-				session.getBasicRemote().sendText(STATUS.ERROR.value+info.error);
+				if(session!=null&&session.isOpen()) session.getBasicRemote().sendText(PACKET.ERROR.value+info.error);
 			} else {
+				if(session!=null&&session.isOpen()) session.getBasicRemote().sendText(PACKET.INFOPACKET.value+info.toString());
 				Process process=builder.start();
 				try(InputStream input=process.getInputStream();
 					BufferedReader error=process.errorReader()) {
+					
 					long time=System.currentTimeMillis();
+					boolean onExit=false;
 					
 					while(process.isAlive()) {
-						if(session==null||!session.isOpen()) {
+						if(!onExit&&(session==null||!session.isOpen())) {
 							ANSI.raw("[BR]");
 							ANSI.raw("Download process terminated because it appears, ws-client is gone.");
+							info.error="Download terminated because client gone";
 							process.destroy();
 						} else {
 							int avail=input.available();
 							if(avail>0) {
 								time=System.currentTimeMillis();
-								String line=new String(input.readNBytes(avail));
+								String line=new String(input.readNBytes(avail)).trim();
 								if(line.contains("[Metadata]")) {
 									String[]temp=line.split("\"");
 									if(temp.length>0) info.local_filename=temp[1];						
 								}
-								session.getAsyncRemote().sendText(STATUS.INFO.value+line);
+								if(Config.DEBUG) {
+									session.getAsyncRemote().sendText(PACKET.INFO.value+line);
+								} else {
+									if(line.toLowerCase().startsWith("[download]")) session.getAsyncRemote().sendText(line);
+								}
 							}
 							if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
 								ANSI.raw("[BR]");
 								ANSI.raw("Download process terminated because it appears, process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
 								process.destroy();
+								info.error="Download terminated because process is stalled.";
 							}
 						}
 					}
@@ -128,22 +145,24 @@ public class EndPoint {
 				if(process.isAlive()) process.destroy();
 				ANSI.raw("[BR]");
 				
-				if(info.downloadable&&Config.DATABASE_USE) {
+				if(info.downloadable&&Config.DATABASE_USE&&!info.isSet(info.error)) {
 					File file=new File(builder.directory().getAbsolutePath()+"/"+info.local_filename);
 					if(file.exists()&&file.isFile()&&file.canRead()) {
 						MakeDownloadable downloadable=new MakeDownloadable(file,info.temp);
 						Optional<String>optLink=downloadable.future.get(2,TimeUnit.MINUTES);
 						optLink.ifPresentOrElse(link->{
-							if(session!=null&&session.isOpen()) session.getAsyncRemote().sendText(STATUS.READY.value+link);
+							if(session!=null&&session.isOpen()) session.getAsyncRemote().sendText(PACKET.READY.value+link);
 						},()->{
-							if(session!=null&&session.isOpen()) session.getAsyncRemote().sendText(STATUS.ERROR.value+"Failed to create downloadable file.");
+							if(session!=null&&session.isOpen()) session.getAsyncRemote().sendText(PACKET.ERROR.value+"Failed to create downloadable file.");
 						});
+					} else if(session!=null&&session.isOpen()) {
+						session.getAsyncRemote().sendText(PACKET.ERROR.value+"Downloaded file not found or readable.");
 					}
 				}
 				
 			}
 		} catch (Exception e) {
-			if(session!=null&&session.isOpen()) session.getBasicRemote().sendText(STATUS.ERROR.value+"Download failed.");
+			if(session!=null&&session.isOpen()) session.getBasicRemote().sendText(PACKET.ERROR.value+"Download failed.");
 			ANSI.raw("[BR]");
 			ANSI.error("Error while looping yt-dlp process.",e);
 		}
@@ -159,7 +178,7 @@ public class EndPoint {
 	
 	public class PingRunner implements Runnable {
 		
-		long interval=30000l;
+		long interval=1000l;
 
 		@Override
 		public void run() {
