@@ -3,7 +3,7 @@ package com.gmail.berndivader.streamserver.ffmpeg;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import com.gmail.berndivader.streamserver.Helper;
@@ -86,7 +86,7 @@ public class FFProbePacket {
 			}
 			builder.command(Config.DL_FFPROBE_PATH,"-v","quiet","-print_format","json","-show_format",path);
 			try {
-				SimpleEntry<String,String>output=Helper.startAndWaitForProcess(builder,10l);
+				Entry<String,String>output=Helper.startAndWaitForProcess(builder,10l);
 				String out=output.getKey();
 				String err=output.getValue();
 				if(!err.isEmpty()) ANSI.error(err,null);
