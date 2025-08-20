@@ -55,7 +55,7 @@ public final class Helper {
 		LGSON=new GsonBuilder().setPrettyPrinting().setFieldNamingStrategy(s->s.getName().toLowerCase()).disableHtmlEscaping().create();
 	}
 	
-	public static SimpleEntry<String,String> startAndWaitForProcess(ProcessBuilder builder,long timeout) throws Exception {
+	public static Entry<String,String> startAndWaitForProcess(ProcessBuilder builder,long timeout) throws Exception {
 		long start=System.currentTimeMillis();
 		timeout*=1000l;
 		Process process=builder.start();
@@ -69,6 +69,7 @@ public final class Helper {
 			byte[]bytes=new byte[4096];
 			int read=0;
 			
+			boolean onExit=false;
 			while(process.isAlive()) {
 				while(input.available()!=0) {
 					if((read=input.read(bytes))!=-1) {
@@ -77,7 +78,10 @@ public final class Helper {
 					}
 				}
 				if(error.available()!=0) err.append(new String(error.readAllBytes()));
-				if(System.currentTimeMillis()-start>timeout) waitForProcess(process,10l);
+				if(System.currentTimeMillis()-start>timeout&&!onExit) {
+					onExit=true;
+					waitForProcess(process,10l);
+				}
 			}
 			
 			output.println();
@@ -272,7 +276,7 @@ public final class Helper {
 	public static boolean updateYTDLP() {
 		ProcessBuilder builder=new ProcessBuilder("yt-dlp","--update");
 		try {
-			SimpleEntry<String,String>output=startAndWaitForProcess(builder,10l);
+			Entry<String,String>output=startAndWaitForProcess(builder,10l);
 			String out=output.getKey();
 			String err=output.getValue();
 			if(!err.isEmpty()) ANSI.warn(err);
