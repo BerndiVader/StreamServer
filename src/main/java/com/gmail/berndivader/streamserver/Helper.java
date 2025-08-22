@@ -3,12 +3,19 @@ package com.gmail.berndivader.streamserver;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.Socket;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
@@ -21,10 +28,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -92,7 +103,7 @@ public final class Helper {
 			return new SimpleEntry<String,String>(out.toString(),err.toString());
 		}
 	}
-		
+	
 	public static Entry<ProcessBuilder,InfoPacket> createDownloadBuilder(File defaultDirectory,String args) {
 		ProcessBuilder builder=new ProcessBuilder();
 		getOrCreateMediaDir(Config.mediaPath()).ifPresentOrElse(dir->builder.directory(dir),()->builder.directory(new File("./")));
@@ -169,6 +180,28 @@ public final class Helper {
 								"--f","bestvideo[ext=mp4][vcodec=avc1]+bestaudio[ext=m4a]/best[ext=mp4]/best"
 						));
 						getOrCreateMediaDir(Config.PLAYLIST_PATH_CUSTOM).ifPresent(dir->builder.directory(dir));;
+						break;
+					case("tor"):
+						ANSI.raw("\033[36m[INFO]Try using Tor for download... ");
+						if(Config.DL_USE_TOR&&Config.torAccessible()) {
+							ANSI.raw("OK![RESET]");
+							builder.command().add("--proxy");
+							builder.command().add(String.format("socks5://%s:%d",Config.DL_TOR_HOST,Config.DL_TOR_PORT));
+							
+							if(Config.DL_USE_CTOR) {
+								ANSI.raw("\\033[36m[INFO]Try chaning exit node... ");
+								Helper.newTorCircuit();
+								String torIP=Helper.getTorExitNode();
+								if(torIP!=null) {
+									ANSI.info(String.format("Now using IP: %s",torIP));
+								} else {
+									ANSI.info("Failed to change Tor IP.");
+								}
+							}
+							
+						} else {
+							ANSI.info("Not able to use Tor.");
+						}
 						break;
 					default:
 						if(!parse[0].isEmpty()) builder.command().add("--"+parse[0]);
@@ -350,6 +383,77 @@ public final class Helper {
 		} catch(Exception e) {
 			return false;
 		}
+	}
+	
+	public static void newTorCircuit() {
+		
+		Future<?>future=Helper.EXECUTOR.submit(new Runnable() {
+			
+			@Override
+			public void run() {
+				String host=Config.DL_CTOR_HOST;
+				int port=Config.DL_CTOR_PORT;
+				String pwd=Config.DL_CTOR_PWD;
+				
+				try(Socket socket=new Socket(host,port);
+						BufferedReader reader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+						PrintWriter writer=new PrintWriter(socket.getOutputStream(),true)) {
+					
+					writer.println(String.format("AUTHENTICATE \"%s\"",pwd));
+					ANSI.raw(reader.readLine());
+					
+					writer.println("SIGNAL NEWNYM");
+					ANSI.raw(String.format(" %s[RESET]",reader.readLine()));
+					Thread.sleep(3000l);
+					
+				} catch(Exception e) {
+					ANSI.error("Change Tor IP failed: ",e);
+				}
+			}
+		});
+		
+		try {
+			future.get(3200l,TimeUnit.MILLISECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			future.cancel(true);
+			ANSI.error("Failed to change Tor's exit node. ",e);
+		}
+		
+	}
+	
+	public static String getTorExitNode() {
+		
+		String ip=null;
+		Future<String>future=EXECUTOR.submit(new Callable<String>() {
+
+			@Override
+			public String call() throws Exception {
+				String ip=null;
+				try {
+					Proxy proxy=new Proxy(Proxy.Type.SOCKS,new InetSocketAddress(Config.DL_TOR_HOST,Config.DL_TOR_PORT));
+					URL url=URI.create("https://api.ipify.org").toURL();
+					HttpURLConnection conn=(HttpURLConnection)url.openConnection(proxy);
+					conn.setRequestMethod("GET");
+					
+					try(BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+						ip=br.readLine();
+					}
+					
+				} catch(Exception e) {
+					ANSI.error("Failed to get Tor's exit node. ",e);
+				}
+				return ip;
+			}
+		});
+		
+		try {
+			ip=future.get(5,TimeUnit.SECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			ANSI.error("Failed to get Tor's current exit node. ",e);
+		}
+		
+		return ip;
+		
 	}
 	
 	public static void close() {

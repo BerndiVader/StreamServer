@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -64,6 +66,15 @@ public class Config {
 	public static String DL_URL="https://PATH.TO.PHP";
 	public static String DL_INTERVAL_FORMAT="DAY";
 	public static Integer DL_INTERVAL_VALUE=14;
+	
+	public static Boolean DL_USE_TOR=false;
+	public static String DL_TOR_HOST="127.0.0.1";
+	public static Integer DL_TOR_PORT=9050;
+
+	public static Boolean DL_USE_CTOR=false;
+	public static String DL_CTOR_HOST="127.0.0.1";
+	public static Integer DL_CTOR_PORT=9051;
+	public static String DL_CTOR_PWD="PWD_HASH_STRING";
 	
 	public static Boolean DATABASE_USE=false;
 	public static String DATABASE_PREFIX="jdbc:mysql://";
@@ -224,6 +235,15 @@ public class Config {
 	
 	public static File getCookies() {
 		return new File(config_dir,"cookies.txt");
+	}
+	
+	public static boolean torAccessible() {
+		try(Socket socket=new Socket()) {
+			socket.connect(new InetSocketAddress(DL_TOR_HOST,DL_TOR_PORT),0);
+		} catch(Exception e) {
+			return false;
+		}
+		return true;
 	}
 	
 }

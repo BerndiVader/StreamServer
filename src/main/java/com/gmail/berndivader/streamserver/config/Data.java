@@ -45,6 +45,15 @@ public class Data {
 	public String DL_INTERVAL_FORMAT;
 	public Integer DL_INTERVAL_VALUE;
 	
+	public Boolean DL_USE_TOR;
+	public String DL_TOR_HOST;
+	public Integer DL_TOR_PORT;
+	
+	public Boolean DL_USE_CTOR;
+	public String DL_CTOR_HOST;
+	public Integer DL_CTOR_PORT;
+	public String DL_CTOR_PWD;
+	
 	public Boolean DATABASE_USE;
 	public String DATABASE_HOST;
 	public String DATABASE_PORT;

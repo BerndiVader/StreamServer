@@ -51,12 +51,6 @@ public class EndPoint {
 	public void onOpen(Session session) {
 		this.session=session;
 		ANSI.info(session.getRequestURI().toASCIIString());
-		session.getRequestParameterMap().forEach((name,list)->{
-			ANSI.info("hihi:"+name);
-			list.forEach(entry->{
-				ANSI.info("hoho:"+entry);
-			});
-		});
 		ANSI.info("WebSocket client connected.");
 		ANSI.prompt();
 		Helper.EXECUTOR.submit(new PingRunner());
@@ -173,7 +167,7 @@ public class EndPoint {
 		Optional<File>opt=Helper.getOrCreateMediaDir(Config.DL_ROOT_PATH);
 		if(opt.isEmpty()) return null;
 		File directory=opt.get();
-		return Helper.createDownloadBuilder(directory,String.format("--link --temp %s",url));
+		return Helper.createDownloadBuilder(directory,String.format("--tor --link --temp %s",url));
 	}
 	
 	public class PingRunner implements Runnable {
