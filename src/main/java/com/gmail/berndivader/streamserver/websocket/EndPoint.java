@@ -77,9 +77,7 @@ public class EndPoint {
 	
 	@OnClose
 	public void onClose(CloseReason reson) {
-		ANSI.info("WS-CLIENT connection closed. "+
-				"Code: "+reson.getCloseCode().getCode()+
-				", Reason: "+reson.getReasonPhrase());
+		ANSI.info(String.format("WS-CLIENT connection closed. Code: %d, Reason: %s",reson.getCloseCode().getCode(),reson.getReasonPhrase()));
 		ANSI.prompt();
 	}
 	
@@ -104,7 +102,7 @@ public class EndPoint {
 						if(!onExit&&(session==null||!session.isOpen())) {
 							ANSI.raw("[BR]");
 							ANSI.raw("Download process terminated because it appears, ws-client is gone.");
-							info.error="Download terminated because client gone";
+							info.error="Download terminated because client gone.";
 							process.destroy();
 						} else {
 							int avail=input.available();
@@ -123,7 +121,7 @@ public class EndPoint {
 							}
 							if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
 								ANSI.raw("[BR]");
-								ANSI.raw("Download process terminated because it appears, process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
+								ANSI.raw(String.format("Download process terminated because it appears, process is stalled since %n minutes.",(long)(Config.DL_TIMEOUT_SECONDS/60)));
 								process.destroy();
 								info.error="Download terminated because process is stalled.";
 							}
