@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 
 public abstract class Packet {
 	
-	public class Thumbnail {
+	public static class Thumbnail {
 		public String url;
 		public int width;
 		public int height;

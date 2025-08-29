@@ -56,11 +56,11 @@ public final class Broadcast {
 					} else if(json.has("error")) {
 						return Packet.build(json,ErrorPacket.class);
 					} else if(json.has("kind")&&json.get("kind").getAsString().equals("youtube#liveBroadcastListResponse")) {
-						if(json.has("items")&&!json.get("items").getAsJsonArray().isEmpty()) {
-							return Packet.build(json.getAsJsonArray("items").get(0).getAsJsonObject(),LiveBroadcastPacket.class);
-						} else {
-							return Packet.emtpy();
+						JsonArray array=json.getAsJsonArray("items");
+						if(array!=null&&!array.isJsonNull()&&array.size()>0) {
+							return Packet.build(array.get(0).getAsJsonObject(),LiveBroadcastPacket.class);
 						}
+						return Packet.emtpy();
 					} else {
 						return Packet.build(json,UnknownPacket.class);
 					}
@@ -264,10 +264,10 @@ public final class Broadcast {
 					} else if(json.has("kind")&&json.get("kind").getAsString().equals("youtube#liveStreamListResponse")) {
 						if(json.has("items")&&!json.getAsJsonArray("items").isEmpty()) {
 							JsonArray array=json.getAsJsonArray("items");
-							for(JsonElement element:array) {
-								return Packet.build(element.getAsJsonObject(),LiveStreamPacket.class);
+							if(array!=null&&!array.isJsonNull()&&array.size()>0) {
+								return Packet.build(array.get(0).getAsJsonObject(),LiveStreamPacket.class);
 							}
-						}
+					}
 						return Packet.emtpy();
 					} else {
 						return Packet.build(json,UnknownPacket.class);
@@ -317,5 +317,5 @@ public final class Broadcast {
 			}
 		});		
 	}
-	
+		
 }
