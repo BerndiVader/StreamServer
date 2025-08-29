@@ -105,6 +105,11 @@ public final class Helper {
 	}
 	
 	public static Entry<ProcessBuilder,InfoPacket> createDownloadBuilder(File defaultDirectory,String args) {
+		return createDownloadBuilder(defaultDirectory,args,true);
+	}
+	
+	
+	public static Entry<ProcessBuilder,InfoPacket> createDownloadBuilder(File defaultDirectory,String args,boolean useInfo) {
 		ProcessBuilder builder=new ProcessBuilder();
 		getOrCreateMediaDir(Config.mediaPath()).ifPresentOrElse(dir->builder.directory(dir),()->builder.directory(new File("./")));
 		boolean downloadable=false;
