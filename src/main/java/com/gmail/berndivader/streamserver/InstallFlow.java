@@ -144,8 +144,4 @@ public class InstallFlow {
 	    return pwd;
 	}
 	
-	private static boolean isLong(String value) {
-		return value.matches("\\d+");
-	}
-	
 }

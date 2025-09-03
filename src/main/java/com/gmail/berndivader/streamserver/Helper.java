@@ -461,6 +461,30 @@ public final class Helper {
 		
 	}
 	
+	public static boolean isDigit(String value) {
+		return isDigit(value,null);
+	}
+	
+	public static <T extends Number> boolean isDigit(String value,Class<T>clazz) {
+		if(clazz==null) {
+			return value.matches("\\d+");
+		}
+		try {
+			if(clazz==Byte.class) {
+				Byte.parseByte(value);
+			} else if(clazz==Short.class) {
+				Short.parseShort(value);
+			} else if(clazz==Long.class) {
+				Long.parseLong(value);
+			} else if(clazz==Integer.class) {
+				Integer.parseInt(value);
+			}
+		} catch(NumberFormatException e) {
+			return false;
+		}
+		return true;
+	}
+	
 	public static void close() {
 		ANSI.print("[WHITE]Shutdown task executor...");
 		EXECUTOR.shutdown();

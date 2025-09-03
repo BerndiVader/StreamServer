@@ -3,7 +3,7 @@ package com.gmail.berndivader.streamserver.youtube.packets;
 import java.util.List;
 import java.util.Map;
 
-public class VideoPacket extends Packet {
+public class VideoSnippetPacket extends Packet {
 
 	public String kind;
 	public String etag;

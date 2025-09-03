@@ -11,7 +11,7 @@ import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.youtube.packets.ErrorPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.Packet;
 import com.gmail.berndivader.streamserver.youtube.packets.UnknownPacket;
-import com.gmail.berndivader.streamserver.youtube.packets.VideoPacket;
+import com.gmail.berndivader.streamserver.youtube.packets.VideoSnippetPacket;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -39,7 +39,7 @@ public final class Video {
 					} else if(json.has("kind")&&json.get("kind").getAsString().equals("youtube#videoListResponse")) {
 						JsonArray array=json.getAsJsonArray("items");
 						if(array!=null&&!array.isJsonNull()&&array.size()>0) {
-							return Packet.build(array.get(0).getAsJsonObject(),VideoPacket.class);
+							return Packet.build(array.get(0).getAsJsonObject(),VideoSnippetPacket.class);
 						}
 						return Packet.emtpy();
 					} else {
