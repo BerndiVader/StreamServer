@@ -115,7 +115,7 @@ public final class Helper {
 		boolean downloadable=false;
 		boolean temp=false;
 		
-		builder.command(Config.DL_YTDLP_PATH
+		builder.command(Config.DOWNLOADER.YTDLP_PATH
 				,"--ignore-errors"
 				,"--progress-delta","2"
 				,"--restrict-filenames"
@@ -177,14 +177,14 @@ public final class Helper {
 						builder.command().addAll(Arrays.asList(
 								"--format","bestvideo[ext=mp4][vcodec=avc1]+bestaudio[ext=m4a]/best[ext=mp4]/best"
 						));
-						getOrCreateMediaDir(Config.PLAYLIST_PATH).ifPresent(dir->builder.directory(dir));;
+						getOrCreateMediaDir(Config.BROADCASTER.PLAYLIST_PATH).ifPresent(dir->builder.directory(dir));;
 						break;
 					case("ytc"):
 						temp=downloadable=false;
 						builder.command().addAll(Arrays.asList(
 								"--f","bestvideo[ext=mp4][vcodec=avc1]+bestaudio[ext=m4a]/best[ext=mp4]/best"
 						));
-						getOrCreateMediaDir(Config.PLAYLIST_PATH_CUSTOM).ifPresent(dir->builder.directory(dir));;
+						getOrCreateMediaDir(Config.BROADCASTER.PLAYLIST_PATH_CUSTOM).ifPresent(dir->builder.directory(dir));;
 						break;
 					case("tor"):
 						ANSI.raw("\033[36m[INFO]Try using Tor for download... ");
@@ -246,11 +246,11 @@ public final class Helper {
 				int w,h;
 				if(bimage.getWidth()>bimage.getHeight()) {
 					double ratio=(double)bimage.getHeight()/bimage.getWidth();
-					w=Config.DL_THUMBNAIL_SIZE.x;
+					w=Config.DOWNLOADER.THUMBNAIL_SIZE.x;
 					h=(int)(w*ratio);
 				} else {
 					double ratio=(double)bimage.getWidth()/bimage.getHeight();
-					h=Config.DL_THUMBNAIL_SIZE.y;
+					h=Config.DOWNLOADER.THUMBNAIL_SIZE.y;
 					w=(int)(h*ratio);
 				}
 				
@@ -288,7 +288,7 @@ public final class Helper {
 	
 	public static boolean ytdlpAvail() {
 		if(!ffmpegAvail()) return false;
-		ProcessBuilder builder=new ProcessBuilder(Config.DL_YTDLP_PATH,"--version");
+		ProcessBuilder builder=new ProcessBuilder(Config.DOWNLOADER.YTDLP_PATH,"--version");
 		try {
 			Process process=builder.start();
 			waitForProcess(process,10l);

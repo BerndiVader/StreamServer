@@ -71,7 +71,7 @@ public class DatabaseConnection {
 	}
 	
 	public static Connection getNewConnection() throws SQLException {
-		if(status==STATUS.OK) return DriverManager.getConnection(Config.connectionString(),Config.DATABASE_USER,Config.DATABASE_PWD);
+		if(status==STATUS.OK) return DriverManager.getConnection(Config.connectionString(),Config.MYSQL.USER,Config.MYSQL.PWD);
 		return null;
 	}
 	
@@ -82,7 +82,7 @@ public class DatabaseConnection {
 			
 			try {
 				Class.forName("com.mysql.cj.jdbc.Driver");
-				try(Connection connection=DriverManager.getConnection(Config.connectionString(),Config.DATABASE_USER,Config.DATABASE_PWD)) {
+				try(Connection connection=DriverManager.getConnection(Config.connectionString(),Config.MYSQL.USER,Config.MYSQL.PWD)) {
 					Properties properties=connection.getClientInfo();
 					connection.close();
 					if(properties!=null) test=STATUS.OK;
@@ -100,7 +100,7 @@ public class DatabaseConnection {
 		STATUS test=STATUS.UNKNOWN;
 		
 		try {
-			test=future.get(Config.DATABASE_TIMEOUT_SECONDS,TimeUnit.SECONDS);
+			test=future.get(Config.MYSQL.TIMEOUT_SECONDS,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			test=STATUS.CANT_CONNECT_SERVER_ERROR;
 			future.cancel(true);
@@ -116,8 +116,8 @@ public class DatabaseConnection {
 			
 			try {
 				Class.forName("com.mysql.cj.jdbc.Driver");
-				try(Connection connection=DriverManager.getConnection(Config.connectionString(),Config.DATABASE_USER,Config.DATABASE_PWD)) {
-					try(PreparedStatement statement=connection.prepareStatement(String.format("SELECT infotext FROM %s.info LIMIT 1",Config.DATABASE_NAME),ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
+				try(Connection connection=DriverManager.getConnection(Config.connectionString(),Config.MYSQL.USER,Config.MYSQL.PWD)) {
+					try(PreparedStatement statement=connection.prepareStatement(String.format("SELECT infotext FROM %s.info LIMIT 1",Config.MYSQL.NAME),ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 						try(ResultSet result=statement.executeQuery()) {
 							if(result.first()) {
 								if(result.getString("infotext").equals(DB_ID)) {
@@ -145,7 +145,7 @@ public class DatabaseConnection {
 		});
 		
 		try {
-			status=future.get(Config.DATABASE_TIMEOUT_SECONDS,TimeUnit.SECONDS);
+			status=future.get(Config.MYSQL.TIMEOUT_SECONDS,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			status=STATUS.CANT_CONNECT_SERVER_ERROR;
 			future.cancel(true);
@@ -160,7 +160,7 @@ public class DatabaseConnection {
 			return false;
 		}
 		
-		try(Connection connection=DriverManager.getConnection(Config.connectionString(),Config.DATABASE_USER,Config.DATABASE_PWD)) {
+		try(Connection connection=DriverManager.getConnection(Config.connectionString(),Config.MYSQL.USER,Config.MYSQL.PWD)) {
 			connection.setAutoCommit(false);
 			try(Statement statement=connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				

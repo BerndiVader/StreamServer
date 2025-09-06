@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 
+import com.gmail.berndivader.streamserver.config.Broadcaster;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.mysql.VerifyOAuth2;
 import com.gmail.berndivader.streamserver.term.ANSI;
@@ -27,8 +28,8 @@ public final class OAuth2 {
 	public static boolean build() {
 		String state=UUID.randomUUID().toString();
 		ANSI.println("Visit the URL and authorize the bot:[BR][GREEN]".concat(String.format(OAUTH_URL,
-				Config.YOUTUBE_CLIENT_ID,
-				Config.YOUTUBE_AUTH_REDIRECT,
+				Config.BROADCASTER.YOUTUBE_CLIENT_ID,
+				Config.BROADCASTER.YOUTUBE_AUTH_REDIRECT,
 				state
 				)));
 		ANSI.print("[YELLOW]Enter the retrieved code: [CYAN]");
@@ -46,9 +47,9 @@ public final class OAuth2 {
 			HttpPost post=new HttpPost(OAUTH_API);
 			StringEntity parameter=new StringEntity(String.format("code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=authorization_code",
 					code,
-					Config.YOUTUBE_CLIENT_ID,
-					Config.YOUTUBE_CLIENT_SECRET,
-					Config.YOUTUBE_AUTH_REDIRECT
+					Config.BROADCASTER.YOUTUBE_CLIENT_ID,
+					Config.BROADCASTER.YOUTUBE_CLIENT_SECRET,
+					Config.BROADCASTER.YOUTUBE_AUTH_REDIRECT
 					));
 			post.setEntity(parameter);
 			post.setHeader("Content-Type","application/x-www-form-urlencoded");
@@ -72,9 +73,9 @@ public final class OAuth2 {
 			if(token.isEmpty()) throw(new Exception("Failed to receive token."));
 			if(refreshToken.isEmpty()) throw(new Exception("Failed to receive refresh token."));
 						
-			Config.YOUTUBE_ACCESS_TOKEN=token;
-			Config.YOUTUBE_REFRESH_TOKEN=refreshToken;
-			Config.YOUTUBE_TOKEN_TIMESTAMP=System.currentTimeMillis()/1000;
+			Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN=token;
+			Config.BROADCASTER.YOUTUBE_REFRESH_TOKEN=refreshToken;
+			Config.BROADCASTER.YOUTUBE_TOKEN_TIMESTAMP=System.currentTimeMillis()/1000;
 			Config.saveConfig();
 			ANSI.println("[GREEN]done![RESET]");
 			
@@ -90,9 +91,9 @@ public final class OAuth2 {
 		HttpPost post=new HttpPost(OAUTH_API);
 		try {
 			StringEntity parameter=new StringEntity(String.format("grant_type=refresh_token&client_id=%s&client_secret=%s&refresh_token=%s",
-					Config.YOUTUBE_CLIENT_ID,
-					Config.YOUTUBE_CLIENT_SECRET,
-					Config.YOUTUBE_REFRESH_TOKEN
+					Config.BROADCASTER.YOUTUBE_CLIENT_ID,
+					Config.BROADCASTER.YOUTUBE_CLIENT_SECRET,
+					Config.BROADCASTER.YOUTUBE_REFRESH_TOKEN
 					));
 
 			post.setEntity(parameter);
@@ -111,8 +112,8 @@ public final class OAuth2 {
 
 			if(token.isEmpty()) throw new RuntimeException("Failed to refresh access token.");
 
-			Config.YOUTUBE_ACCESS_TOKEN=token;
-			Config.YOUTUBE_TOKEN_TIMESTAMP=System.currentTimeMillis()/1000l;
+			Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN=token;
+			Config.BROADCASTER.YOUTUBE_TOKEN_TIMESTAMP=System.currentTimeMillis()/1000l;
 			Config.saveConfig();
 
 			ANSI.println("[GREEN]done![/GREEN] Renewed the refresh token for YouTube.[PROMPT]");
@@ -127,6 +128,6 @@ public final class OAuth2 {
 	}		
 
 	public static boolean isExpired() {
-		return System.currentTimeMillis()/1000l-Config.YOUTUBE_TOKEN_TIMESTAMP>Config.YOUTUBE_TOKEN_EXPIRE_TIME;
+		return System.currentTimeMillis()/1000l-Config.BROADCASTER.YOUTUBE_TOKEN_TIMESTAMP>Broadcaster.YOUTUBE_TOKEN_EXPIRE_TIME;
 	}		
 }

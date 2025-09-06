@@ -50,7 +50,7 @@ public class InfoPacket {
 			if(url==null||url.isEmpty()) return packet;
 			
 			ProcessBuilder builder=new ProcessBuilder();
-			builder.command(Config.DL_YTDLP_PATH
+			builder.command(Config.DOWNLOADER.YTDLP_PATH
 				,"--quiet"
 				,"--no-warnings"
 				,"--dump-json"

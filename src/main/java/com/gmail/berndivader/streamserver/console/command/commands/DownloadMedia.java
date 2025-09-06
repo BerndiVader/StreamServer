@@ -50,7 +50,7 @@ public class DownloadMedia extends Command {
 	@Override
 	public boolean execute(String[] args) {
 		
-		if(Config.DATABASE_USE) {
+		if(Config.MYSQL.USE) {
 			CleanUpDownloadables cleanUp=new CleanUpDownloadables();
 			try {
 				cleanUp.future.get(20l,TimeUnit.SECONDS);
@@ -59,7 +59,7 @@ public class DownloadMedia extends Command {
 			}
 		}
 
-		Optional<File>opt=Helper.getOrCreateMediaDir(Config.DL_ROOT_PATH);
+		Optional<File>opt=Helper.getOrCreateMediaDir(Config.DOWNLOADER.ROOT_PATH);
 		if(opt.isEmpty()) return false;
 		
 		File directory=opt.get();
@@ -104,7 +104,7 @@ public class DownloadMedia extends Command {
 			if(process.isAlive()) process.destroy();
 			ANSI.raw("[BR]");
 			
-			if(infoPacket.downloadable&&Config.DATABASE_USE) {
+			if(infoPacket.downloadable&&Config.MYSQL.USE) {
 				File file=new File(builder.directory().getAbsolutePath()+"/"+infoPacket.local_filename);
 				if(file.exists()&&file.isFile()&&file.canRead()) {
 					MakeDownloadable downloadable= new MakeDownloadable(file,infoPacket.temp);

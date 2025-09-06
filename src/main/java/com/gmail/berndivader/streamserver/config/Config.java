@@ -1,6 +1,5 @@
 package com.gmail.berndivader.streamserver.config;
 
-import java.awt.Point;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -19,57 +18,19 @@ import com.gmail.berndivader.streamserver.youtube.PrivacyStatus;
 
 public class Config {
 			
-	public static String BROADCAST_DEFAULT_TITLE="Lorem ipsum";
-	public static String BROADCAST_DEFAULT_DESCRIPTION="Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-	public static String BROADCAST_DEFAULT_PRIVACY="private";
-	public static Long BROADCAST_REPEAT_TIMER_INTERVAL=1l;
-	
-	public static String YOUTUBE_STREAM_KEY="xxxx-xxxx-xxxx-xxxx-xxxx";
-	public static String YOUTUBE_STREAM_URL="rtmp://a.rtmp.youtube.com/live2";
-	
-	public static String YOUTUBE_API_KEY="YT-API-KEY";
-	public static String YOUTUBE_CLIENT_ID="YT-CLIENT-ID";
-	public static String YOUTUBE_CLIENT_SECRET="YT-CLIENT-SECRET";
-	public static String YOUTUBE_AUTH_REDIRECT="https://YOUR.OAUTH2-REDIRECT.PAGE";
-	public static String YOUTUBE_ACCESS_TOKEN="YT-OAUTH2-ACCESS-TOKEN";
-	public static String YOUTUBE_REFRESH_TOKEN="YT-OUATH2-REFRESH-TOKEN";
-	public static Long YOUTUBE_TOKEN_TIMESTAMP=0l;
-	
-	public static final Long YOUTUBE_TOKEN_EXPIRE_TIME=3599l;
-	public static final long BROADCAST_PLAYLIST_REFRESH_INTERVAL=60l;
-		
-	public static Boolean STREAM_BOT_START=false;
-	
-	public static String PLAYLIST_PATH="./playlist";
-	public static String PLAYLIST_PATH_CUSTOM="./custom";
-	
-	public static String DL_YTDLP_PATH="yt-dlp";
-	public static String DL_FFMPEG_PATH="ffmpeg";
-	public static String DL_FFPROBE_PATH="ffprobe";
-	public static String DL_ROOT_PATH="./library";
-	public static String DL_MUSIC_PATH="/music";
-	public static String DL_TEMP_PATH="/temp";
-	public static String DL_MEDIA_PATH="/media";
-	public static String DL_WWW_THUMBNAIL_PATH="/ABSOLUTE/PATH/TO/THUMBNAILS";
-	public static Point DL_THUMBNAIL_SIZE=new Point(640,480);
-		
-	public static Boolean DATABASE_USE=false;
-	public static String DATABASE_PREFIX="jdbc:mysql://";
-	public static String DATABASE_HOST="MYSQL.HOST.NAME";
-	public static String DATABASE_PORT="3306";
-	public static String DATABASE_NAME="yampb";
-	public static String DATABASE_USER="MYSQL-USER-NAME";
-	public static String DATABASE_PWD="MYSQL-PASSWORD";
-	public static Long DATABASE_TIMEOUT_SECONDS=10l;
-	
 	public static String HELP_TEXT;
 	public static String DISCORD_HELP_TEXT;
 	public static String DISCORD_HELP_TEXT_TITLE="YAMPB Discord help";
 	public static String YAMPB_ANSI;
 	
+	public static Broadcaster BROADCASTER=new Broadcaster();
+	public static String DATABASE_PREFIX="jdbc:mysql://";
+	public static MySql MYSQL=new MySql();
 	public static Downloader DOWNLOADER=new Downloader();
 	public static Discord DISCORD=new Discord(); 
 	public static WebSocket WEBSOCKET=new WebSocket();
+	
+	
 	
 	public static Boolean DEBUG=false;
 	
@@ -167,23 +128,23 @@ public class Config {
 	}
 	
 	public static String musicPath() {
-		return DL_ROOT_PATH+DL_MUSIC_PATH;
+		return DOWNLOADER.ROOT_PATH+DOWNLOADER.MUSIC_PATH;
 	}
 	
 	public static String mediaPath() {
-		return DL_ROOT_PATH+DL_MEDIA_PATH;
+		return DOWNLOADER.ROOT_PATH+DOWNLOADER.MEDIA_PATH;
 	}
 	
 	public static String tempPath() {
-		return DL_ROOT_PATH+DL_TEMP_PATH;
+		return DOWNLOADER.ROOT_PATH+DOWNLOADER.TEMP_PATH;
 	}
 	
 	public static String connectionString() {
-		return DATABASE_PREFIX+DATABASE_HOST+":"+DATABASE_PORT+"/"+DATABASE_NAME;
+		return DATABASE_PREFIX+MYSQL.HOST+":"+MYSQL.PORT+"/"+MYSQL.NAME;
 	}
 	
 	public static PrivacyStatus broadcastPrivacyStatus() {
-		String priv=BROADCAST_DEFAULT_PRIVACY.toUpperCase();
+		String priv=BROADCASTER.BROADCAST_DEFAULT_PRIVACY.toUpperCase();
 		return PrivacyStatus.isEnum(priv)?PrivacyStatus.valueOf(priv):PrivacyStatus.UNLISTED;
 	}
 	

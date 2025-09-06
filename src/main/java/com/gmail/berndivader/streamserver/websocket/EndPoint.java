@@ -137,7 +137,7 @@ public class EndPoint {
 				if(process.isAlive()) process.destroy();
 				ANSI.raw("[BR]");
 				
-				if(info.downloadable&&Config.DATABASE_USE&&!info.isSet(info.error)) {
+				if(info.downloadable&&Config.MYSQL.USE&&!info.isSet(info.error)) {
 					File file=new File(builder.directory().getAbsolutePath()+"/"+info.local_filename);
 					if(file.exists()&&file.isFile()&&file.canRead()) {
 						MakeDownloadable downloadable=new MakeDownloadable(file,info.temp);
@@ -162,7 +162,7 @@ public class EndPoint {
 	}
 	
 	private static Entry<ProcessBuilder,InfoPacket> getDownloader(String url) {
-		Optional<File>opt=Helper.getOrCreateMediaDir(Config.DL_ROOT_PATH);
+		Optional<File>opt=Helper.getOrCreateMediaDir(Config.DOWNLOADER.ROOT_PATH);
 		if(opt.isEmpty()) return null;
 		File directory=opt.get();
 		return Helper.createDownloadBuilder(directory,String.format("--tor --link --temp %s",url));

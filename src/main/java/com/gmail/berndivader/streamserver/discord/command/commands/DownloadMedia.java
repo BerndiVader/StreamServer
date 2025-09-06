@@ -67,7 +67,7 @@ public class DownloadMedia extends Command<Void> {
 
 		@Override
 		public void run() {
-			Optional<File>opt=Helper.getOrCreateMediaDir(Config.DL_ROOT_PATH);
+			Optional<File>opt=Helper.getOrCreateMediaDir(Config.DOWNLOADER.ROOT_PATH);
 			if(opt.isEmpty()) {
 				
 				channel.createMessage(EmbedCreateSpec.builder()

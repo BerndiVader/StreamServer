@@ -73,9 +73,9 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 			ANSI.error("Failed to create or update downloadable media file.",e);
 			return Optional.ofNullable(null);
 		}
-		File thumbnail=new File(Config.DL_WWW_THUMBNAIL_PATH);
+		File thumbnail=new File(Config.DOWNLOADER.WWW_THUMBNAIL_PATH);
 		if(!thumbnail.exists()) thumbnail.mkdirs();
-		thumbnail=new File(Config.DL_WWW_THUMBNAIL_PATH,uuid.toString()+".jpg");
+		thumbnail=new File(Config.DOWNLOADER.WWW_THUMBNAIL_PATH,uuid.toString()+".jpg");
 		Helper.extractImageFromMedia(file,thumbnail);
 		return Optional.of(Config.DOWNLOADER.URL+"/download.php?uuid="+uuid.toString());
 	}

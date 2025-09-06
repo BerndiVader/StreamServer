@@ -33,9 +33,9 @@ public class StartLiveStream extends Command {
 			
 		}
 				
-		String title=opts.length>0?opts[0]:Config.BROADCAST_DEFAULT_TITLE;
-		String description=opts.length>1?opts[1]:Config.BROADCAST_DEFAULT_DESCRIPTION;
-		String priv=opts.length>2?opts[2].toUpperCase():Config.BROADCAST_DEFAULT_PRIVACY.toUpperCase();
+		String title=opts.length>0?opts[0]:Config.BROADCASTER.BROADCAST_DEFAULT_TITLE;
+		String description=opts.length>1?opts[1]:Config.BROADCASTER.BROADCAST_DEFAULT_DESCRIPTION;
+		String priv=opts.length>2?opts[2].toUpperCase():Config.BROADCASTER.BROADCAST_DEFAULT_PRIVACY.toUpperCase();
 		
 		PrivacyStatus privacy=PrivacyStatus.isEnum(priv)?PrivacyStatus.valueOf(priv):PrivacyStatus.UNLISTED;
 		

@@ -43,9 +43,9 @@ public final class Broadcast {
 			BroadcastStatus status=broadcastStatus;
 			if (OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
 
-			String url=Youtube.URL.concat("liveBroadcasts?part=id,snippet,contentDetails,monetizationDetails,status&broadcastStatus="+status.name()+"&key=").concat(Config.YOUTUBE_API_KEY);
+			String url=Youtube.URL.concat("liveBroadcasts?part=id,snippet,contentDetails,monetizationDetails,status&broadcastStatus="+status.name()+"&key=").concat(Config.BROADCASTER.YOUTUBE_API_KEY);
 			HttpGet get=new HttpGet(url);
-			get.setHeader("Authorization","Bearer ".concat(Config.YOUTUBE_ACCESS_TOKEN));
+			get.setHeader("Authorization","Bearer ".concat(Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN));
 			get.addHeader("Accept","application/json");
 
 			try {
@@ -77,10 +77,10 @@ public final class Broadcast {
 		return Helper.EXECUTOR.submit(()->{
 			if(OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
 
-			String url=Youtube.URL.concat("liveBroadcasts?part=id,snippet,contentDetails,status&key=").concat(Config.YOUTUBE_API_KEY);
+			String url=Youtube.URL.concat("liveBroadcasts?part=id,snippet,contentDetails,status&key=").concat(Config.BROADCASTER.YOUTUBE_API_KEY);
 
 			HttpPost post=new HttpPost(url);
-			post.setHeader("Authorization","Bearer ".concat(Config.YOUTUBE_ACCESS_TOKEN));
+			post.setHeader("Authorization","Bearer ".concat(Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN));
 			post.addHeader("Accept","application/json");
 			post.addHeader("Content-Type","application/json");
 
@@ -132,10 +132,10 @@ public final class Broadcast {
 		return Helper.EXECUTOR.submit(()->{
 			if(OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
 
-			String url=Youtube.URL.concat("liveStreams?part=snippet,cdn,contentDetails,status&key=").concat(Config.YOUTUBE_API_KEY);
+			String url=Youtube.URL.concat("liveStreams?part=snippet,cdn,contentDetails,status&key=").concat(Config.BROADCASTER.YOUTUBE_API_KEY);
 
 			HttpPost post=new HttpPost(url);
-			post.setHeader("Authorization","Bearer ".concat(Config.YOUTUBE_ACCESS_TOKEN));
+			post.setHeader("Authorization","Bearer ".concat(Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN));
 			post.addHeader("Accept","application/json");
 			post.addHeader("Content-Type","application/json");
 
@@ -187,9 +187,9 @@ public final class Broadcast {
 		return Helper.EXECUTOR.submit(()->{
 			if (OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
 
-			String url=Youtube.URL.concat("liveBroadcasts/bind?id="+broadcastId+"&streamId="+streamId+"&part=id,snippet,contentDetails,status&key=").concat(Config.YOUTUBE_API_KEY);
+			String url=Youtube.URL.concat("liveBroadcasts/bind?id="+broadcastId+"&streamId="+streamId+"&part=id,snippet,contentDetails,status&key=").concat(Config.BROADCASTER.YOUTUBE_API_KEY);
 			HttpPost post=new HttpPost(url);
-			post.setHeader("Authorization","Bearer ".concat(Config.YOUTUBE_ACCESS_TOKEN));
+			post.setHeader("Authorization","Bearer ".concat(Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN));
 			post.addHeader("Accept","application/json");
 			post.addHeader("Content-Type","application/json");			
 
@@ -217,9 +217,9 @@ public final class Broadcast {
 		return Helper.EXECUTOR.submit(()->{
 			if (OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
 
-			String url=Youtube.URL.concat("liveBroadcasts/transition?broadcastStatus="+status+"&id="+broadcastId+"&part=id,snippet,contentDetails,status&key=").concat(Config.YOUTUBE_API_KEY);
+			String url=Youtube.URL.concat("liveBroadcasts/transition?broadcastStatus="+status+"&id="+broadcastId+"&part=id,snippet,contentDetails,status&key=").concat(Config.BROADCASTER.YOUTUBE_API_KEY);
 			HttpPost post=new HttpPost(url);
-			post.setHeader("Authorization","Bearer ".concat(Config.YOUTUBE_ACCESS_TOKEN));
+			post.setHeader("Authorization","Bearer ".concat(Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN));
 			post.addHeader("Accept","application/json");
 			post.addHeader("Content-Type","application/json");
 
@@ -248,9 +248,9 @@ public final class Broadcast {
 			
 			if (OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
 
-			String url=Youtube.URL.concat(String.format("liveStreams?id=%s&part=id,snippet,cdn,status&key=%s",id,Config.YOUTUBE_API_KEY));
+			String url=Youtube.URL.concat(String.format("liveStreams?id=%s&part=id,snippet,cdn,status&key=%s",id,Config.BROADCASTER.YOUTUBE_API_KEY));
 			HttpGet get=new HttpGet(url);
-			get.setHeader("Authorization","Bearer ".concat(Config.YOUTUBE_ACCESS_TOKEN));
+			get.setHeader("Authorization","Bearer ".concat(Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN));
 			get.addHeader("Accept","application/json");
 			
 			try {
@@ -286,9 +286,9 @@ public final class Broadcast {
 		return Helper.EXECUTOR.submit(()->{
 			if (OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
 
-			String url=Youtube.URL.concat("liveStreams?part=id,snippet,cdn,status&mine=true&key=").concat(Config.YOUTUBE_API_KEY);
+			String url=Youtube.URL.concat("liveStreams?part=id,snippet,cdn,status&mine=true&key=").concat(Config.BROADCASTER.YOUTUBE_API_KEY);
 			HttpGet get=new HttpGet(url);
-			get.setHeader("Authorization","Bearer ".concat(Config.YOUTUBE_ACCESS_TOKEN));
+			get.setHeader("Authorization","Bearer ".concat(Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN));
 			get.addHeader("Accept","application/json");
 
 			try {
@@ -303,7 +303,7 @@ public final class Broadcast {
 							JsonArray array=json.getAsJsonArray("items");
 							for(JsonElement element:array) {
 								LiveStreamPacket packet=(LiveStreamPacket)Packet.build(element.getAsJsonObject(),LiveStreamPacket.class);
-								if(packet.cdn.ingestionInfo.streamName.equals(Config.YOUTUBE_STREAM_KEY)) return packet;
+								if(packet.cdn.ingestionInfo.streamName.equals(Config.BROADCASTER.YOUTUBE_STREAM_KEY)) return packet;
 							}
 						}
 						return Packet.emtpy();

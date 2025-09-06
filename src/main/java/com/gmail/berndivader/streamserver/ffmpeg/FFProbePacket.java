@@ -84,7 +84,7 @@ public class FFProbePacket {
 			} catch (IOException e) {
 				ANSI.error(e.getMessage(),e);
 			}
-			builder.command(Config.DL_FFPROBE_PATH,"-v","quiet","-print_format","json","-show_format",path);
+			builder.command(Config.DOWNLOADER.FFPROBE_PATH,"-v","quiet","-print_format","json","-show_format",path);
 			try {
 				Entry<String,String>output=Helper.startAndWaitForProcess(builder,10l);
 				String out=output.getKey();

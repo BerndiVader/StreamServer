@@ -29,6 +29,7 @@ import com.github.kokorin.jaffree.ffmpeg.ProgressListener;
 import com.github.kokorin.jaffree.ffmpeg.UrlInput;
 import com.github.kokorin.jaffree.ffmpeg.UrlOutput;
 import com.gmail.berndivader.streamserver.Helper;
+import com.gmail.berndivader.streamserver.config.Broadcaster;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.mysql.GetNextScheduled;
@@ -124,7 +125,7 @@ public final class BroadcastRunner extends TimerTask {
 		refreshFilelist();
 		shuffleFilelist();
 		
-		checkOrReInitiateLiveBroadcast(Config.BROADCAST_DEFAULT_TITLE,Config.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
+		checkOrReInitiateLiveBroadcast(Config.BROADCASTER.BROADCAST_DEFAULT_TITLE,Config.BROADCASTER.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
 
 		index.set(0);
 		expiredCounter=0l;
@@ -163,12 +164,12 @@ public final class BroadcastRunner extends TimerTask {
 			expiredCounter+=period;
 			if(!hold.get()) {
 	    		if(ffmpeg()==null||ffmpeg().isCancelled()||ffmpeg().isDone()) startStream();
-				if(expiredCounter>Config.YOUTUBE_TOKEN_EXPIRE_TIME) {
-					checkOrReInitiateLiveBroadcast(Config.BROADCAST_DEFAULT_TITLE,Config.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
+				if(expiredCounter>Broadcaster.YOUTUBE_TOKEN_EXPIRE_TIME) {
+					checkOrReInitiateLiveBroadcast(Config.BROADCASTER.BROADCAST_DEFAULT_TITLE,Config.BROADCASTER.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
 					expiredCounter=0l;
 				}
 			} else {
-				if(refreshTimer>Config.BROADCAST_PLAYLIST_REFRESH_INTERVAL) {
+				if(refreshTimer>Broadcaster.PLAYLIST_REFRESH_INTERVAL) {
 					refreshFilelist();
 					shuffleFilelist();
 					try {
@@ -292,12 +293,12 @@ public final class BroadcastRunner extends TimerTask {
 			ANSI.prompt();
 		}
 		
-		Path path=Paths.get(Config.DL_FFMPEG_PATH);
+		Path path=Paths.get(Config.DOWNLOADER.FFMPEG_PATH);
 		ffmpeg(FFmpeg.atPath(path.getParent())
 				.addInput(UrlInput.fromUrl(file.getAbsolutePath())
 						.addArgument("-re")
 						)
-				.addOutput(UrlOutput.toUrl(Config.YOUTUBE_STREAM_URL+"/"+Config.YOUTUBE_STREAM_KEY)
+				.addOutput(UrlOutput.toUrl(Config.BROADCASTER.YOUTUBE_STREAM_URL+"/"+Config.BROADCASTER.YOUTUBE_STREAM_KEY)
 						.setCodec(StreamType.VIDEO,"copy")
 						.setCodec(StreamType.AUDIO,"copy")
 						.addArguments("-strict","-2")
@@ -479,8 +480,8 @@ public final class BroadcastRunner extends TimerTask {
 	}
 	
 	public static void refreshFilelist() {
-    	File playlistDir=new File(Config.working_dir,Config.PLAYLIST_PATH);
-    	File customDir=new File(Config.working_dir,Config.PLAYLIST_PATH_CUSTOM);
+    	File playlistDir=new File(Config.working_dir,Config.BROADCASTER.PLAYLIST_PATH);
+    	File customDir=new File(Config.working_dir,Config.BROADCASTER.PLAYLIST_PATH_CUSTOM);
     	
     	FileFilter filter=pathName->pathName.getAbsolutePath().toLowerCase().endsWith(".mp4");
     	List<File>newFiles=Arrays.asList(getFiles(playlistDir,filter));

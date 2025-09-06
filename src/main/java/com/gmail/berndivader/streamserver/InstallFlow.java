@@ -32,7 +32,7 @@ public class InstallFlow {
 					} else break;
 				} while(true);
 			} else {
-				Config.DATABASE_USE=false;
+				Config.MYSQL.USE=false;
 			}
 			
 			if(ask("[BR]Config YT broadcaster? [CYAN][YES/no]","yes").equalsIgnoreCase("yes")) {
@@ -43,7 +43,7 @@ public class InstallFlow {
 					} else break;
 				} while(true);
 			} else {
-				Config.STREAM_BOT_START=false;
+				Config.BROADCASTER.STREAM_BOT_START=false;
 			}
 			
 			if(ask("[BR]Config Discord bot? [CYAN][YES/no]","yes").equalsIgnoreCase("yes")) {
@@ -71,11 +71,11 @@ public class InstallFlow {
 	private boolean installDB() {
 		boolean use=false;
 		
-		Config.DATABASE_HOST=ask(String.format("MySQL hostname? [CYAN][%s]",Config.DATABASE_HOST),Config.DATABASE_HOST);
-		Config.DATABASE_PORT=ask(String.format("MySQL port? [CYAN][%s]",Config.DATABASE_PORT),Config.DATABASE_PORT);
-		Config.DATABASE_NAME=ask(String.format("MySQL databasename? [CYAN][%s]",Config.DATABASE_NAME),Config.DATABASE_NAME);
-		Config.DATABASE_USER=ask(String.format("MySQL username? [CYAN][%s]",Config.DATABASE_USER),Config.DATABASE_USER);
-		Config.DATABASE_PWD=askPwd("MySQL password? [CYAN][blank for current]",Config.DATABASE_PWD);
+		Config.MYSQL.HOST=ask(String.format("MySQL hostname? [CYAN][%s]",Config.MYSQL.HOST),Config.MYSQL.HOST);
+		Config.MYSQL.PORT=ask(String.format("MySQL port? [CYAN][%s]",Config.MYSQL.PORT),Config.MYSQL.PORT);
+		Config.MYSQL.NAME=ask(String.format("MySQL databasename? [CYAN][%s]",Config.MYSQL.NAME),Config.MYSQL.NAME);
+		Config.MYSQL.USER=ask(String.format("MySQL username? [CYAN][%s]",Config.MYSQL.USER),Config.MYSQL.USER);
+		Config.MYSQL.PWD=askPwd("MySQL password? [CYAN][blank for current]",Config.MYSQL.PWD);
 		
 		STATUS test=DatabaseConnection.testInstall();
 		ANSI.info(test.msg());
@@ -91,22 +91,22 @@ public class InstallFlow {
 			break;
 		}
 		
-		return Config.DATABASE_USE=use;
+		return Config.MYSQL.USE=use;
 	}
 	
 	private boolean installBC() {
 		boolean use=true;
 		
-		Config.YOUTUBE_API_KEY=ask(String.format("Youtube API key? [CYAN][%s]",Config.YOUTUBE_API_KEY),Config.YOUTUBE_API_KEY);
-		Config.YOUTUBE_CLIENT_ID=ask(String.format("OAuth2 client id? [CYAN][%s]",Config.YOUTUBE_CLIENT_ID),Config.YOUTUBE_CLIENT_ID);
-		Config.YOUTUBE_CLIENT_SECRET=ask(String.format("OAuth2 client secret? [CYAN][%s]",Config.YOUTUBE_CLIENT_SECRET),Config.YOUTUBE_CLIENT_SECRET);
-		Config.YOUTUBE_AUTH_REDIRECT=ask(String.format("OAuth2 redirect page? [CYAN][%s]",Config.YOUTUBE_AUTH_REDIRECT),Config.YOUTUBE_AUTH_REDIRECT);
+		Config.BROADCASTER.YOUTUBE_API_KEY=ask(String.format("Youtube API key? [CYAN][%s]",Config.BROADCASTER.YOUTUBE_API_KEY),Config.BROADCASTER.YOUTUBE_API_KEY);
+		Config.BROADCASTER.YOUTUBE_CLIENT_ID=ask(String.format("OAuth2 client id? [CYAN][%s]",Config.BROADCASTER.YOUTUBE_CLIENT_ID),Config.BROADCASTER.YOUTUBE_CLIENT_ID);
+		Config.BROADCASTER.YOUTUBE_CLIENT_SECRET=ask(String.format("OAuth2 client secret? [CYAN][%s]",Config.BROADCASTER.YOUTUBE_CLIENT_SECRET),Config.BROADCASTER.YOUTUBE_CLIENT_SECRET);
+		Config.BROADCASTER.YOUTUBE_AUTH_REDIRECT=ask(String.format("OAuth2 redirect page? [CYAN][%s]",Config.BROADCASTER.YOUTUBE_AUTH_REDIRECT),Config.BROADCASTER.YOUTUBE_AUTH_REDIRECT);
 		
-		Config.YOUTUBE_STREAM_KEY=ask(String.format("Livestream key? [CYAN][%s]",Config.YOUTUBE_STREAM_KEY),Config.YOUTUBE_STREAM_KEY);
-		Config.YOUTUBE_STREAM_URL=ask(String.format("Livestream rtmp url? [CYAN][%s]",Config.YOUTUBE_STREAM_URL),Config.YOUTUBE_STREAM_URL);
-		Config.BROADCAST_DEFAULT_PRIVACY=ask(String.format("Livestream default privacy?[BR]Possible values: PUBLIC|UNLISTED|PRIVATE [CYAN][%s]",Config.BROADCAST_DEFAULT_PRIVACY),Config.BROADCAST_DEFAULT_PRIVACY);
+		Config.BROADCASTER.YOUTUBE_STREAM_KEY=ask(String.format("Livestream key? [CYAN][%s]",Config.BROADCASTER.YOUTUBE_STREAM_KEY),Config.BROADCASTER.YOUTUBE_STREAM_KEY);
+		Config.BROADCASTER.YOUTUBE_STREAM_URL=ask(String.format("Livestream rtmp url? [CYAN][%s]",Config.BROADCASTER.YOUTUBE_STREAM_URL),Config.BROADCASTER.YOUTUBE_STREAM_URL);
+		Config.BROADCASTER.BROADCAST_DEFAULT_PRIVACY=ask(String.format("Livestream default privacy?[BR]Possible values: PUBLIC|UNLISTED|PRIVATE [CYAN][%s]",Config.BROADCASTER.BROADCAST_DEFAULT_PRIVACY),Config.BROADCASTER.BROADCAST_DEFAULT_PRIVACY);
 		
-		return Config.STREAM_BOT_START=use;
+		return Config.BROADCASTER.STREAM_BOT_START=use;
 	}
 	
 	private boolean installDC() {

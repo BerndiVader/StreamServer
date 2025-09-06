@@ -15,7 +15,7 @@ public class ListFiles extends Command {
 	public boolean execute(String[] arguments) {
 
 		String arg=arguments[0];
-		String path=Config.DL_ROOT_PATH;
+		String path=Config.DOWNLOADER.ROOT_PATH;
 		boolean sub=false;
 		
 		String search=arg;
@@ -30,10 +30,10 @@ public class ListFiles extends Command {
 			path=Config.tempPath();
 			arg=arg.toUpperCase().replaceFirst("--TEMP","").trim();
 		} else if(arg.toUpperCase().startsWith("--PLAYLIST")) {
-			path=Config.PLAYLIST_PATH;
+			path=Config.BROADCASTER.PLAYLIST_PATH;
 			arg=arg.toUpperCase().replaceFirst("--PLAYLIST","").trim();
 		} else if(arg.toUpperCase().startsWith("--CUSTOM")) {
-			path=Config.PLAYLIST_PATH_CUSTOM;
+			path=Config.BROADCASTER.PLAYLIST_PATH_CUSTOM;
 			arg=arg.toUpperCase().replaceFirst("--CUSTOM","").trim();
 		} else {
 			sub=true;

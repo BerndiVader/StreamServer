@@ -24,9 +24,9 @@ public final class Video {
 		return Helper.EXECUTOR.submit(()->{
 			if(OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
 
-			String url=Youtube.URL.concat(String.format("videos?id=%s&part=snippet&key=%s",id,Config.YOUTUBE_API_KEY));
+			String url=Youtube.URL.concat(String.format("videos?id=%s&part=snippet&key=%s",id,Config.BROADCASTER.YOUTUBE_API_KEY));
 			HttpGet get=new HttpGet(url);
-			get.setHeader("Authorization","Bearer ".concat(Config.YOUTUBE_ACCESS_TOKEN));
+			get.setHeader("Authorization","Bearer ".concat(Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN));
 			get.addHeader("Accept","application/json");
 
 			try {
