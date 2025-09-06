@@ -119,9 +119,9 @@ public class EndPoint {
 									if(line.toLowerCase().startsWith("[download]")) session.getAsyncRemote().sendText(line);
 								}
 							}
-							if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
+							if(System.currentTimeMillis()-time>Config.DOWNLOADER.TIMEOUT_SECONDS*1000l){
 								ANSI.raw("[BR]");
-								ANSI.raw(String.format("Download process terminated because it appears, process is stalled since %n minutes.",(long)(Config.DL_TIMEOUT_SECONDS/60)));
+								ANSI.raw(String.format("Download process terminated because it appears, process is stalled since %n minutes.",(long)(Config.DOWNLOADER.TIMEOUT_SECONDS/60)));
 								process.destroy();
 								info.error="Download terminated because process is stalled.";
 							}

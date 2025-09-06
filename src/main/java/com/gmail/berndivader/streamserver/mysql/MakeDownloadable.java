@@ -77,7 +77,7 @@ public class MakeDownloadable implements Callable<Optional<String>>{
 		if(!thumbnail.exists()) thumbnail.mkdirs();
 		thumbnail=new File(Config.DL_WWW_THUMBNAIL_PATH,uuid.toString()+".jpg");
 		Helper.extractImageFromMedia(file,thumbnail);
-		return Optional.of(Config.DL_URL+"/download.php?uuid="+uuid.toString());
+		return Optional.of(Config.DOWNLOADER.URL+"/download.php?uuid="+uuid.toString());
 	}
 
 }

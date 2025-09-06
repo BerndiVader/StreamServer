@@ -151,7 +151,7 @@ public class DownloadMedia extends Command<Void> {
 									if(temp.length>0) infoPacket.local_filename=temp[1];
 								}
 								message.edit(MessageEditSpec.create().withContentOrNull("```css\n."+line+"```")).subscribe();
-							} else if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l) {
+							} else if(System.currentTimeMillis()-time>Config.DOWNLOADER.TIMEOUT_SECONDS*1000l) {
 								status=Status.TIMEOUT;
 								break;
 							}
@@ -172,7 +172,7 @@ public class DownloadMedia extends Command<Void> {
 						edit.contentOrNull("")
 							.addEmbed(EmbedCreateSpec.builder()
 								.title("TIMOUT")
-								.description("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.")
+								.description("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DOWNLOADER.TIMEOUT_SECONDS/60)+" minutes.")
 								.color(Color.RED)
 								.build());
 						break;

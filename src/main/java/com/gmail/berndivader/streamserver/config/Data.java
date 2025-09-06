@@ -1,7 +1,5 @@
 package com.gmail.berndivader.streamserver.config;
 
-import java.awt.Point;
-
 import com.google.gson.annotations.SerializedName;
 
 public class Data {
@@ -23,33 +21,8 @@ public class Data {
 	public String YOUTUBE_ACCESS_TOKEN;
 	public String YOUTUBE_REFRESH_TOKEN;
 	public Long YOUTUBE_TOKEN_TIMESTAMP;
-	public Boolean YOUTUBE_USE_COOKIES;
 	public String PLAYLIST_PATH;
 	public String PLAYLIST_PATH_CUSTOM;
-	
-	public String DL_YTDLP_PATH;
-	public String DL_FFMPEG_PATH;
-	public String DL_FFPROBE_PATH;
-	public String DL_ROOT_PATH;
-	public String DL_MUSIC_PATH;
-	public String DL_TEMP_PATH;
-	public String DL_MEDIA_PATH;
-	public String DL_WWW_THUMBNAIL_PATH;
-	public Point DL_THUMBNAIL_SIZE;
-	
-	public Long DL_TIMEOUT_SECONDS;
-	public String DL_URL;
-	public String DL_INTERVAL_FORMAT;
-	public Integer DL_INTERVAL_VALUE;
-	
-	public Boolean DL_USE_TOR;
-	public String DL_TOR_HOST;
-	public Integer DL_TOR_PORT;
-	
-	public Boolean DL_USE_CTOR;
-	public String DL_CTOR_HOST;
-	public Integer DL_CTOR_PORT;
-	public String DL_CTOR_PWD;
 	
 	public Boolean DATABASE_USE;
 	public String DATABASE_HOST;
@@ -59,6 +32,7 @@ public class Data {
 	public String DATABASE_PWD;
 	public Long DATABASE_TIMEOUT_SECONDS;
 	
+	public Downloader DOWNLOADER;
 	public Discord DISCORD;
 	public WebSocket WEBSOCKET;
 	

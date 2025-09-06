@@ -125,7 +125,7 @@ public final class Helper {
 				,"--output","%(title).64s.%(ext)s"
 		);
 		
-		if(Config.YOUTUBE_USE_COOKIES&&Config.cookiesExists()) {
+		if(Config.DOWNLOADER.USE_COOKIES&&Config.cookiesExists()) {
 			builder.command().add("--cookies");
 			builder.command().add(Config.getCookies().getAbsolutePath());
 		}
@@ -167,7 +167,7 @@ public final class Helper {
 						}
 						break;
 					case("cookies"):
-						if(!Config.YOUTUBE_USE_COOKIES&&Config.cookiesExists()) {
+						if(!Config.DOWNLOADER.USE_COOKIES&&Config.cookiesExists()) {
 							builder.command().add("--cookies");
 							builder.command().add(Config.getCookies().getAbsolutePath());
 						}
@@ -188,13 +188,13 @@ public final class Helper {
 						break;
 					case("tor"):
 						ANSI.raw("\033[36m[INFO]Try using Tor for download... ");
-						if(Config.DL_USE_TOR&&Config.torAccessible()) {
+						if(Config.DOWNLOADER.USE_TOR&&Config.torAccessible()) {
 							ANSI.raw("OK![RESET]");
 							builder.command().add("--proxy");
-							builder.command().add(String.format("socks5://%s:%d",Config.DL_TOR_HOST,Config.DL_TOR_PORT));
+							builder.command().add(String.format("socks5://%s:%d",Config.DOWNLOADER.TOR_HOST,Config.DOWNLOADER.TOR_PORT));
 							
-							if(Config.DL_USE_CTOR) {
-								ANSI.raw("\\033[36m[INFO]Try chaning exit node... ");
+							if(Config.DOWNLOADER.USE_CTOR) {
+								ANSI.raw("\\033[36m[INFO]Try to change exit node... ");
 								Helper.newTorCircuit();
 								String torIP=Helper.getTorExitNode();
 								if(torIP!=null) {
@@ -396,9 +396,9 @@ public final class Helper {
 			
 			@Override
 			public void run() {
-				String host=Config.DL_CTOR_HOST;
-				int port=Config.DL_CTOR_PORT;
-				String pwd=Config.DL_CTOR_PWD;
+				String host=Config.DOWNLOADER.CTOR_HOST;
+				int port=Config.DOWNLOADER.CTOR_PORT;
+				String pwd=Config.DOWNLOADER.CTOR_PWD;
 				
 				try(Socket socket=new Socket(host,port);
 						BufferedReader reader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -435,7 +435,7 @@ public final class Helper {
 			public String call() throws Exception {
 				String ip=null;
 				try {
-					Proxy proxy=new Proxy(Proxy.Type.SOCKS,new InetSocketAddress(Config.DL_TOR_HOST,Config.DL_TOR_PORT));
+					Proxy proxy=new Proxy(Proxy.Type.SOCKS,new InetSocketAddress(Config.DOWNLOADER.TOR_HOST,Config.DOWNLOADER.TOR_PORT));
 					URL url=URI.create("https://api.ipify.org").toURL();
 					HttpURLConnection conn=(HttpURLConnection)url.openConnection(proxy);
 					conn.setRequestMethod("GET");

@@ -88,9 +88,9 @@ public class DownloadMedia extends Command {
 						}
 						ANSI.raw("[CR][DL]"+line);
 					}
-					if(System.currentTimeMillis()-time>Config.DL_TIMEOUT_SECONDS*1000l){
+					if(System.currentTimeMillis()-time>Config.DOWNLOADER.TIMEOUT_SECONDS*1000l){
 						ANSI.raw("[BR]");
-						ANSI.raw("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DL_TIMEOUT_SECONDS/60)+" minutes.");
+						ANSI.raw("Download will be terminated, because it appears, that the process is stalled since "+(long)(Config.DOWNLOADER.TIMEOUT_SECONDS/60)+" minutes.");
 						process.destroy();
 					}
 				}

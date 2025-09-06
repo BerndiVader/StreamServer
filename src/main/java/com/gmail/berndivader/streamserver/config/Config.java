@@ -37,9 +37,7 @@ public class Config {
 	
 	public static final Long YOUTUBE_TOKEN_EXPIRE_TIME=3599l;
 	public static final long BROADCAST_PLAYLIST_REFRESH_INTERVAL=60l;
-	
-	public static Boolean YOUTUBE_USE_COOKIES=false;
-	
+		
 	public static Boolean STREAM_BOT_START=false;
 	
 	public static String PLAYLIST_PATH="./playlist";
@@ -54,21 +52,7 @@ public class Config {
 	public static String DL_MEDIA_PATH="/media";
 	public static String DL_WWW_THUMBNAIL_PATH="/ABSOLUTE/PATH/TO/THUMBNAILS";
 	public static Point DL_THUMBNAIL_SIZE=new Point(640,480);
-	
-	public static Long DL_TIMEOUT_SECONDS=1800l;
-	public static String DL_URL="https://PATH.TO.PHP";
-	public static String DL_INTERVAL_FORMAT="DAY";
-	public static Integer DL_INTERVAL_VALUE=14;
-	
-	public static Boolean DL_USE_TOR=false;
-	public static String DL_TOR_HOST="127.0.0.1";
-	public static Integer DL_TOR_PORT=9050;
-
-	public static Boolean DL_USE_CTOR=false;
-	public static String DL_CTOR_HOST="127.0.0.1";
-	public static Integer DL_CTOR_PORT=9051;
-	public static String DL_CTOR_PWD="PWD_HASH_STRING";
-	
+		
 	public static Boolean DATABASE_USE=false;
 	public static String DATABASE_PREFIX="jdbc:mysql://";
 	public static String DATABASE_HOST="MYSQL.HOST.NAME";
@@ -83,6 +67,7 @@ public class Config {
 	public static String DISCORD_HELP_TEXT_TITLE="YAMPB Discord help";
 	public static String YAMPB_ANSI;
 	
+	public static Downloader DOWNLOADER=new Downloader();
 	public static Discord DISCORD=new Discord(); 
 	public static WebSocket WEBSOCKET=new WebSocket();
 	
@@ -226,7 +211,7 @@ public class Config {
 	
 	public static boolean torAccessible() {
 		try(Socket socket=new Socket()) {
-			socket.connect(new InetSocketAddress(DL_TOR_HOST,DL_TOR_PORT),0);
+			socket.connect(new InetSocketAddress(DOWNLOADER.TOR_HOST,DOWNLOADER.TOR_PORT),0);
 		} catch(Exception e) {
 			return false;
 		}
