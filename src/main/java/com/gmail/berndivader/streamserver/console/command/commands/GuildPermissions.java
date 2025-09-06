@@ -27,7 +27,7 @@ public class GuildPermissions extends Command {
 					Long guildId=Long.valueOf(parameters[0]);
 					String name=parameters[1];
 					Guild guild=new Guild(name,channelIds.toArray(Long[]::new));
-					Config.DISCORD_PERMITTED_GUILDS.merge(guildId,guild,(oldGuild,newGuild)->newGuild);
+					Config.DISCORD.PERMITTED_GUILDS.merge(guildId,guild,(oldGuild,newGuild)->newGuild);
 					ANSI.println("[GREEN]Guild permissions added or updated.[PROMPT]");
 				} catch (NumberFormatException e) {
 					ANSI.warn("Failed to parse guild or channel id. Please ensure they are valid numbers.");
@@ -40,8 +40,8 @@ public class GuildPermissions extends Command {
 			if(!del.isEmpty()) {
 				try {
 					Long id=Long.valueOf(del);
-					if(Config.DISCORD_PERMITTED_GUILDS.containsKey(id)) {
-						Config.DISCORD_PERMITTED_GUILDS.remove(id);
+					if(Config.DISCORD.PERMITTED_GUILDS.containsKey(id)) {
+						Config.DISCORD.PERMITTED_GUILDS.remove(id);
 						ANSI.println("[GREEN]Removed guild from permission list.");
 					} else {
 						ANSI.warn("No guild with given id found.");
@@ -54,7 +54,7 @@ public class GuildPermissions extends Command {
 			}
 		} else {
 			ANSI.println("[MAGENTA]Permitted guilds:");
-			Config.DISCORD_PERMITTED_GUILDS.forEach((id,guild)->{
+			Config.DISCORD.PERMITTED_GUILDS.forEach((id,guild)->{
 				String output="[YELLOW]Name:[BLUE]"+guild.name+" [YELLOW]Id:[BLUE]"+id+" [YELLOW]Channels:[BLUE]";
 				for(long channel:guild.channelId) {
 					output+=channel+(" ");

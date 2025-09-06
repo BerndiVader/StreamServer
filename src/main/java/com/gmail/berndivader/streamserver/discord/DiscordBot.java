@@ -47,7 +47,7 @@ public final class DiscordBot {
 	
 	public DiscordBot() {
 		DiscordBot.status=Status.DISCONNECTED;
-		if(Config.DISCORD_MUSIC_BOT) provider=MusicPlayer.create();
+		if(Config.DISCORD.MUSIC_BOT) provider=MusicPlayer.create();
 		
 		Commands.instance=new Commands();
 		
@@ -56,7 +56,7 @@ public final class DiscordBot {
 				.resolver(DefaultAddressResolverGroup.INSTANCE))
 				.build();
 
-		client=DiscordClient.builder(Config.DISCORD_TOKEN)
+		client=DiscordClient.builder(Config.DISCORD.TOKEN)
 			.setReactorResources(reactor)
 			.build()
 			.login()
@@ -76,9 +76,9 @@ public final class DiscordBot {
 		if(status!=Status.CONNECTED) return;
 		
 		client.on(GuildCreateEvent.class)
-			.filter(event->Config.DISCORD_PERMITTED_GUILDS.containsKey(event.getGuild().getId().asLong()))
+			.filter(event->Config.DISCORD.PERMITTED_GUILDS.containsKey(event.getGuild().getId().asLong()))
 			.flatMap(event->event.getGuild().getChannels())
-			.filter(channel->Config.DISCORD_MUSIC_BOT&&channel.getType()==Channel.Type.GUILD_VOICE&&channel.getName().equals(Config.DISCORD_VOICE_CHANNEL_NAME))
+			.filter(channel->Config.DISCORD.MUSIC_BOT&&channel.getType()==Channel.Type.GUILD_VOICE&&channel.getName().equals(Config.DISCORD.VOICE_CHANNEL_NAME))
 			.cast(VoiceChannel.class)
 			.flatMap(voice->{
 
@@ -86,7 +86,7 @@ public final class DiscordBot {
 					
 					ANSI.println("Create musicplayer....");
 					provider.player().addListener(new TrackScheduler(voice));
-					if(Config.DISCORD_MUSIC_AUTOPLAY) MusicPlayer.playRandomMusic();
+					if(Config.DISCORD.MUSIC_AUTOPLAY) MusicPlayer.playRandomMusic();
 					
 				}).retryWhen(Retry.backoff(1024l,Duration.ofSeconds(1)).maxBackoff(Duration.ofSeconds(10)))
 				.onErrorContinue((error,o)->{
@@ -98,7 +98,7 @@ public final class DiscordBot {
 
 			}).subscribe();
 		
-		if(Config.DISCORD_MUSIC_BOT) {
+		if(Config.DISCORD.MUSIC_BOT) {
 			client.on(VoiceStateUpdateEvent.class)
 			.filter(event->(event.isJoinEvent()||event.isMoveEvent())&&!event.getCurrent().getUserId().equals(client.getSelfId()))
 			.flatMap(event->{
@@ -106,7 +106,7 @@ public final class DiscordBot {
 				return event.getCurrent().getMember().doOnSuccess(member->{
 					member.getVoiceState().flatMap(voiceState->voiceState.getChannel()).subscribe(channel -> {
 						
-						if(channel.getName().equalsIgnoreCase(Config.DISCORD_VOICE_CHANNEL_NAME)) {
+						if(channel.getName().equalsIgnoreCase(Config.DISCORD.VOICE_CHANNEL_NAME)) {
 							PermissionOverwrite overrite=PermissionOverwrite.forMember(member.getId(),null,PermissionSet.of(Permission.SPEAK,Permission.STREAM));
 							channel.addMemberOverwrite(member.getId(),overrite).subscribe();
 						}
@@ -119,10 +119,10 @@ public final class DiscordBot {
 		
 		client.on(MessageCreateEvent.class)
 	    	.filter(
-	    			e->e.getMessage().getContent().startsWith(Config.DISCORD_CMD_PREFIX)
+	    			e->e.getMessage().getContent().startsWith(Config.DISCORD.CMD_PREFIX)
 	    			&&e.getMember().isPresent()
 	    			&&e.getGuildId().isPresent()
-	    			&&(Config.DISCORD_ROLE_ID==0l||e.getMember().get().getRoleIds().contains(Snowflake.of(Config.DISCORD_ROLE_ID)))
+	    			&&(Config.DISCORD.ROLE_ID==0l||e.getMember().get().getRoleIds().contains(Snowflake.of(Config.DISCORD.ROLE_ID)))
 	    			&&Permissions.Guilds.permitted(e.getGuildId().get().asLong(),e.getMessage().getChannelId().asLong())
 	    		)
 		    .flatMap(e->{
@@ -132,7 +132,7 @@ public final class DiscordBot {
 		        String cmd=parse[0].toLowerCase().substring(1);
 
 		        Optional<Command<?>>opt=Commands.instance.build(cmd);
-		        if(Config.DISCORD_DELETE_CMD_MESSAGE&&opt.isPresent()) message.delete().subscribe();
+		        if(Config.DISCORD.DELETE_CMD_MESSAGE&&opt.isPresent()) message.delete().subscribe();
 		        return Mono.justOrEmpty(opt)
 		        		.flatMap(command->{
 		        			String args=parse.length==2?parse[1]:"";

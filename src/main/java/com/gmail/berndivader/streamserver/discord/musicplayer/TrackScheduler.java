@@ -74,7 +74,7 @@ public class TrackScheduler extends AudioEventAdapter {
 		AudioTrack next=DiscordBot.instance.provider.scheduledTracks.poll();
 		if(next!=null) {
 			player.playTrack(next);
-		} else if(Config.DISCORD_MUSIC_AUTOPLAY) {
+		} else if(Config.DISCORD.MUSIC_AUTOPLAY) {
 			MusicPlayer.playRandomMusic();
 		}
 		

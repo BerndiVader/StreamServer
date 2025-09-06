@@ -11,8 +11,8 @@ public final class Permissions {
 		private Users() {}
 		
 		public static boolean permitted(Long id,Rank required) {
-			if(Config.DISCORD_PERMITTED_USERS.containsKey(id)) {
-				User user=Config.DISCORD_PERMITTED_USERS.get(id);
+			if(Config.DISCORD.PERMITTED_USERS.containsKey(id)) {
+				User user=Config.DISCORD.PERMITTED_USERS.get(id);
 				return user.rank.ordinal()>=required.ordinal();
 			} else if(required==Rank.GUEST) {
 				return true;
@@ -25,8 +25,8 @@ public final class Permissions {
 		private Guilds() {}
 		
 		public static boolean permitted(Long guildId,Long channelId) {
-			return Config.DISCORD_PERMITTED_GUILDS.containsKey(guildId)
-					&&Config.DISCORD_PERMITTED_GUILDS.get(guildId).channelId.contains(channelId);
+			return Config.DISCORD.PERMITTED_GUILDS.containsKey(guildId)
+					&&Config.DISCORD.PERMITTED_GUILDS.get(guildId).channelId.contains(channelId);
 		}
 			
 	}

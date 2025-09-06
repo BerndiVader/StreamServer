@@ -24,7 +24,7 @@ public class UserPermissions extends Command {
 					String name=parameters[1];
 					Rank rank=Rank.valueOf(parameters[2].toUpperCase());
 					User user=new User(name,rank);
-					Config.DISCORD_PERMITTED_USERS.merge(memberId,user,(oldUser,newUser)->newUser);
+					Config.DISCORD.PERMITTED_USERS.merge(memberId,user,(oldUser,newUser)->newUser);
 					ANSI.println("[GREEN]User permissions successfully added/updated.[PROMPT]");
 					return true;
 				} catch (NumberFormatException e) {
@@ -43,8 +43,8 @@ public class UserPermissions extends Command {
 			if(!del.isEmpty()) {
 				try {
 					Long id=Long.valueOf(del);
-					if(Config.DISCORD_PERMITTED_USERS.containsKey(id)) {
-						Config.DISCORD_PERMITTED_USERS.remove(id);
+					if(Config.DISCORD.PERMITTED_USERS.containsKey(id)) {
+						Config.DISCORD.PERMITTED_USERS.remove(id);
 						ANSI.println("[GREEN]Removed user from permission list.");
 					} else {
 						ANSI.warn("No user with given id found.");
@@ -57,7 +57,7 @@ public class UserPermissions extends Command {
 			}
 		} else {
 			ANSI.println("[MAGENTA]Permitted members:");
-			Config.DISCORD_PERMITTED_USERS.forEach((id,user)->{
+			Config.DISCORD.PERMITTED_USERS.forEach((id,user)->{
 				ANSI.println("[YELLOW]Name:[BLUE]"+user.name+" [YELLOW]Id:[BLUE]"+id+" [YELLOW]Rank:[BLUE]"+user.rank.name());
 			});
 		}

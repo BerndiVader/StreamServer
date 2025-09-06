@@ -26,8 +26,8 @@ public class Help extends Command<Message> {
 
 		if(Permissions.Users.permitted(member.getId().asLong(),this.getClass().getDeclaredAnnotation(Permission.class).required())) {
 			Rank rank=Rank.GUEST;
-			if(Config.DISCORD_PERMITTED_USERS.containsKey(member.getId().asLong())) {
-				rank=Config.DISCORD_PERMITTED_USERS.get(member.getId().asLong()).rank;
+			if(Config.DISCORD.PERMITTED_USERS.containsKey(member.getId().asLong())) {
+				rank=Config.DISCORD.PERMITTED_USERS.get(member.getId().asLong()).rank;
 			}
 			return execute(string,channel,rank);
 		} else {

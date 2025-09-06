@@ -31,7 +31,7 @@ public final class YAMPB {
 		
 		if(Config.DATABASE_USE) DatabaseConnection.instance=new DatabaseConnection();		
 		if(Config.STREAM_BOT_START&&Config.FFMPEG_AVAIL) BroadcastRunner.instance=new BroadcastRunner();
-		if(Config.DISCORD_BOT_START) DiscordBot.instance=new DiscordBot();
+		if(Config.DISCORD.BOT_START) DiscordBot.instance=new DiscordBot();
 		if(Config.WEBSOCKET.USE&&Config.YTDLP_AVAIL) WebSocket.start();
 
 		ConsoleRunner.instance=new ConsoleRunner();

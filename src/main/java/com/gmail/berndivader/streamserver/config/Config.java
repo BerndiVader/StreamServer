@@ -10,21 +10,15 @@ import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Scanner;
 
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.YAMPB;
-import com.gmail.berndivader.streamserver.discord.permission.Guild;
-import com.gmail.berndivader.streamserver.discord.permission.User;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.youtube.PrivacyStatus;
 
 public class Config {
 			
-	public static HashMap<Long,Guild>DISCORD_PERMITTED_GUILDS=new HashMap<Long,Guild>();
-	public static HashMap<Long,User>DISCORD_PERMITTED_USERS=new HashMap<Long,User>();
-	
 	public static String BROADCAST_DEFAULT_TITLE="Lorem ipsum";
 	public static String BROADCAST_DEFAULT_DESCRIPTION="Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
 	public static String BROADCAST_DEFAULT_PRIVACY="private";
@@ -40,14 +34,13 @@ public class Config {
 	public static String YOUTUBE_ACCESS_TOKEN="YT-OAUTH2-ACCESS-TOKEN";
 	public static String YOUTUBE_REFRESH_TOKEN="YT-OUATH2-REFRESH-TOKEN";
 	public static Long YOUTUBE_TOKEN_TIMESTAMP=0l;
+	
 	public static final Long YOUTUBE_TOKEN_EXPIRE_TIME=3599l;
 	public static final long BROADCAST_PLAYLIST_REFRESH_INTERVAL=60l;
 	
 	public static Boolean YOUTUBE_USE_COOKIES=false;
 	
-	public static Boolean DISCORD_BOT_START=false;
 	public static Boolean STREAM_BOT_START=false;
-	public static Boolean DISCORD_MUSIC_BOT=false;
 	
 	public static String PLAYLIST_PATH="./playlist";
 	public static String PLAYLIST_PATH_CUSTOM="./custom";
@@ -85,18 +78,12 @@ public class Config {
 	public static String DATABASE_PWD="MYSQL-PASSWORD";
 	public static Long DATABASE_TIMEOUT_SECONDS=10l;
 	
-	public static String DISCORD_CMD_PREFIX=".";
-	public static String DISCORD_TOKEN="BOT-TOKEN";
-	public static Boolean DISCORD_DELETE_CMD_MESSAGE=false;
-	public static String DISCORD_VOICE_CHANNEL_NAME="VOICE-CHANNEL-NAME";
-	public static Boolean DISCORD_MUSIC_AUTOPLAY=false;
-	public static Long DISCORD_ROLE_ID=0l;
-	
 	public static String HELP_TEXT;
 	public static String DISCORD_HELP_TEXT;
 	public static String DISCORD_HELP_TEXT_TITLE="YAMPB Discord help";
 	public static String YAMPB_ANSI;
 	
+	public static Discord DISCORD=new Discord(); 
 	public static WebSocket WEBSOCKET=new WebSocket();
 	
 	public static Boolean DEBUG=false;

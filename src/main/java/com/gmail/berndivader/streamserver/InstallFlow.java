@@ -54,7 +54,7 @@ public class InstallFlow {
 					} else break;
 				} while(true);
 			} else {
-				Config.DISCORD_BOT_START=false;
+				Config.DISCORD.BOT_START=false;
 			}		
 			
 			Config.saveConfig();
@@ -113,18 +113,18 @@ public class InstallFlow {
 		boolean use=true;
 		
 		ANSI.println("[BLUE]To get/create token for your bot visit: https://discord.com/developers/applications");
-		Config.DISCORD_TOKEN=ask(String.format("Discord bot token? [CYAN][%s]",Config.DISCORD_TOKEN),Config.DISCORD_TOKEN);
+		Config.DISCORD.TOKEN=ask(String.format("Discord bot token? [CYAN][%s]",Config.DISCORD.TOKEN),Config.DISCORD.TOKEN);
 		
-		if(Config.DISCORD_MUSIC_BOT=ask("Use music bot? [CYAN][yes/NO]","no").equalsIgnoreCase("yes")) {
-			Config.DISCORD_VOICE_CHANNEL_NAME=ask(String.format("Voice channel by name? [CYAN][%s]",Config.DISCORD_VOICE_CHANNEL_NAME),Config.DISCORD_VOICE_CHANNEL_NAME);
-			Config.DISCORD_MUSIC_AUTOPLAY=ask("Use music bot? [CYAN][yes/NO]","no").equalsIgnoreCase("yes");
+		if(Config.DISCORD.MUSIC_BOT=ask("Use music bot? [CYAN][yes/NO]","no").equalsIgnoreCase("yes")) {
+			Config.DISCORD.VOICE_CHANNEL_NAME=ask(String.format("Voice channel by name? [CYAN][%s]",Config.DISCORD.VOICE_CHANNEL_NAME),Config.DISCORD.VOICE_CHANNEL_NAME);
+			Config.DISCORD.MUSIC_AUTOPLAY=ask("Use music bot? [CYAN][yes/NO]","no").equalsIgnoreCase("yes");
 		}
 		
 		if(ask("Setup a default guild permission? [CYAN][YES/no]","yes").equalsIgnoreCase("yes")) {
 			
 		}
 		
-		return Config.DISCORD_BOT_START=use;
+		return Config.DISCORD.BOT_START=use;
 	}
 	
 	private static String ask(String question,String preset) {

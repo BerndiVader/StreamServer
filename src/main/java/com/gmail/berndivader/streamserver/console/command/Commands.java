@@ -78,7 +78,7 @@ public class Commands {
 										add&=DatabaseConnection.status==STATUS.OK;
 										break;
 									case DISCORDMUSIC:
-										add&=Config.DISCORD_MUSIC_BOT;
+										add&=Config.DISCORD.MUSIC_BOT;
 										break;
 									case FFMPEG:
 										add&=Config.FFMPEG_AVAIL;

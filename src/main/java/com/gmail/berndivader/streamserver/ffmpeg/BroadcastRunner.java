@@ -281,7 +281,7 @@ public final class BroadcastRunner extends TimerTask {
 				
 		new UpdateCurrent(title,playingPacket().toString());
 		
-		if(Config.DISCORD_BOT_START&&DiscordBot.instance!=null) DiscordBot.instance.updateStatus(title);
+		if(Config.DISCORD.BOT_START&&DiscordBot.instance!=null) DiscordBot.instance.updateStatus(title);
 		
 		if(Config.DEBUG) {
 			ANSI.info("[BLUE]Now playing: "

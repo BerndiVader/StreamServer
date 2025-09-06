@@ -1,10 +1,7 @@
 package com.gmail.berndivader.streamserver.config;
 
 import java.awt.Point;
-import java.util.HashMap;
 
-import com.gmail.berndivader.streamserver.discord.permission.Guild;
-import com.gmail.berndivader.streamserver.discord.permission.User;
 import com.google.gson.annotations.SerializedName;
 
 public class Data {
@@ -62,18 +59,7 @@ public class Data {
 	public String DATABASE_PWD;
 	public Long DATABASE_TIMEOUT_SECONDS;
 	
-	public Boolean DISCORD_BOT_START;
-	public String DISCORD_TOKEN;
-	public Boolean DISCORD_DELETE_CMD_MESSAGE;
-	public HashMap<Long,Guild>DISCORD_PERMITTED_GUILDS;
-	public HashMap<Long,User>DISCORD_PERMITTED_USERS;
-	public Long DISCORD_ROLE_ID;
-	
-	public Boolean DISCORD_MUSIC_BOT;
-	@SerializedName("DISCORD_CHANNEL")
-	public String DISCORD_VOICE_CHANNEL_NAME;
-	public Boolean DISCORD_MUSIC_AUTOPLAY;
-	
+	public Discord DISCORD;
 	public WebSocket WEBSOCKET;
 	
 	public Boolean DEBUG;
