@@ -28,8 +28,8 @@ public class Broadcaster {
 	public String PLAYLIST_PATH_CUSTOM;
 	
 	public Broadcaster() {
-		BROADCAST_DEFAULT_TITLE="Lorem ipsum";
-		BROADCAST_DEFAULT_DESCRIPTION="Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+		BROADCAST_DEFAULT_TITLE="YAMPB Livestream Default Title";
+		BROADCAST_DEFAULT_DESCRIPTION="YAMPB Livestream Default Description";
 		BROADCAST_DEFAULT_PRIVACY="private";
 		BROADCAST_REPEAT_TIMER_INTERVAL=1l;
 		

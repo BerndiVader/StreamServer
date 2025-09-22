@@ -7,6 +7,7 @@ import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
 import com.gmail.berndivader.streamserver.mysql.DatabaseConnection.STATUS;
 import com.gmail.berndivader.streamserver.term.ANSI;
+import com.gmail.berndivader.streamserver.youtube.OAuth2;
 
 public class InstallFlow {
 	
@@ -55,8 +56,8 @@ public class InstallFlow {
 				} while(true);
 			} else {
 				Config.DISCORD.BOT_START=false;
-			}		
-			
+			}
+						
 			Config.saveConfig();
 			done=true;
 			
@@ -105,6 +106,13 @@ public class InstallFlow {
 		Config.BROADCASTER.YOUTUBE_STREAM_KEY=ask(String.format("Livestream key? [CYAN][%s]",Config.BROADCASTER.YOUTUBE_STREAM_KEY),Config.BROADCASTER.YOUTUBE_STREAM_KEY);
 		Config.BROADCASTER.YOUTUBE_STREAM_URL=ask(String.format("Livestream rtmp url? [CYAN][%s]",Config.BROADCASTER.YOUTUBE_STREAM_URL),Config.BROADCASTER.YOUTUBE_STREAM_URL);
 		Config.BROADCASTER.BROADCAST_DEFAULT_PRIVACY=ask(String.format("Livestream default privacy?[BR]Possible values: PUBLIC|UNLISTED|PRIVATE [CYAN][%s]",Config.BROADCASTER.BROADCAST_DEFAULT_PRIVACY),Config.BROADCASTER.BROADCAST_DEFAULT_PRIVACY);
+		
+		Config.BROADCASTER.BROADCAST_DEFAULT_TITLE=ask(String.format("Default Livestream Title? [CYAN][%s]",Config.BROADCASTER.BROADCAST_DEFAULT_TITLE),Config.BROADCASTER.BROADCAST_DEFAULT_TITLE);
+		Config.BROADCASTER.BROADCAST_DEFAULT_DESCRIPTION=ask(String.format("Default Livestream Title? [CYAN][%s]",Config.BROADCASTER.BROADCAST_DEFAULT_DESCRIPTION),Config.BROADCASTER.BROADCAST_DEFAULT_DESCRIPTION);
+		
+		if(ask("Try to create OAuth2 Access Token?[CYAN][YES/no][BR][GREEN](Valid redirect page is required for this action.)","yes").equalsIgnoreCase("yes")) {
+			OAuth2.build();
+		}
 		
 		return Config.BROADCASTER.STREAM_BOT_START=use;
 	}
