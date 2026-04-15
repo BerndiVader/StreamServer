@@ -294,6 +294,7 @@ public final class BroadcastRunner extends TimerTask {
 		}
 		
 		Path path=Paths.get(Config.DOWNLOADER.FFMPEG_PATH);
+		
 		ffmpeg(FFmpeg.atPath(path.getParent())
 				.addInput(UrlInput.fromUrl(file.getAbsolutePath())
 						.addArgument("-re")
@@ -318,7 +319,10 @@ public final class BroadcastRunner extends TimerTask {
 					public void onProgress(FFmpegProgress progress) {
 						BroadcastRunner.progress(progress);
 					}
-				}).setOverwriteOutput(true).executeAsync());
+				})
+				.setOverwriteOutput(true)
+				.executeAsync());
+		
 		if(ffmpeg()!=null&&!ffmpeg().isDone()&&!ffmpeg().isCancelled()) playing(file);
 	}
 	

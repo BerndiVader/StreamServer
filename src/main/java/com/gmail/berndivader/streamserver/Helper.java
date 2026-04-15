@@ -173,6 +173,7 @@ public final class Helper {
 						}
 						break;
 					case("yt"):
+					case("broadcast"):
 						temp=downloadable=false;
 						builder.command().addAll(Arrays.asList(
 								"--format","bestvideo[ext=mp4][vcodec=avc1]+bestaudio[ext=m4a]/best[ext=mp4]/best"
@@ -180,6 +181,7 @@ public final class Helper {
 						getOrCreateMediaDir(Config.BROADCASTER.PLAYLIST_PATH).ifPresent(dir->builder.directory(dir));;
 						break;
 					case("ytc"):
+					case("custom"):
 						temp=downloadable=false;
 						builder.command().addAll(Arrays.asList(
 								"--f","bestvideo[ext=mp4][vcodec=avc1]+bestaudio[ext=m4a]/best[ext=mp4]/best"

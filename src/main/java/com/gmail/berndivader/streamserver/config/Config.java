@@ -17,7 +17,7 @@ import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.youtube.PrivacyStatus;
 
 public class Config {
-			
+	
 	public static String HELP_TEXT;
 	public static String DISCORD_HELP_TEXT;
 	public static String DISCORD_HELP_TEXT_TITLE="YAMPB Discord help";
@@ -29,8 +29,6 @@ public class Config {
 	public static Downloader DOWNLOADER=new Downloader();
 	public static Discord DISCORD=new Discord(); 
 	public static WebSocket WEBSOCKET=new WebSocket();
-	
-	
 	
 	public static Boolean DEBUG=false;
 	

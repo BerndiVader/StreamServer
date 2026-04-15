@@ -99,9 +99,9 @@ public class DownloadMedia extends Command<Void> {
 						.title(infoPacket.title)
 						.url(infoPacket.webpage_url)
 						.description(infoPacket.description)
-						.image(infoPacket.thumbnail)
 						.color(Color.BLUE)
 						.footer(infoPacket.format,null);
+					if(Helper.isUrl(infoPacket.thumbnail)) embedBuilder.image(infoPacket.thumbnail);
 					
 					MessageEditSpec.Builder msgBuilder=MessageEditSpec.builder();
 					msgBuilder.addComponent(ActionRow.of(ButtonAction.Builder.cancel(uuid)))
@@ -182,9 +182,10 @@ public class DownloadMedia extends Command<Void> {
 							.title("Download finished....")
 							.url(infoPacket.webpage_url)
 							.description(infoPacket.title)
-							.image(infoPacket.thumbnail)
 							.color(Color.GREEN)
 							.footer(infoPacket.format,null);
+						if(Helper.isUrl(infoPacket.thumbnail)) embed.image(infoPacket.thumbnail);
+						
 						if(infoPacket.downloadable) {
 							File file=new File(builder.directory().getAbsolutePath()+"/"+infoPacket.local_filename);
 							if(file.exists()&&file.isFile()&&file.canRead()) {

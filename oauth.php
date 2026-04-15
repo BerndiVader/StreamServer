@@ -36,6 +36,22 @@ else
     </div>
 </div>
 
+<?php
+
+function error()
+{
+    ?>
+    <div class="alert alert-danger" role="alert">
+        An error occurred while processing your request.
+    </div>
+    <?php
+    exit;
+}
+
+include_once("footer.php");
+
+?>
+
 <!-- Include Bootstrap JS and dependencies -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
@@ -50,17 +66,3 @@ function copyToClipboard() {
     alert("Code copied: " + copyText.value);
 }
 </script>
-
-<?php
-
-function error()
-{
-    ?>
-    <div class="alert alert-danger" role="alert">
-        An error occurred while processing your request.
-    </div>
-    <?php
-    exit;
-}
-
-include_once("footer.php");
