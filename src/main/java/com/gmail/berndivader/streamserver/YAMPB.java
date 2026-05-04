@@ -1,10 +1,13 @@
 package com.gmail.berndivader.streamserver;
 
+import java.io.IOException;
+
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
+import com.gmail.berndivader.streamserver.stream.AuthServer;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.websocket.WebSocket;
 import com.gmail.berndivader.streamserver.youtube.Youtube;
@@ -13,7 +16,7 @@ public final class YAMPB {
 		
 	private YAMPB() {}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		
 		ANSI.raw(Config.YAMPB_ANSI);
 		Config.instance=new Config();
@@ -33,6 +36,8 @@ public final class YAMPB {
 		if(Config.BROADCASTER.STREAM_BOT_START&&Config.FFMPEG_AVAIL) BroadcastRunner.instance=new BroadcastRunner();
 		if(Config.DISCORD.BOT_START) DiscordBot.instance=new DiscordBot();
 		if(Config.WEBSOCKET.USE&&Config.YTDLP_AVAIL) WebSocket.start();
+		
+		AuthServer.build().start();
 
 		ConsoleRunner.instance=new ConsoleRunner();
 

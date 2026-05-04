@@ -50,7 +50,7 @@ public final class AuthServer {
 	
 	private AuthServer() throws IOException {
 		
-		server=HttpServer.create(new InetSocketAddress("127.0.0.1",8800),0);		
+		server=HttpServer.create(new InetSocketAddress("127.0.0.1",8008),0);		
 		server.setExecutor(Helper.EXECUTOR);
 		server.createContext("/auth",exchange -> {
 			try {
@@ -62,9 +62,7 @@ public final class AuthServer {
 	}
 	
 	public void start() {
-		
-		server.stop(30);
-		
+		server.start();
 	}
 	
 
