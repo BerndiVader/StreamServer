@@ -7,6 +7,7 @@ public class Data {
 	public Downloader DOWNLOADER;
 	public Discord DISCORD;
 	public WebSocket WEBSOCKET;
+	public Livestream LIVESTREAM;
 	
 	public Boolean DEBUG;
 	

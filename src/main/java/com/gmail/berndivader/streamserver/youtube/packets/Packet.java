@@ -51,13 +51,13 @@ public abstract class Packet {
 		return this.source;
 	}
 	
-	public static Packet build(JsonObject source,Class<? extends Packet> clazz) {
-		Packet packet=Helper.GSON.fromJson(source,clazz);
+	public static <T extends Packet>T build(JsonObject source,Class<T> clazz) {
+		T packet=Helper.GSON.fromJson(source,clazz);
 		packet.source=source;
 		return packet;
 	}
 	
-	public static Packet emtpy() {
+	public static EmptyPacket emtpy() {
 		return Packet.build(new JsonObject(),EmptyPacket.class);
 	}
 		

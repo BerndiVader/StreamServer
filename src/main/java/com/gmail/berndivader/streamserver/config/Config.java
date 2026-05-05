@@ -29,6 +29,7 @@ public class Config {
 	public static Downloader DOWNLOADER=new Downloader();
 	public static Discord DISCORD=new Discord(); 
 	public static WebSocket WEBSOCKET=new WebSocket();
+	public static Livestream LIVESTREAM=new Livestream();
 	
 	public static Boolean DEBUG=false;
 	
