@@ -37,7 +37,11 @@ public final class YAMPB {
 		if(Config.DISCORD.BOT_START) DiscordBot.instance=new DiscordBot();
 		if(Config.WEBSOCKET.USE&&Config.YTDLP_AVAIL) WebSocket.start();
 		
-		AuthServer.build().start();
+		if(Config.LIVESTREAM.USE&&BroadcastRunner.instance!=null) {
+			AuthServer.instance=AuthServer.build();
+			AuthServer.instance.start();
+		}
+		
 
 		ConsoleRunner.instance=new ConsoleRunner();
 
@@ -51,11 +55,14 @@ public final class YAMPB {
 		WebSocket.close();
 		Helper.close();
 		Youtube.close();
+		if(Config.LIVESTREAM.USE&&AuthServer.instance!=null) AuthServer.instance.stop();
 		
 		if(ConsoleRunner.forceExit) {
 			ANSI.println("[RED][FORCE EXIT][/RED]");
 			System.exit(0);
-		} else ANSI.println("[GREEN][FINISH ALL RUNNING TASKS, THEN EXIT][/GREEN]");
+		} else {
+			ANSI.println("[GREEN][FINISH ALL RUNNING TASKS, THEN EXIT][/GREEN]");
+		}
 	}
 	
 	private static boolean install() {

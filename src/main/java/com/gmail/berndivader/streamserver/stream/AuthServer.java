@@ -18,6 +18,8 @@ import com.sun.net.httpserver.HttpServer;
 
 public final class AuthServer {
 	
+	public static AuthServer instance;
+	
 	private enum CODE {
 		OK(200),
 		FAILED(401),
@@ -41,32 +43,44 @@ public final class AuthServer {
 			
 			try(InputStream input=exchange.getRequestBody()) {
 				CODE code=CODE.FAILED;
+				
 				String body=new String(input.readAllBytes(),StandardCharsets.UTF_8);
 				AuthPacket packet=Packet.build(body,AuthPacket.class);
-				if(packet!=null) {
-					if(packet.action.equals(Config.LIVESTREAM.ACTION)) {
-						if(packet.query.equals(Config.LIVESTREAM.SECRET)&&packet.protocol.equals(Config.LIVESTREAM.PROTOCOL)) {
-							if(packet.path.equals(Config.LIVESTREAM.PATH+"/"+Config.LIVESTREAM.STREAM_KEY)) {
-								ANSI.info(String.format("Streaming accepted from %s with ID: %s",packet.ip,packet.id));
-								code=CODE.OK;
-							}
-						}
-					} else if(packet.action.equals("read")) {
-						if(packet.protocol.equals(Config.LIVESTREAM.PROTOCOL)
+				
+				if(packet==null) {
+					code=CODE.FAILED;
+				} else {
+					switch(packet.action) {
+					case "publish":
+						if(packet.query.equals(Config.LIVESTREAM.SECRET)
+								&&packet.protocol.equals(Config.LIVESTREAM.PROTOCOL)
 								&&packet.path.equals(Config.LIVESTREAM.PATH+"/"+Config.LIVESTREAM.STREAM_KEY)) {
+							ANSI.info(String.format("Streaming accepted from %s with ID: %s",packet.ip,packet.id));
+							code=CODE.OK;
+						}
+						break;
+					case "read":
+						if(packet.protocol.equals(Config.LIVESTREAM.PROTOCOL)
+								&&packet.path.equals(Config.LIVESTREAM.PATH+"/"+Config.LIVESTREAM.STREAM_KEY)
+								&&(Config.LIVESTREAM.WATCHER_SECRET.isEmpty()||Config.LIVESTREAM.WATCHER_SECRET.equals(packet.query))) {
 							ANSI.info(String.format("Watcher accepted from %s with ID: %s",packet.ip,packet.id));
 							code=CODE.OK;
 						}
+						break;
 					}
 				}
 				exchange.sendResponseHeaders(code.value,-1);
+				
 				if(code!=CODE.OK) {
-					ANSI.info(String.format("Livestream connection rejected: %s",packet.source.toString()));
+					if(packet!=null) {
+						ANSI.info(String.format("Livestream connection rejected: %s",packet.source.toString()));
+					} else {
+		                ANSI.error("Livestream connection rejected: invalid or null packet",new Exception("AuthPacket is NULL"));
+					}
 				}
+				
 			} catch (IOException e) {
 				ANSI.error("Authserver failed: "+e.getMessage(),e);
-			} finally {
-				exchange.close();
 			}
 			
 		});
@@ -76,9 +90,8 @@ public final class AuthServer {
 		} catch(TimeoutException e) {
 			future.cancel(true);
 			exchange.sendResponseHeaders(CODE.TIMEOUT.value,-1);
-			exchange.close();
+			throw(e);
 		} catch(Exception e1) {
-			exchange.close();
 			throw(e1);
 		}
 
@@ -95,18 +108,20 @@ public final class AuthServer {
 				auth(exchange);
 			} catch (Exception e) {
 				e.printStackTrace();
+			} finally {
+				exchange.close();
 			}
 		});
 	}
 	
 	public void start() {
-		ANSI.print("[YELLOW]Starting BroadcastRunner...");
+		ANSI.print("[YELLOW]Starting Authserver...");
 		server.start();
 		ANSI.println("[GREEN]DONE![RESET]");
 	}
 	
 	public void stop() {
-		ANSI.print("[YELLOW]Stopping BroadcastRunner...");
+		ANSI.print("[YELLOW]Stopping Authserver...");
 		server.stop(10);
 		ANSI.println("[GREEN]DONE![RESET]");
 	}
