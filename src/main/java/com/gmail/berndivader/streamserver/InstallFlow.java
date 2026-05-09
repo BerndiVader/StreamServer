@@ -57,6 +57,23 @@ public class InstallFlow {
 			} else {
 				Config.DISCORD.BOT_START=false;
 			}
+			
+			if(ask("[BR]Use Websocket for downloader? [CYAN][YES/no]","yes").equalsIgnoreCase("yes")) {
+				do {
+					if(!installWS()) {
+						String ask=ask("Failed to setup Websocket. Retry? [YES/no]","yes");
+						if(ask.equalsIgnoreCase("no")) break;
+					} else break;
+				} while(true);
+			} else {
+				Config.WEBSOCKET.USE=false;
+			}
+			
+			if(ask("[BR]Use live streaming ability? [CYAN][yes/NO]","no").equalsIgnoreCase("no")) {
+				Config.LIVESTREAM.USE=false;
+			} else {
+				Config.WEBSOCKET.USE=true;
+			}
 						
 			Config.saveConfig();
 			done=true;
@@ -133,6 +150,11 @@ public class InstallFlow {
 		}
 		
 		return Config.DISCORD.BOT_START=use;
+	}
+	
+	private boolean installWS() {
+		boolean use=true;
+		return Config.WEBSOCKET.USE=use;
 	}
 	
 	private static String ask(String question,String preset) {
