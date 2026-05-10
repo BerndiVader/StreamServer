@@ -394,7 +394,7 @@ public final class Helper {
 	
 	public static void newTorCircuit() {
 		
-		Future<?>future=Helper.EXECUTOR.submit(new Runnable() {
+		Future<?> future=Helper.EXECUTOR.submit(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -420,7 +420,7 @@ public final class Helper {
 		});
 		
 		try {
-			future.get(3200l,TimeUnit.MILLISECONDS);
+			future.get(5200l,TimeUnit.MILLISECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			future.cancel(true);
 			ANSI.error("Failed to change Tor's exit node. ",e);
@@ -454,7 +454,7 @@ public final class Helper {
 		});
 		
 		try {
-			ip=future.get(5,TimeUnit.SECONDS);
+			ip=future.get(5200l,TimeUnit.MILLISECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			ANSI.error("Failed to get Tor's current exit node. ",e);
 		}

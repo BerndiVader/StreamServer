@@ -12,10 +12,10 @@ application {
 repositories {
     mavenCentral()
   	maven {
-    	url 'https://m2.dv8tion.net/releases'
+    	url='https://m2.dv8tion.net/releases'
   	}
   	maven {
-  		url 'https://jitpack.io'
+  		url='https://jitpack.io'
   	}  	
 }
 

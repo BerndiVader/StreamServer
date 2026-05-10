@@ -171,8 +171,9 @@ public class Config {
 	
 	public static boolean torAccessible() {
 		try(Socket socket=new Socket()) {
-			socket.connect(new InetSocketAddress(DOWNLOADER.TOR_HOST,DOWNLOADER.TOR_PORT),0);
+			socket.connect(new InetSocketAddress(DOWNLOADER.TOR_HOST,DOWNLOADER.TOR_PORT),3200);
 		} catch(Exception e) {
+			if(Config.DEBUG) ANSI.error(e.getMessage(),e);
 			return false;
 		}
 		return true;
