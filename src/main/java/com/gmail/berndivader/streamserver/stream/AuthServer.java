@@ -65,6 +65,7 @@ public final class AuthServer {
 							}
 							break;
 						case "read":
+							ANSI.println(body);
 							if(packet.protocol.equals(Config.LIVESTREAM.PROTOCOL)
 									&&packet.path.equals(Config.LIVESTREAM.PATH+"/"+Config.LIVESTREAM.STREAM_KEY)
 									&&(Config.LIVESTREAM.WATCHER_SECRET.isEmpty()||Config.LIVESTREAM.WATCHER_SECRET.equals(packet.query))) {
@@ -105,12 +106,29 @@ public final class AuthServer {
 
 	}
 	
+
+	private static void online(HttpExchange exchange) {
+		
+		ANSI.println("ONLINE: "+exchange.getRequestURI().getQuery());
+		String query=exchange.getRequestURI().getQuery();
+		
+		
+	}
+
+	private static void offline(HttpExchange exchange) {
+		
+		ANSI.println("OFFLINE: "+exchange.getRequestURI().getQuery());
+		
+	}
+	
+		
 	private HttpServer server;
 	
 	private AuthServer() throws IOException {
 		
 		server=HttpServer.create(new InetSocketAddress("127.0.0.1",8008),0);		
 		server.setExecutor(Helper.EXECUTOR);
+		
 		server.createContext("/auth",new HttpHandler() {
 			
 			@Override
@@ -125,6 +143,35 @@ public final class AuthServer {
 			}
 
 		});
+		
+		server.createContext("/stream/online",new HttpHandler() {
+			
+			@Override
+			public void handle(HttpExchange exchange) {
+				try {
+					online(exchange);
+				} catch (Exception e) {
+					ANSI.error(e.getMessage(),e);
+				} finally {
+					exchange.close();
+				}
+			}
+
+		});		
+		server.createContext("/stream/offline",new HttpHandler() {
+			
+			@Override
+			public void handle(HttpExchange exchange) {
+				try {
+					offline(exchange);
+				} catch (Exception e) {
+					ANSI.error(e.getMessage(),e);
+				} finally {
+					exchange.close();
+				}
+			}
+
+		});		
 		
 	}
 	
