@@ -11,6 +11,8 @@ public class Livestream {
 	public String ACTION;
 	public String SECRET;
 	public String WATCHER_SECRET;
+	public String LIVE_TIMEOUT;
+	public String WATCHER_TIMEOUT;
 	
 	public Livestream() {
 		USE=false;
@@ -21,6 +23,8 @@ public class Livestream {
 		ACTION="publish";
 		SECRET="87654321";
 		WATCHER_SECRET="";
+		LIVE_TIMEOUT="90";
+		WATCHER_TIMEOUT="90";
 	}
 
 }
