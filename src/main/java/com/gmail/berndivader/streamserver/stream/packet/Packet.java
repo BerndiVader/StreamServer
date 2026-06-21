@@ -13,6 +13,10 @@ public abstract class Packet {
 	
 	public abstract void validate();
 	
+	public String print() {
+		return Helper.GSON.toJson(this);
+	}
+	
 	public static <T extends Packet>T build(String source,Class<T> clazz) {
 		T packet=null;
 		try {
