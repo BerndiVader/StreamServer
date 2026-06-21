@@ -7,7 +7,7 @@ import com.gmail.berndivader.streamserver.console.ConsoleRunner;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.mysql.DatabaseConnection;
-import com.gmail.berndivader.streamserver.stream.AuthServer;
+import com.gmail.berndivader.streamserver.stream.Live;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.websocket.WebSocket;
 import com.gmail.berndivader.streamserver.youtube.Youtube;
@@ -38,8 +38,7 @@ public final class YAMPB {
 		if(Config.WEBSOCKET.USE&&Config.YTDLP_AVAIL) WebSocket.start();
 		
 		if(Config.LIVESTREAM.USE&&BroadcastRunner.instance!=null) {
-			AuthServer.instance=AuthServer.build();
-			AuthServer.instance.start();
+			Live.start();
 		}
 		
 
@@ -55,7 +54,7 @@ public final class YAMPB {
 		WebSocket.close();
 		Helper.close();
 		Youtube.close();
-		if(Config.LIVESTREAM.USE&&AuthServer.instance!=null) AuthServer.instance.stop();
+		if(Config.LIVESTREAM.USE) Live.stop();
 		
 		if(ConsoleRunner.forceExit) {
 			ANSI.println("[RED][FORCE EXIT][/RED]");

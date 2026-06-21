@@ -23,7 +23,7 @@ public final class WebSocket {
 	
 	public static void start() {
 		
-		if (server==null) {
+		if(server==null) {
 			server=new Server(HOST,PORT,WEBSOCKET_PATH,null,EndPoint.class);
 			try {
 				server.start();
