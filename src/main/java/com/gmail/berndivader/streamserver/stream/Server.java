@@ -52,7 +52,7 @@ public final class Server {
 					
 					String body=new String(input.readAllBytes(),StandardCharsets.UTF_8);
 					StreamPacket packet=Packet.build(body,StreamPacket.class);
-															
+
 					if(packet==null) {
 						code=CODE.FAILED;
 					} else {
@@ -65,6 +65,9 @@ public final class Server {
 								ANSI.info(String.format("Streamer accepted from %s with ID: %s",packet.ip,packet.id));
 								code=CODE.OK;
 								Live.registerStreamer(packet);
+							} else {
+								code=CODE.FAILED;
+								packet.errReason="Credentials wrong.";
 							}
 							break;
 						case "read":
@@ -76,7 +79,13 @@ public final class Server {
 									ANSI.info(String.format("Watcher accepted from %s with ID: %s",packet.ip,packet.id));
 									Live.registerWatcher(packet);
 									code=CODE.OK;
+								} else {
+									code=CODE.FAILED;
+									packet.errReason="No lifestream for requested path.";
 								}
+							} else {
+								code=CODE.FAILED;
+								packet.errReason="Credentials wrong.";
 							}
 							break;
 						}
@@ -84,7 +93,7 @@ public final class Server {
 					
 					if(code!=CODE.OK) {
 						if(packet!=null) {
-							ANSI.info(String.format("Auth connection rejected: %s",packet.source.toString()));
+							ANSI.info(String.format("Auth connection rejected: %s",packet.errReason));
 						} else {
 			                ANSI.error("Auth connection rejected: invalid or null packet",new Exception("StreamPacket is NULL"));
 						}
@@ -93,7 +102,6 @@ public final class Server {
 				} catch (IOException e) {
 					ANSI.error("Authserver failed: "+e.getMessage(),e);
 				}
-				
 				return code;
 			}
 			
@@ -112,7 +120,6 @@ public final class Server {
 
 	}
 	
-
 	private static void online(HttpExchange exchange) {
 
 		String json=Live.query2jsonString(URLDecoder.decode(exchange.getRequestURI().getQuery(),StandardCharsets.UTF_8));

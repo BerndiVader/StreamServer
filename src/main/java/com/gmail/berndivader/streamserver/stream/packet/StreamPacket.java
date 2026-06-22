@@ -17,6 +17,7 @@ public class StreamPacket extends Packet {
 	public transient Boolean online;
 	public transient Instant startedAt;
 	public transient Instant lastSeen;
+	public transient String errReason;
 	
 	@Override
 	public void validate() {
