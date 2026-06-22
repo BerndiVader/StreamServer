@@ -29,7 +29,7 @@ public class Live {
 	public static boolean registerWatcher(StreamPacket watcher) {
 		if(watcher!=null) {
 			watcher.startedAt=Instant.now();
-			StreamPacket dub=watchers.putIfAbsent(watcher.id,watcher);
+			StreamPacket dub=watchers.get(watcher.id);
 			if(dub!=null&&dub.startedAt.isAfter(Instant.now().plusSeconds(Integer.parseInt(Config.LIVESTREAM.WATCHER_TIMEOUT)))) {
 				watchers.remove(dub.id);
 			}
@@ -50,7 +50,7 @@ public class Live {
 	public static boolean registerStreamer(StreamPacket candit) {
 		if(candit!=null) {
 			candit.startedAt=Instant.now();
-			StreamPacket dub=candits.putIfAbsent(candit.token,candit);
+			StreamPacket dub=candits.get(candit.token);
 			if(dub!=null&&dub.startedAt.isAfter(Instant.now().plusSeconds(Integer.parseInt(Config.LIVESTREAM.LIVE_TIMEOUT)))) {
 				candits.remove(dub.token);
 			}
@@ -65,7 +65,7 @@ public class Live {
 			candit.startedAt=Instant.now();
 			candit.lastSeen=Instant.now();
 			candit.online=true;
-			StreamPacket active=actives.putIfAbsent(token,candit);
+			StreamPacket active=actives.get(token);
 			if(active!=null&&active.lastSeen.isAfter(Instant.now().plusSeconds(STREAM_TIMEOUT_SECONDS))) {
 				actives.remove(active.token);
 			}
