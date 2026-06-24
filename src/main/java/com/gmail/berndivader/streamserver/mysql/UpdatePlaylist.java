@@ -46,7 +46,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 	@Override
 	public Boolean call() throws Exception {
 		BroadcastRunner.refreshFilelist();
-		File[]files=BroadcastRunner.getFiles().clone();
+		File[]files=BroadcastRunner.getFiles();
 		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			connection.setAutoCommit(false);
