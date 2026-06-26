@@ -52,8 +52,10 @@ public class UpdatePlaylist implements Callable<Boolean> {
 			connection.setAutoCommit(false);
 			try(PreparedStatement statement=connection.prepareStatement(SQL,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY)) {
 				
-				ANSI.println("[BEGIN MYSQL PLAYLIST UPDATE]");
-				if(IS_COMMAND) ANSI.print("[GREEN]|");
+				if(IS_COMMAND) {
+					ANSI.println("[BEGIN MYSQL PLAYLIST UPDATE]");
+					ANSI.print("[GREEN]|");
+				}
 				
 				statement.addBatch("DELETE FROM playlist;");
 				
