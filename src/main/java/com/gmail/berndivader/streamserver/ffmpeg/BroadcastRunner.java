@@ -48,8 +48,8 @@ import com.gmail.berndivader.streamserver.youtube.packets.UnknownPacket;
 
 public final class BroadcastRunner extends TimerTask {
 	
-	private static final Object YOUTUBE_LOCK=new Object();
-	private static final Object STREAM_LOCK=new Object();
+	public static final Object YOUTUBE_LOCK=new Object();
+	public static final Object STREAM_LOCK=new Object();
 	
 	private static AtomicBoolean stop=new AtomicBoolean(false);
 	public static AtomicBoolean hold=new AtomicBoolean(false);

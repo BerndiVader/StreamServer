@@ -10,6 +10,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 
@@ -125,6 +126,57 @@ public final class Broadcast {
 				return ErrorPacket.buildError("Request to insert liveBroadcast failed.",e.getMessage(),"CUSTOM");
 			}
 		});
+	}
+	
+	public static Future<Packet>updateLiveBroadcast(String title,String description,PrivacyStatus privacy) {
+		
+		return Helper.EXECUTOR.submit(()->{
+			
+			Packet candit=getLiveBroadcast(BroadcastStatus.active).get(15l,TimeUnit.SECONDS);
+			if(!(candit instanceof LiveBroadcastPacket)) return candit;
+			LiveBroadcastPacket current=(LiveBroadcastPacket)candit;
+			
+			String url=Youtube.URL+"liveBroadcasts?part=id,snippet,status&key="+Config.BROADCASTER.YOUTUBE_API_KEY;
+			
+			HttpPut put=new HttpPut(url);
+			put.setHeader("Authorization","Bearer ".concat(Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN));
+			put.addHeader("Accept","application/json");
+			put.addHeader("Content-Type","application/json");
+			
+			JsonObject root=new JsonObject();
+			JsonObject snippet=new JsonObject();
+			JsonObject status=new JsonObject();
+			
+			root.addProperty("id",current.id);
+			
+			snippet.addProperty("title",title!=null&&!title.isEmpty()?title:current.snippet.title);
+			snippet.addProperty("description",description!=null&!description.isEmpty()?description:current.snippet.description);
+			snippet.addProperty("isDefaultBroadcast",current.snippet.isDefaultBroadcast);
+
+			status.addProperty("privacyStatus",privacy!=null?privacy.getName():current.status.privacyStatus);
+			status.addProperty("selfDeclaredMadeForKids",current.status.selfDeclaredMadeForKids);
+			
+			root.add("snippet",snippet);
+			root.add("status",status);
+			
+			put.setEntity(new StringEntity(root.toString(),"UTF-8"));
+			
+			Packet answer=Youtube.HTTP_CLIENT.execute(put,response->{
+				
+				JsonObject json=JsonParser.parseString(EntityUtils.toString(response.getEntity())).getAsJsonObject();
+				
+				if(json.has("error")) return Packet.build(json,ErrorPacket.class);
+				if(json.has("kind")
+						&&json.get("kind").getAsString().equals("youtube#liveBroadcast")) return Packet.build(json,LiveBroadcastPacket.class);
+				
+				return Packet.build(json,UnknownPacket.class);
+			});
+			
+			ANSI.println(answer.toString());
+			
+			return answer;
+		});
+		
 	}
 
 	public static Future<Packet>insertLivestream(String title,String description,String privacy) {
