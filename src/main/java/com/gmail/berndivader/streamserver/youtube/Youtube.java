@@ -12,7 +12,7 @@ public final class Youtube {
 	private Youtube() {}
 
 	static final CloseableHttpClient HTTP_CLIENT=HttpClients.createSystem();
-	static final String URL="https://youtube.googleapis.com/youtube/v3/";
+	static final String URL="https://www.googleapis.com/youtube/v3/";
 	
 	public static void close() {
 		ANSI.println("Close YouTube httpclient.");
