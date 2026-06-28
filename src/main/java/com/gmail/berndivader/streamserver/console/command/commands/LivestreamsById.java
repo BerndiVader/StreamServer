@@ -37,7 +37,7 @@ public class LivestreamsById extends Command{
 		if(p instanceof LiveBroadcastPacket) {
 			LiveBroadcastPacket broadcast=(LiveBroadcastPacket)p;
 			if(printJson) {
-				ANSI.println(broadcast.source().toString());
+				ANSI.println(broadcast.toPrettyString());
 			} else {
 				StringBuilder out=new StringBuilder("[GREEN]LiveBroadcastPacket:[BR]");
 				out.append("[BLUE]Title: [YELLOW]".concat(broadcast.snippet.title));
