@@ -36,7 +36,7 @@ public class ErrorPacket extends Packet {
 	
 	public void printDetails() {
 		printSimple();
-		errors.forEach(e->ANSI.warn(e.reason+" - "+e.domain+" - "+e.message));
+		if(errors!=null) errors.forEach(e->ANSI.warn(e.reason+" - "+e.domain+" - "+e.message));
 	}
 	
 	public static ErrorPacket buildError(String message,String reason,String status) {

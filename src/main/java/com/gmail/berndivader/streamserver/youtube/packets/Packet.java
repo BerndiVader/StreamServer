@@ -44,7 +44,11 @@ public abstract class Packet {
 	
 	@Override
 	public String toString() {
-		return source.toString();
+		return source!=null?source.toString():"{}";
+	}
+	
+	public String toPrettyString() {
+		return source!=null?Helper.GSON.toJson(source):"{}";
 	}
 	
 	public JsonObject source() {
