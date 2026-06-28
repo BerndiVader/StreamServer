@@ -61,8 +61,6 @@ public final class BroadcastRunner extends TimerTask {
 	private static volatile FFmpegResultFuture ffmpeg;
 	
 	public static final AtomicInteger index=new AtomicInteger(0);
-	public static Packet liveBroadcast=Packet.emtpy();
-	public static Packet liveStream=Packet.emtpy();
 	
 	private static long expiredCounter=0l;
 	private static long refreshTimer=0l;
@@ -189,11 +187,11 @@ public final class BroadcastRunner extends TimerTask {
 			
 			if(Config.DEBUG) ANSI.info("[BLUE]Test if broadcast is still live on Youtube...[RESET]");
 			try {
-				Packet packet=liveBroadcast=Broadcast.getLiveBroadcastWithTries(BroadcastStatus.active,2);
+				Packet packet=Broadcast.getLiveBroadcastWithTries(BroadcastStatus.active,2);
 				if(packet instanceof EmptyPacket) {
 					ANSI.println("[YELLOW]Try to reinstall livebroadcast on Youtube...");
 					
-					packet=liveStream=Broadcast.getDefaultLiveStream().get(15l,TimeUnit.SECONDS);
+					packet=Broadcast.getDefaultLiveStream().get(15l,TimeUnit.SECONDS);
 					if(packet instanceof LiveStreamPacket) {
 						ANSI.println("[GREEN]Got livestream resource identified by STREAM_KEY...");
 						
@@ -498,7 +496,6 @@ public final class BroadcastRunner extends TimerTask {
 		
 	}
 		
-	
 	private static File[] getFiles(File directory,FileFilter filter) {
 		if(directory.exists()) {
 	    	if(directory.isDirectory()) {
