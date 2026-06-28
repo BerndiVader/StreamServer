@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
 import com.gmail.berndivader.streamserver.annotation.Requireds;
+import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.console.command.Command;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.youtube.Broadcast;
@@ -57,7 +58,7 @@ public class UpdateBroadcast extends Command{
 		if(p instanceof LiveBroadcastPacket) {
 			LiveBroadcastPacket broadcast=(LiveBroadcastPacket)p;
 			if(printJson) {
-				ANSI.println(broadcast.source().toString());
+				ANSI.println(broadcast.toString());
 			} else {
 				StringBuilder out=new StringBuilder("[GREEN]LiveBroadcastPacket:[BR]");
 				out.append("[BLUE]Title: [YELLOW]".concat(broadcast.snippet.title));
@@ -70,12 +71,13 @@ public class UpdateBroadcast extends Command{
 				ANSI.println(out.toString());
 			}
 		} else if(p instanceof ErrorPacket) {
-			ErrorPacket packet=(ErrorPacket)p;
-			packet.printSimple();
+			ErrorPacket err=(ErrorPacket)p;
+			err.printDetails();
 		} else if(p instanceof EmptyPacket) {
 			ANSI.println("Currently, no live broadcast running.");
 		} else if(p instanceof UnknownPacket) {
 			ANSI.println("The livebroadcast request anwered with an unknown packet.");
+			if(Config.DEBUG) ANSI.info(p.toString());
 		}
 	
 		return true;

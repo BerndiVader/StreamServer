@@ -136,7 +136,7 @@ public final class Broadcast {
 			if(!(candit instanceof LiveBroadcastPacket)) return candit;
 			LiveBroadcastPacket current=(LiveBroadcastPacket)candit;
 			
-			String url=Youtube.URL+"liveBroadcasts?part=id,snippet,status&key="+Config.BROADCASTER.YOUTUBE_API_KEY;
+			String url=Youtube.URL+"liveBroadcasts?part=id,snippet,contentDetails,status&key="+Config.BROADCASTER.YOUTUBE_API_KEY;
 			
 			HttpPut put=new HttpPut(url);
 			put.setHeader("Authorization","Bearer ".concat(Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN));
@@ -146,18 +146,26 @@ public final class Broadcast {
 			JsonObject root=new JsonObject();
 			JsonObject snippet=new JsonObject();
 			JsonObject status=new JsonObject();
+			JsonObject contentDetails=new JsonObject();
+			JsonObject monitorStream=new JsonObject();
 			
 			root.addProperty("id",current.id);
 			
 			snippet.addProperty("title",title!=null&&!title.isEmpty()?title:current.snippet.title);
 			snippet.addProperty("description",description!=null&!description.isEmpty()?description:current.snippet.description);
 			snippet.addProperty("isDefaultBroadcast",current.snippet.isDefaultBroadcast);
-
+			snippet.addProperty("scheduledStartTime",current.snippet.scheduledStartTime);
+			
+			monitorStream.addProperty("enableMonitorStream",current.contentDetails.monitorStream.enableMonitorStream);
+			monitorStream.addProperty("broadcastStreamDelayMs",current.contentDetails.monitorStream.broadcastStreamDelayMs);
+			contentDetails.add("monitorStream",monitorStream);
+			
 			status.addProperty("privacyStatus",privacy!=null?privacy.getName():current.status.privacyStatus);
 			status.addProperty("selfDeclaredMadeForKids",current.status.selfDeclaredMadeForKids);
 			
 			root.add("snippet",snippet);
 			root.add("status",status);
+			root.add("contentDetails",contentDetails);
 			
 			put.setEntity(new StringEntity(root.toString(),"UTF-8"));
 			
@@ -171,9 +179,7 @@ public final class Broadcast {
 				
 				return Packet.build(json,UnknownPacket.class);
 			});
-			
-			ANSI.println(answer.toString());
-			
+									
 			return answer;
 		});
 		
