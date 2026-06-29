@@ -12,6 +12,7 @@ import java.util.jar.JarInputStream;
 
 import com.gmail.berndivader.streamserver.YAMPB;
 import com.gmail.berndivader.streamserver.annotation.ConsoleCommand;
+import com.gmail.berndivader.streamserver.annotation.Requireds;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
@@ -29,12 +30,12 @@ public class Commands {
 	
 	static {
 		try {
-			fileName = URLDecoder.decode(
+			fileName=URLDecoder.decode(
 					YAMPB.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
 					StandardCharsets.UTF_8.toString());
 		} catch (UnsupportedEncodingException e) {
 			try {
-				fileName = URLDecoder.decode(
+				fileName=URLDecoder.decode(
 						YAMPB.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
 						StandardCharsets.ISO_8859_1.toString());
 			} catch (UnsupportedEncodingException e1) {
@@ -66,8 +67,9 @@ public class Commands {
 						ConsoleCommand anno=clazz.getAnnotation(ConsoleCommand.class);
 						if(anno!=null) {
 							boolean add=true;
-							for(int i=0;i<anno.requireds().length;i++) {
-								switch(anno.requireds()[i]) {
+							Requireds[]requireds=anno.requireds();
+							for(int i=0;i<requireds.length;i++) {
+								switch(requireds[i]) {
 									case BROADCASTRUNNER:
 										add&=BroadcastRunner.instance!=null;
 										break;

@@ -13,8 +13,8 @@ import com.gmail.berndivader.streamserver.youtube.packets.Packet;
 import com.gmail.berndivader.streamserver.youtube.packets.UnknownPacket;
 import com.gmail.berndivader.streamserver.youtube.packets.VideoSnippetPacket;
 
-@ConsoleCommand(name="getvideo",usage="Get info about yt video by video id.",requireds={Requireds.NONE})
-public class VideoById extends Command {
+@ConsoleCommand(name="videoinfo",usage="Get info about yt video by video id.",requireds={Requireds.NONE})
+public class VideoInfo extends Command {
 	
 	private boolean printJson=false;
 

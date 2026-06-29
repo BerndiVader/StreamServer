@@ -17,8 +17,8 @@ import com.gmail.berndivader.streamserver.youtube.packets.Packet;
 import com.gmail.berndivader.streamserver.youtube.packets.UnknownPacket;
 import com.google.gson.JsonObject;
 
-@ConsoleCommand(name="livestatus",usage="Get info and status of running live broadcast from Youtube.")
-public class LivestreamsById extends Command{
+@ConsoleCommand(name="liveinfo",usage="Get info and status of running live broadcast from Youtube.")
+public class LiveInfo extends Command{
 
 	@Override
 	public boolean execute(String[] args) {
@@ -44,6 +44,7 @@ public class LivestreamsById extends Command{
 				out.append("[BR][BLUE]Description: [YELLOW]".concat(broadcast.snippet.description));
 				out.append("[BR][BLUE]Publish time: [YELLOW]".concat(broadcast.snippet.publishedAt));
 				out.append("[BR][BLUE]Kind: [YELLOW]".concat(broadcast.kind));
+				out.append("[BR][BLUE]Privacy: [YELLOW]".concat(broadcast.status.privacyStatus));
 				out.append("[BR][BLUE]Video URL: [YELLOW]https://www.youtube.com/watch?v=".concat(broadcast.id));
 				out.append("[BR][BLUE]Channel URL: [YELLOW]https://www.youtube.com/channel/".concat(broadcast.snippet.channelId));
 				ANSI.println(out.toString());

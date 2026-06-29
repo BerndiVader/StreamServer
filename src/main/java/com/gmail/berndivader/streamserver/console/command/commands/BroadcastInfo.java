@@ -9,7 +9,7 @@ import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 import com.gmail.berndivader.streamserver.term.ANSI;
 
-@ConsoleCommand(name="b", usage="[status|file|next] -> Info about broadcast status, current file and next file",requireds={Requireds.BROADCASTRUNNER})
+@ConsoleCommand(name="broadcast", usage="[status|file|next] -> Info about broadcast status, current file and next file",requireds={Requireds.BROADCASTRUNNER})
 public class BroadcastInfo extends Command {
 
 	@Override
