@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.stream.packet.StreamPacket;
+import com.gmail.berndivader.streamserver.term.ANSI;
 import com.google.gson.JsonObject;
 
 public class Live {
@@ -21,9 +22,13 @@ public class Live {
 	public static long STREAM_TIMEOUT_SECONDS=90l;
 	
 	public static void start() throws IOException {
-		server=Server.build();
-		server.start();
 		api=Api.build();
+		if(api.isOnline()) {
+			server=Server.build();
+			server.start();
+		} else {
+			ANSI.error("MediaMTX server not found. Disable Livestream.",null);
+		}
 	}
 	
 	public static boolean registerWatcher(StreamPacket watcher) {
@@ -38,16 +43,16 @@ public class Live {
 		return false;
 	}
 	
-	public static void activateWatcher(String id) {
+	protected static void activateWatcher(String id) {
 		StreamPacket watcher=watchers.get(id);
 		if(watcher!=null) watcher.online=true;
 	}
 	
-	public static void removeWatcher(String id) {
+	protected static void removeWatcher(String id) {
 		watchers.remove(id);
 	}
 	
-	public static boolean registerStreamer(StreamPacket candit) {
+	protected static boolean registerStreamer(StreamPacket candit) {
 		if(candit!=null) {
 			candit.startedAt=Instant.now();
 			StreamPacket dub=candits.get(candit.token);
@@ -59,7 +64,7 @@ public class Live {
 		return false;
 	}
 	
-	public static boolean activateStreamer(String token) {
+	protected static boolean activateStreamer(String token) {
 		StreamPacket candit=candits.remove(token);
 		if(candit!=null) {
 			candit.startedAt=Instant.now();
@@ -74,11 +79,11 @@ public class Live {
 		return false;
 	}
 	
-	public static void removeStreamer(String token) {
+	protected static void removeStreamer(String token) {
 		actives.remove(token);
 	}
 	
-	public static boolean isLive(String token) {
+	protected static boolean isLive(String token) {
 		return actives.containsKey(token);
 	}
 	
