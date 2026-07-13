@@ -88,6 +88,9 @@ public class Commands {
 									case YTDLP:
 										add&=Config.YTDLP_AVAIL;
 										break;
+									case LIVESTREAM:
+										add&=Config.LIVESTREAM.USE;
+										break;
 									default:
 										add=true;
 										break;

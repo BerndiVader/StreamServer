@@ -1,7 +1,5 @@
 package com.gmail.berndivader.streamserver.stream;
 
-import java.io.IOException;
-
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -52,12 +50,39 @@ public class Api {
 				});
 			return (packet instanceof GeneralPacket);
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			ANSI.error(e.getMessage(),e);
 		}
 		
 		return false;
 		
+	}
+	
+	public GeneralPacket getGeneral() {
+		
+		HttpGet get=new HttpGet(Config.LIVESTREAM.API_URL+"/v3/info");
+		try {
+			ApiPacket packet=HTTP_CLIENT.execute(get,r->{
+				
+					int status=r.getStatusLine().getStatusCode();
+					if(status==200) {
+						return ApiPacket.build(EntityUtils.toString(r.getEntity()),GeneralPacket.class);
+					} else if(status==500) {
+						return ApiPacket.build(EntityUtils.toString(r.getEntity()),ErrorPacket.class);
+					}
+					return null;
+				});
+			
+			if(packet instanceof GeneralPacket) {
+				return (GeneralPacket)packet;
+			}
+			if(packet instanceof ErrorPacket) {
+				ANSI.error(packet.print(),null);
+			}
+		} catch (Exception e) {
+			ANSI.error(e.getMessage(),e);
+		}
+		return null;
 	}
 
 }
