@@ -12,7 +12,7 @@ import com.google.gson.JsonObject;
 public class Live {
 	
 	public static Server server;
-	public static Clients clients;
+	public static Api api;
 	
 	private static final ConcurrentHashMap<String,StreamPacket> candits=new ConcurrentHashMap<String,StreamPacket>();
 	private static final ConcurrentHashMap<String,StreamPacket> actives=new ConcurrentHashMap<String,StreamPacket>();
@@ -23,7 +23,7 @@ public class Live {
 	public static void start() throws IOException {
 		server=Server.build();
 		server.start();
-		clients=Clients.build();
+		api=Api.build();
 	}
 	
 	public static boolean registerWatcher(StreamPacket watcher) {
@@ -86,13 +86,12 @@ public class Live {
 		return server!=null;
 	}
 	
-	public static boolean isClient() {
-		return clients!=null;
+	public static boolean isApi() {
+		return api!=null;
 	}
 	
 	public static void stop() {
 		if(server!=null) server.stop();
-		if(clients!=null) clients.stop();
 	}
 	
 	public static String query2jsonString(String query) {

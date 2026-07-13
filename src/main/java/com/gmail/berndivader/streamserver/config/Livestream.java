@@ -5,6 +5,7 @@ public class Livestream {
 	
 	public Boolean USE;
 	public String URL;
+	public String API_URL;
 	public String STREAM_KEY;
 	public String PATH;
 	public String PROTOCOL;
@@ -17,6 +18,7 @@ public class Livestream {
 	public Livestream() {
 		USE=false;
 		URL="rtmp://127.0.0.1";
+		API_URL="http://127.0.0.1:9997";
 		STREAM_KEY="xxxx-xxxx-xxxx-xxxx-xxxx";
 		PATH="live";
 		PROTOCOL="rtmp";
