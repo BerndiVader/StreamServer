@@ -61,7 +61,7 @@ public final class Helper {
 	
 	static {
 		EXECUTOR=Executors.newCachedThreadPool();
-		SCHEDULED_EXECUTOR=Executors.newScheduledThreadPool(1);
+		SCHEDULED_EXECUTOR=Executors.newScheduledThreadPool(2);
 		GSON=new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 		LGSON=new GsonBuilder().setPrettyPrinting().setFieldNamingStrategy(s->s.getName().toLowerCase()).disableHtmlEscaping().create();
 	}

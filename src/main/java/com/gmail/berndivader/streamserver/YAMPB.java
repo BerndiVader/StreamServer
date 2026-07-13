@@ -51,10 +51,11 @@ public final class YAMPB {
 			ANSI.error("Exception while shutting down.", e);
 		}
 		
+		if(Config.LIVESTREAM.USE) Live.stop();
+		
 		WebSocket.close();
 		Helper.close();
 		Youtube.close();
-		if(Config.LIVESTREAM.USE) Live.stop();
 		
 		if(ConsoleRunner.forceExit) {
 			ANSI.println("[RED][FORCE EXIT][/RED]");

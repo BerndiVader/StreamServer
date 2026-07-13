@@ -24,6 +24,10 @@ public final class Youtube {
 			}
 		}
 	}
+	
+	public static CloseableHttpClient getClient() {
+		return HTTP_CLIENT;
+	}
 
 }
 
