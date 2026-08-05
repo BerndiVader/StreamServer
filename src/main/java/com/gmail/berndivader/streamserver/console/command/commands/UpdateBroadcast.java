@@ -37,18 +37,22 @@ public class UpdateBroadcast extends Command{
 		if(arg.contains("--title")) {
 			Matcher m=Pattern.compile("--title\\s+'([^']*)'").matcher(arg);
 			if(m.find()) title=m.group(1);
-		}
-		if(arg.contains("--desc")) {
+		} else if(arg.contains("--desc")) {
 			Matcher m=Pattern.compile("--desc\\s+'([^']*)'").matcher(arg);
 			if(m.find()) description=m.group(1);
-		}
-		if(arg.contains("--privacy")) {
+		} else if(arg.contains("--privacy")) {
 			Matcher m=Pattern.compile("--privacy\\s+(public|private|unlisted)").matcher(arg);
 			if(m.find()) privacy=PrivacyStatus.valueOf(m.group(1).toUpperCase());
 		}
 		
 		Packet p=Packet.build(new JsonObject(),EmptyPacket.class);
 		try {
+			if(title.equalsIgnoreCase("default")) {
+				title=Config.BROADCASTER.BROADCAST_DEFAULT_TITLE;
+			}
+			if(description.equalsIgnoreCase("default")) {
+				description=Config.BROADCASTER.BROADCAST_DEFAULT_DESCRIPTION;
+			}
 			p=Broadcast.updateLiveBroadcast(title,description,privacy).get(15l,TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			ANSI.error(e.getMessage(),e);
