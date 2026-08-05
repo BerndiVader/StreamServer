@@ -27,7 +27,7 @@ public class Live {
 			server=Server.build();
 			server.start();
 		} else {
-			ANSI.error("MediaMTX server not found. Disable Livestream.",null);
+			ANSI.error("MediaMTX server not found. Livestreams not avail.",null);
 		}
 	}
 	
