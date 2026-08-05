@@ -41,9 +41,11 @@ public final class Broadcast {
 	
 	public static Future<Packet>getLiveBroadcast(BroadcastStatus broadcastStatus) {
 		return Helper.EXECUTOR.submit(()->{
-			BroadcastStatus status=broadcastStatus;
-			if (OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
+			
+			if(OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
 
+			BroadcastStatus status=broadcastStatus;
+			
 			String url=Youtube.URL.concat("liveBroadcasts?part=id,snippet,contentDetails,monetizationDetails,status&broadcastStatus="+status.name()+"&key=").concat(Config.BROADCASTER.YOUTUBE_API_KEY);
 			HttpGet get=new HttpGet(url);
 			get.setHeader("Authorization","Bearer ".concat(Config.BROADCASTER.YOUTUBE_ACCESS_TOKEN));
@@ -59,7 +61,24 @@ public final class Broadcast {
 					} else if(json.has("kind")&&json.get("kind").getAsString().equals("youtube#liveBroadcastListResponse")) {
 						JsonArray array=json.getAsJsonArray("items");
 						if(array!=null&&!array.isJsonNull()&&array.size()>0) {
-							return Packet.build(array.get(0).getAsJsonObject(),LiveBroadcastPacket.class);
+							if(array.size()>1) {
+								for(JsonElement e:array) {
+									LiveBroadcastPacket broadcast=Packet.build(e.getAsJsonObject(),LiveBroadcastPacket.class);
+									if(broadcast.contentDetails!=null&&broadcast.contentDetails.boundStreamId!=null) {
+										try {
+											Packet candit=getLiveStreamById(broadcast.contentDetails.boundStreamId).get(15l,TimeUnit.SECONDS);
+											if(candit instanceof LiveStreamPacket) {
+												LiveStreamPacket live=(LiveStreamPacket)candit;
+												if(live.cdn.ingestionInfo.streamName.equals(Config.BROADCASTER.YOUTUBE_STREAM_KEY)) return broadcast;
+											}
+										} catch (InterruptedException | ExecutionException | TimeoutException e1) {
+											return ErrorPacket.buildError("Failed to get LiveStream in getLiveBroadcast",e1.getMessage(),"");
+										}
+									}
+								}
+							} else {
+								return Packet.build(array.get(0).getAsJsonObject(),LiveBroadcastPacket.class);
+							}
 						}
 						return Packet.emtpy();
 					} else {
@@ -185,7 +204,7 @@ public final class Broadcast {
 		
 	}
 
-	public static Future<Packet>insertLivestream(String title,String description,String privacy) {
+	private static Future<Packet>insertLivestream(String title,String description,String privacy) {
 
 		return Helper.EXECUTOR.submit(()->{
 			if(OAuth2.isExpired()&&!OAuth2.refresh()) return ErrorPacket.buildError("Token expired.","Access token is expired and refresh failed.","CUSTOM");
