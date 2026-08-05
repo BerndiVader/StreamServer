@@ -232,8 +232,17 @@ public final class BroadcastRunner extends TimerTask {
 					error.printSimple();
 				} else if(packet instanceof LiveBroadcastPacket) {
 					LiveBroadcastPacket broadcast=(LiveBroadcastPacket)packet;
-					ANSI.println("Broadcast is live on Youtube.");
-					if(Config.DEBUG) ANSI.info(broadcast.source().toString());
+					Packet candit=Broadcast.getLiveStreamById(broadcast.contentDetails.boundStreamId).get(15l,TimeUnit.SECONDS);
+					if(candit instanceof LiveStreamPacket) {
+						LiveStreamPacket live=(LiveStreamPacket)candit;
+						ANSI.info("Broadcast is live and livestream is active on Youtube.");
+						if(Config.DEBUG) {
+							ANSI.info(broadcast.toString());
+							ANSI.info(live.toString());
+						}
+					} else {
+						ANSI.error("No useable livestream resource found on YT.",null);
+					}
 				}
 			} catch(Exception e) {
 				ANSI.error("Failed to restart live broadcast on Youtube.",e);
