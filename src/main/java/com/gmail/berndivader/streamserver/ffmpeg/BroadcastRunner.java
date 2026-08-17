@@ -2,10 +2,14 @@ package com.gmail.berndivader.streamserver.ffmpeg;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -17,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 import com.github.kokorin.jaffree.StreamType;
@@ -28,11 +33,14 @@ import com.github.kokorin.jaffree.ffmpeg.OutputListener;
 import com.github.kokorin.jaffree.ffmpeg.ProgressListener;
 import com.github.kokorin.jaffree.ffmpeg.UrlInput;
 import com.github.kokorin.jaffree.ffmpeg.UrlOutput;
+import com.github.kokorin.jaffree.ffprobe.FFprobe;
+import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.config.Broadcaster;
 import com.gmail.berndivader.streamserver.config.Config;
 import com.gmail.berndivader.streamserver.discord.DiscordBot;
 import com.gmail.berndivader.streamserver.mysql.GetNextScheduled;
+import com.gmail.berndivader.streamserver.mysql.GetPlaylist;
 import com.gmail.berndivader.streamserver.mysql.UpdateCurrent;
 import com.gmail.berndivader.streamserver.mysql.UpdatePlaylist;
 import com.gmail.berndivader.streamserver.term.ANSI;
@@ -50,10 +58,11 @@ public final class BroadcastRunner extends TimerTask {
 	
 	public static final Object YOUTUBE_LOCK=new Object();
 	public static final Object STREAM_LOCK=new Object();
+	public static final ReentrantLock PLAYLIST_LOCK=new ReentrantLock();
 	
 	private static AtomicBoolean stop=new AtomicBoolean(false);
 	public static AtomicBoolean hold=new AtomicBoolean(false);
-	
+		
 	private static volatile FFmpegProgress progress;
 	private static volatile FFProbePacket playingPacket;
 	private static volatile String message;
@@ -68,9 +77,10 @@ public final class BroadcastRunner extends TimerTask {
 	
 	private static final CopyOnWriteArrayList<File>files=new CopyOnWriteArrayList<File>();
 	private static final CopyOnWriteArrayList<File>customs=new CopyOnWriteArrayList<File>();
-	
+			
 	public static BroadcastRunner instance;
 	
+	private record GopInfo(int gop, double durationSec) {}	
 	
 	public static FFmpegProgress progress() {
 		return progress;
@@ -118,7 +128,12 @@ public final class BroadcastRunner extends TimerTask {
 		stop.set(false);
 		hold.set(false);
 		
-		refreshFilelist();
+		try {
+			new UpdatePlaylist(true);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			ANSI.error(e.getMessage(),e);
+			refreshFilelist();
+		}
 		shuffleFilelist();
 		
 		checkOrReInitiateLiveBroadcast(Config.BROADCASTER.BROADCAST_DEFAULT_TITLE,Config.BROADCASTER.BROADCAST_DEFAULT_DESCRIPTION,Config.broadcastPrivacyStatus());
@@ -522,13 +537,181 @@ public final class BroadcastRunner extends TimerTask {
     	File customDir=new File(Config.working_dir,Config.BROADCASTER.PLAYLIST_PATH_CUSTOM);
     	
     	FileFilter filter=pathName->pathName.getAbsolutePath().toLowerCase().endsWith(".mp4");
-    	List<File>newFiles=Arrays.asList(getFiles(playlistDir,filter));
+    	List<File>playlistNewFiles=Arrays.asList(getFiles(playlistDir,filter));
+    	List<File>customNewFiles=Arrays.asList(getFiles(customDir,filter));
+		
+		PLAYLIST_LOCK.lock();
+		try {
+	    	
+	    	managePlaylist(playlistNewFiles);
+	    } finally {
+			PLAYLIST_LOCK.unlock();
+		}
+		
 		files.clear();
-		files.addAll(newFiles);
-    	newFiles=Arrays.asList(getFiles(customDir,filter));
-		customs.clear();
-		customs.addAll(newFiles);
+		files.addAll(playlistNewFiles);
     	
+		customs.clear();
+		customs.addAll(customNewFiles);
 	}
+	
+	private static void managePlaylist(List<File>files) {
+		
+		ANSI.info("Check playlist for new files...[BR]");
+		
+		GetPlaylist playlist=new GetPlaylist();
+		try {
+			ArrayList<String>list=playlist.future.get(15l,TimeUnit.SECONDS);
+			ArrayList<File>converts=new ArrayList<File>();
+			
+			for(File candit:files) {
+				if(!list.contains(candit.getCanonicalPath())) {
+					if(!isKeyframeFixed(candit)) {
+						converts.add(candit);
+					}
+				}
+			}
+			
+			if(converts.size()>0) {
+				convertFile(converts);
+			}
+			
+		} catch (IOException| InterruptedException | ExecutionException | TimeoutException e) {
+			ANSI.error(e.getMessage(),e);
+		}
+		
+	}
+	
+	private static void convertFile(ArrayList<File>files) {
+		Iterator<File>iterator=files.iterator();
+		int size=files.size();
+		AtomicInteger count=new AtomicInteger(0);
+		
+		while(iterator.hasNext()) {
+			File file=iterator.next();
+			count.incrementAndGet();
+
+			if(!file.exists()) {
+				iterator.remove();
+				continue;
+			}
+
+			try {
+				GopInfo info=getGOP(file);
+				if(info.gop==-1) {
+					iterator.remove();
+					continue;
+				}
+
+				double durationMS=info.durationSec*1000d;
+				Path outputPath=Paths.get(file.getParent(),"fixed_"+file.getName());
+
+				FFmpeg.atPath(Paths.get(Config.DOWNLOADER.FFMPEG_PATH).getParent())
+					.addInput(UrlInput.fromPath(file.toPath()))
+					.setOverwriteOutput(true)
+					.addArguments("-c:v","libx264")
+					.addArguments("-preset","fast")
+					.addArguments("-crf","20")
+					.addArguments("-g",String.valueOf(info.gop))
+					.addArguments("-keyint_min",String.valueOf(info.gop))
+					.addArguments("-sc_threshold","0")
+					.addArguments("-c:a","aac")
+					.addArguments("-b:a","160k")
+					.addArguments("-ar","44100")
+					.addArguments("-movflags","+faststart")
+					.addOutput(UrlOutput.toPath(outputPath))
+					.setProgressListener(prog-> {
+						double percent=durationMS>0d?100d*prog.getTimeMillis()/durationMS:0d;
+						ANSI.print("[CR][DL]("+count.get()+" of "+size+") Convert file "+file.getName()+" - "+String.format("%.1f%% done.",percent));
+				})
+				.execute();
+
+				File converted=outputPath.toFile();
+				if(converted.exists()&&converted.length()>0) {
+					Files.move(outputPath,file.toPath(),StandardCopyOption.REPLACE_EXISTING);
+				} else {
+					if(converted.exists()) converted.delete();
+					iterator.remove();
+				}
+
+			} catch(Exception e) {
+				ANSI.error("Error at "+file.getName()+":"+e.getMessage(),e);
+				iterator.remove();
+			}
+			ANSI.print("[BR]");
+			
+		}
+	}	
+	
+	private static GopInfo getGOP(File file) {
+		int gop=-1;
+		double duration=-1;
+		
+		String path=file.getAbsolutePath();
+		try {
+			path=file.getCanonicalPath();
+		} catch (IOException e) {
+			ANSI.error(e.getMessage(),e);
+		}
+		
+		FFprobeResult result=FFprobe.atPath(Paths.get(Config.DOWNLOADER.FFPROBE_PATH).getParent())
+				.setShowStreams(true)
+				.setShowFormat(true)
+				.setInput(path)
+				.execute();
+		
+		double rFrameRate=-1;
+		for(com.github.kokorin.jaffree.ffprobe.Stream stream:result.getStreams()) {
+			if(stream.getCodecType()==StreamType.VIDEO) {
+				rFrameRate=stream.getRFrameRate().doubleValue();
+				break;
+			}
+		}
+		
+		if(rFrameRate!=-1) gop=(int)Math.round(rFrameRate*2);
+		duration=result.getFormat().getDuration();
+		
+		return new GopInfo(gop,duration);
+	}
+	
+	private static boolean isKeyframeFixed(File file) {
+		try {
+			FFprobeResult result=
+					FFprobe.atPath(Paths.get(Config.DOWNLOADER.FFPROBE_PATH).getParent())
+						.setShowPackets(true)
+						.setSelectStreams(StreamType.VIDEO)
+						.setShowEntries("packet=pts_time,flags")
+						.setInput(file.getAbsolutePath())
+						.execute();
+			
+			List<com.github.kokorin.jaffree.ffprobe.Packet>packets=result.getPackets();
+			if(packets==null||packets.isEmpty()) return false;
+			
+			List<Float>keyTimes=new ArrayList<Float>();
+			for(com.github.kokorin.jaffree.ffprobe.Packet packet:packets) {
+				String flags=packet.getFlags();
+				if(flags!=null&&flags.contains("K")) {
+					Float pts=packet.getPtsTime();
+					if(pts!=null) keyTimes.add(pts);
+				}
+			}
+			
+			if(keyTimes.size()<3) return false;
+			
+			int bad=0;
+			int size=keyTimes.size();
+			for(int i=1;i<size;i++) {
+				double diff=keyTimes.get(i)-keyTimes.get(i-1);
+				if(diff>2.5d) bad++;
+			}
+			
+			return bad<=size*0.1d;
+		
+		} catch(Exception e) {
+			ANSI.error(e.getMessage(),e);
+		}
+		return false;
+	}
+	
 	
 }

@@ -19,16 +19,23 @@ import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
 import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 
 public class UpdatePlaylist implements Callable<Boolean> {
-	
+		
 	static final String SQL="INSERT INTO `playlist` (`title`, `filepath`, `ffprobe`) VALUES(?, ?, ?);";
     static final String[]SPINNER=new String[] {"\u0008/", "\u0008-", "\u0008\\", "\u0008|"};
     final boolean IS_COMMAND;
 	
 	public UpdatePlaylist(boolean fromConsole) throws InterruptedException, ExecutionException, TimeoutException {
+		IS_COMMAND=fromConsole;
+		
+		if(!BroadcastRunner.PLAYLIST_LOCK.tryLock()) {
+			ANSI.info("Playlist update already active, abort.[BR]");
+			return;
+		}
+		
 		Future<Boolean>future=Helper.EXECUTOR.submit(this);
 		
-		if(IS_COMMAND=fromConsole) {
-			if(future.get(20,TimeUnit.MINUTES)) {
+		if(IS_COMMAND) {
+			if(future.get(20l,TimeUnit.MINUTES)) {
 				ANSI.info("[SUCESSFUL MYSQL PLAYLIST UPDATE]");
 			} else {
 				ANSI.warn("[FAILED MYSQL PLAYLIST UPDATE]");
@@ -45,6 +52,7 @@ public class UpdatePlaylist implements Callable<Boolean> {
 
 	@Override
 	public Boolean call() throws Exception {
+		boolean ok=true;
 		BroadcastRunner.refreshFilelist();
 		File[]files=BroadcastRunner.getFiles();
 		
@@ -85,9 +93,9 @@ public class UpdatePlaylist implements Callable<Boolean> {
 			}
 		} catch (Exception e) {
 			ANSI.error("Update playlist failed.",e);
-			return false;
+			ok=false;
 		}
-		return true;
+		return ok;
 	}
 
 }
