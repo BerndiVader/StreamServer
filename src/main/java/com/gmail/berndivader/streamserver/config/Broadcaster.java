@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class Broadcaster {
 	
 	public static final Long YOUTUBE_TOKEN_EXPIRE_TIME=3599l;
-	public static final long PLAYLIST_REFRESH_INTERVAL=60l;	
+	public static final long PLAYLIST_REFRESH_INTERVAL=480l;
 	
 	public Boolean STREAM_BOT_START;
 	@SerializedName("STREAM_KEY")

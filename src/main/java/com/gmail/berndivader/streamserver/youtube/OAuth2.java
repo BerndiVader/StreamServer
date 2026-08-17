@@ -20,18 +20,22 @@ import com.google.gson.JsonParser;
 
 public final class OAuth2 {
 	
-	private static final String OAUTH_URL="https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=https://www.googleapis.com/auth/youtube&state=%s&access_type=offline&prompt=consent%20select_account";
+	private static final String OAUTH_URL="https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=https://www.googleapis.com/auth/youtube&state=%s&access_type=offline&prompt=consent";
 	private static final String OAUTH_API="https://oauth2.googleapis.com/token";
-
+	
 	private OAuth2() {}
 
 	public static boolean build() {
 		String state=UUID.randomUUID().toString();
-		ANSI.println("Visit the URL and authorize the bot:[BR][GREEN]".concat(String.format(OAUTH_URL,
+		ANSI.println("Visit the URL and authorize the bot:[BR][GREEN]".concat(
+			String.format(
+				OAUTH_URL,
 				Config.BROADCASTER.YOUTUBE_CLIENT_ID,
 				Config.BROADCASTER.YOUTUBE_AUTH_REDIRECT,
 				state
-				)));
+			)
+		));
+		
 		ANSI.print("[YELLOW]Enter the retrieved code: [CYAN]");
 		try {
 			String code=ANSI.keyboard.nextLine();
