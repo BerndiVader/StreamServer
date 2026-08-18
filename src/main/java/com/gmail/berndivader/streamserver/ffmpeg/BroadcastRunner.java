@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 import com.github.kokorin.jaffree.StreamType;
@@ -58,10 +57,11 @@ public final class BroadcastRunner extends TimerTask {
 	
 	public static final Object YOUTUBE_LOCK=new Object();
 	public static final Object STREAM_LOCK=new Object();
-	public static final ReentrantLock PLAYLIST_LOCK=new ReentrantLock();
 	
-	private static AtomicBoolean stop=new AtomicBoolean(false);
-	public static AtomicBoolean hold=new AtomicBoolean(false);
+	public static final AtomicBoolean PLAYLIST_UPDATE_RUNNING=new AtomicBoolean(false);
+	
+	private static final AtomicBoolean STOP=new AtomicBoolean(false);
+	public static final AtomicBoolean HOLD=new AtomicBoolean(false);
 		
 	private static volatile FFmpegProgress progress;
 	private static volatile FFProbePacket playingPacket;
@@ -125,8 +125,8 @@ public final class BroadcastRunner extends TimerTask {
 	public BroadcastRunner() {
 		ANSI.print("[YELLOW]Starting BroadcastRunner...");
 
-		stop.set(false);
-		hold.set(false);
+		STOP.set(false);
+		HOLD.set(false);
 		
 		try {
 			new UpdatePlaylist(true);
@@ -144,11 +144,11 @@ public final class BroadcastRunner extends TimerTask {
 	}
 	
 	public void stop() throws InterruptedException {
-		if(!stop.get()) {
+		if(!STOP.get()) {
 			synchronized(STREAM_LOCK) {
 				
 				ANSI.print("[YELLOW]Stopping BroadcastRunner...");
-				stop.set(true);
+				STOP.set(true);
 				FFmpegResultFuture current=ffmpeg();
 		    	if(current!=null&&(!current.isCancelled()||!current.isDone())) {
 		    		ANSI.print("[YELLOW][Stop broadcasting...");
@@ -170,10 +170,10 @@ public final class BroadcastRunner extends TimerTask {
 	@Override
 	public void run() {
 				
-		if(!stop.get()) {
+		if(!STOP.get()) {
 			refreshTimer+=period;
 			expiredCounter+=period;
-			if(!hold.get()) {
+			if(!HOLD.get()) {
 				FFmpegResultFuture current=ffmpeg();
 	    		if(current==null||current.isCancelled()||current.isDone()) startStream();
 				if(expiredCounter>Broadcaster.YOUTUBE_TOKEN_EXPIRE_TIME) {
@@ -186,7 +186,7 @@ public final class BroadcastRunner extends TimerTask {
 					shuffleFilelist();
 					try {
 						new UpdatePlaylist(false);
-						hold.set(files.size()==0);
+						HOLD.set(files.size()==0);
 					} catch (InterruptedException | ExecutionException | TimeoutException e) {
 						ANSI.error("Failed to update playlist.",e);
 					}
@@ -280,13 +280,13 @@ public final class BroadcastRunner extends TimerTask {
 				ANSI.error("Get next scheduled file failed.",e);
 			}
 			
-			File[]files=getFiles();
+			File[]files=files();
 			if(files.length>0) {
 				createStream(files[index.get()]);
 				index.set((index.get()+1)%files.length);
 			} else {
 				ANSI.info("Broadcasting is on hold because there are no mediafiles inside playlist dirctory.");
-				BroadcastRunner.hold.set(true);
+				BroadcastRunner.HOLD.set(true);
 			}
 			
 		}
@@ -397,7 +397,7 @@ public final class BroadcastRunner extends TimerTask {
 	public static void previous() {
 		synchronized(STREAM_LOCK) {
 			if(isStreaming()) {
-				File[]files=getFiles();
+				File[]files=files();
 				index.set((index.get()-2+files.length)%files.length);
 				stopStream();
 			}
@@ -417,7 +417,7 @@ public final class BroadcastRunner extends TimerTask {
 		return null;
 	}
 	
-	public static File[] getFiles() {
+	public static File[] files() {
 		return files.toArray(File[]::new);
 	}
 	
@@ -536,16 +536,21 @@ public final class BroadcastRunner extends TimerTask {
     	File playlistDir=new File(Config.working_dir,Config.BROADCASTER.PLAYLIST_PATH);
     	File customDir=new File(Config.working_dir,Config.BROADCASTER.PLAYLIST_PATH_CUSTOM);
     	
-    	FileFilter filter=pathName->pathName.getAbsolutePath().toLowerCase().endsWith(".mp4");
+    	FileFilter filter=new FileFilter() {
+			@Override
+			public boolean accept(File pathname) {
+				return pathname.getAbsolutePath().toLowerCase().endsWith(".mp4");
+			}
+		};
+		
     	List<File>playlistNewFiles=Arrays.asList(getFiles(playlistDir,filter));
     	List<File>customNewFiles=Arrays.asList(getFiles(customDir,filter));
-		
-		PLAYLIST_LOCK.lock();
+				
 		try {
-	    	
+			PLAYLIST_UPDATE_RUNNING.set(true);
 	    	managePlaylist(playlistNewFiles);
 	    } finally {
-			PLAYLIST_LOCK.unlock();
+	    	PLAYLIST_UPDATE_RUNNING.set(false);
 		}
 		
 		files.clear();
@@ -555,34 +560,40 @@ public final class BroadcastRunner extends TimerTask {
 		customs.addAll(customNewFiles);
 	}
 	
-	private static void managePlaylist(List<File>files) {
+	private static long managePlaylist(List<File>files) {
 		
 		ANSI.info("Check playlist for new files...[BR]");
 		
+		double durationSec=0l;
 		GetPlaylist playlist=new GetPlaylist();
+		
 		try {
 			ArrayList<String>list=playlist.future.get(15l,TimeUnit.SECONDS);
 			ArrayList<File>converts=new ArrayList<File>();
-			
+						
 			for(File candit:files) {
 				if(!list.contains(candit.getCanonicalPath())) {
 					if(!isKeyframeFixed(candit)) {
+						double duration=getGOP(candit).durationSec;
+						if(durationSec>-1) durationSec+=duration;
 						converts.add(candit);
 					}
 				}
 			}
 			
 			if(converts.size()>0) {
-				convertFile(converts);
+				convertFiles(converts);
 			}
 			
 		} catch (IOException| InterruptedException | ExecutionException | TimeoutException e) {
 			ANSI.error(e.getMessage(),e);
 		}
 		
+		return Math.round(durationSec);
+		
 	}
 	
-	private static void convertFile(ArrayList<File>files) {
+	private static void convertFiles(ArrayList<File>files) {
 		Iterator<File>iterator=files.iterator();
 		int size=files.size();
 		AtomicInteger count=new AtomicInteger(0);
@@ -641,7 +652,7 @@ public final class BroadcastRunner extends TimerTask {
 			ANSI.print("[BR]");
 			
 		}
-	}	
+	}
 	
 	private static GopInfo getGOP(File file) {
 		int gop=-1;

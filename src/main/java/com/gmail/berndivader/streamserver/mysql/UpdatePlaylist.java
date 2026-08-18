@@ -11,8 +11,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.github.kokorin.jaffree.ffprobe.FFprobe;
-import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.gmail.berndivader.streamserver.term.ANSI;
 import com.gmail.berndivader.streamserver.Helper;
 import com.gmail.berndivader.streamserver.ffmpeg.BroadcastRunner;
@@ -20,41 +18,46 @@ import com.gmail.berndivader.streamserver.ffmpeg.FFProbePacket;
 
 public class UpdatePlaylist implements Callable<Boolean> {
 		
-	static final String SQL="INSERT INTO `playlist` (`title`, `filepath`, `ffprobe`) VALUES(?, ?, ?);";
-    static final String[]SPINNER=new String[] {"\u0008/", "\u0008-", "\u0008\\", "\u0008|"};
-    final boolean IS_COMMAND;
+	private static final String SQL="INSERT INTO `playlist` (`title`, `filepath`, `ffprobe`) VALUES(?, ?, ?);";
+    private static final String[]SPINNER=new String[] {"\u0008/", "\u0008-", "\u0008\\", "\u0008|"};
+    
+    private final boolean IS_COMMAND;
+    private long duration;
+    
+    public Future<Boolean>future;
 	
 	public UpdatePlaylist(boolean fromConsole) throws InterruptedException, ExecutionException, TimeoutException {
+
 		IS_COMMAND=fromConsole;
-		
-		if(!BroadcastRunner.PLAYLIST_LOCK.tryLock()) {
-			ANSI.info("Playlist update already active, abort.[BR]");
-			return;
-		}
-		
-		Future<Boolean>future=Helper.EXECUTOR.submit(this);
+		duration=20l;
+		future=Helper.EXECUTOR.submit(this);
 		
 		if(IS_COMMAND) {
-			if(future.get(20l,TimeUnit.MINUTES)) {
-				ANSI.info("[SUCESSFUL MYSQL PLAYLIST UPDATE]");
-			} else {
-				ANSI.warn("[FAILED MYSQL PLAYLIST UPDATE]");
+			try {
+				if(future.get(duration,TimeUnit.MINUTES)) {
+					ANSI.info("[SUCESSFUL MYSQL PLAYLIST UPDATE]");
+				} else {
+					ANSI.warn("[FAILED MYSQL PLAYLIST UPDATE]");
+				}
+			} catch(TimeoutException e) {
+	            ANSI.warn("UpdatePlaylist timed out after " + duration + " minutes.");
+				future.cancel(true);
 			}
 		}
 	}
 	
-	static FFprobeResult getFFprobeResult(String path) {
-		return FFprobe.atPath()
-				.setInput(path)
-				.setShowFormat(true)
-				.execute();
-	}
-
 	@Override
 	public Boolean call() throws Exception {
+		
+		if(BroadcastRunner.PLAYLIST_UPDATE_RUNNING.get()) {
+			ANSI.info("Playlist update already active, abort.[BR]");
+			return false;
+		}
+		
 		boolean ok=true;
+		
 		BroadcastRunner.refreshFilelist();
-		File[]files=BroadcastRunner.getFiles();
+		File[]files=BroadcastRunner.files();
 		
 		try(Connection connection=DatabaseConnection.getNewConnection()) {
 			connection.setAutoCommit(false);
