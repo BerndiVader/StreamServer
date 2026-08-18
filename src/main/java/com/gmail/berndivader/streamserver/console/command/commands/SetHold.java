@@ -13,8 +13,8 @@ public class SetHold extends Command {
 	public boolean execute(String[] args) {
 		
 		String arg=args[0];
-		BroadcastRunner.hold.set(arg.isEmpty()?!BroadcastRunner.hold.get():Boolean.valueOf(arg));
-		ANSI.println(String.format("[BLUE]The Broadcastrunner is set to: [YELLOW]%s[PROMPT]",Boolean.toString(BroadcastRunner.hold.get())));
+		BroadcastRunner.HOLD.set(arg.isEmpty()?!BroadcastRunner.HOLD.get():Boolean.valueOf(arg));
+		ANSI.println(String.format("[BLUE]The Broadcastrunner is set to: [YELLOW]%s[PROMPT]",Boolean.toString(BroadcastRunner.HOLD.get())));
 		return true;
 	}
 

@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class Broadcaster {
 	
 	public static final Long YOUTUBE_TOKEN_EXPIRE_TIME=3599l;
-	public static final long PLAYLIST_REFRESH_INTERVAL=480l;
+	public static final Long PLAYLIST_REFRESH_INTERVAL=480l;
 	
 	public Boolean STREAM_BOT_START;
 	@SerializedName("STREAM_KEY")
@@ -26,6 +26,7 @@ public class Broadcaster {
 	public Long YOUTUBE_TOKEN_TIMESTAMP;
 	public String PLAYLIST_PATH;
 	public String PLAYLIST_PATH_CUSTOM;
+	public Float PLAYLIST_CONVERT_FACTOR;
 	
 	public Broadcaster() {
 		BROADCAST_DEFAULT_TITLE="YAMPB Livestream Default Title";
@@ -48,6 +49,7 @@ public class Broadcaster {
 		
 		PLAYLIST_PATH="./playlist";
 		PLAYLIST_PATH_CUSTOM="./custom";
+		PLAYLIST_CONVERT_FACTOR=4f;
 	}
 
 }

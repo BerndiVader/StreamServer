@@ -28,16 +28,16 @@ public class Play extends Command<Message> {
 		Mono<Message>mono=Mono.empty();
 		String s=string;
 		
+		File[]files=BroadcastRunner.files();
+		
 		switch(s.toLowerCase()) {
 		case "next":
-			mono=createMessage(BroadcastRunner.getFiles()[BroadcastRunner.index.get()],channel);
+			mono=createMessage(files[BroadcastRunner.index.get()],channel);
 			BroadcastRunner.next();
 			break;
 		case "prev":
 			mono=createMessage(
-					BroadcastRunner.getFiles()[(BroadcastRunner.index.get()-2+BroadcastRunner.getFiles().length)%BroadcastRunner.getFiles().length],
-					channel
-					);
+					files[(BroadcastRunner.index.get()-2+files.length)%files.length],channel);
 			BroadcastRunner.previous();
 			break;
 		case "repeat":
@@ -45,7 +45,7 @@ public class Play extends Command<Message> {
 				mono=createMessage(BroadcastRunner.playing(),channel);
 				BroadcastRunner.restart();
 			} else {
-				mono=createMessage(BroadcastRunner.getFiles()[BroadcastRunner.index.get()],channel);
+				mono=createMessage(files[BroadcastRunner.index.get()],channel);
 				BroadcastRunner.next();
 			}
 			break;

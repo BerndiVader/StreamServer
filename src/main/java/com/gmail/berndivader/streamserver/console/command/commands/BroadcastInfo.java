@@ -31,7 +31,7 @@ public class BroadcastInfo extends Command {
 					}
 					break;
 				case "next":
-					File next=BroadcastRunner.getFiles()[BroadcastRunner.index.get()];
+					File next=BroadcastRunner.files()[BroadcastRunner.index.get()];
 					if(next!=null) {
 						ANSI.println("Next File: "+next.getName());
 						ANSI.println(FFProbePacket.build(next).toString());
