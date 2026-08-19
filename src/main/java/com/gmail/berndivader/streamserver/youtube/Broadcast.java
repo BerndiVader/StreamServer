@@ -118,7 +118,7 @@ public final class Broadcast {
 			
 			JsonObject contentDetails=new JsonObject();
 			contentDetails.addProperty("enableAutoStart",true);
-			contentDetails.addProperty("enableEmbed",true);
+			contentDetails.addProperty("enableEmbed",false);
 
 			JsonObject liveBroadcast=new JsonObject();
 			liveBroadcast.add("snippet",snippet);
